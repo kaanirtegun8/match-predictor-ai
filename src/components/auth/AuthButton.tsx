@@ -1,4 +1,5 @@
 import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
 interface AuthButtonProps extends TouchableOpacityProps {
   title: string;
@@ -14,7 +15,7 @@ export function AuthButton({ title, style, ...props }: AuthButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#2f95dc',
+    backgroundColor: Colors.primary,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
