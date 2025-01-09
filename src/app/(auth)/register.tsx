@@ -1,9 +1,39 @@
-import { View, Text, StyleSheet, Platform } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, StyleSheet, Platform, Alert } from 'react-native';
+import { Link, router } from 'expo-router';
+import { useState } from 'react';
 import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHeader } from '@/components/auth';
 import { Colors } from '@/constants/Colors';
+import { registerWithEmail } from '@/services/auth';
 
 export default function RegisterScreen() {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async () => {
+    if (!fullName || !email || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await registerWithEmail(email, password);
+      router.replace('/(tabs)/bulletin');
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <AuthHeader 
@@ -15,26 +45,34 @@ export default function RegisterScreen() {
         <AuthInput
           placeholder="Full Name"
           autoCapitalize="words"
+          value={fullName}
+          onChangeText={setFullName}
         />
         <AuthInput
           placeholder="Email"
           keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
         />
         <AuthInput
           placeholder="Password"
           secureTextEntry
+          value={password}
+          onChangeText={setPassword}
         />
         <AuthInput
           placeholder="Confirm Password"
           secureTextEntry
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
         />
       </View>
 
       <AuthButton
         title="Sign Up"
-        onPress={() => {
-          // TODO: Implement registration
-        }}
+        onPress={handleRegister}
+        loading={loading}
       />
 
       <View style={styles.dividerContainer}>

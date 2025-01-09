@@ -1,9 +1,32 @@
-import { View, Text, StyleSheet, Platform } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, StyleSheet, Platform, Alert } from 'react-native';
+import { Link, router } from 'expo-router';
+import { useState } from 'react';
 import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHeader } from '@/components/auth';
 import { Colors } from '@/constants/Colors';
+import { loginWithEmail } from '@/services/auth';
 
 export default function LoginScreen() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await loginWithEmail(email, password);
+      router.replace('/(tabs)/bulletin');
+    } catch (error: any) {
+      Alert.alert('Error', error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <AuthHeader 
@@ -15,18 +38,22 @@ export default function LoginScreen() {
         <AuthInput
           placeholder="Email"
           keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          autoCapitalize="none"
         />
         <AuthInput
           placeholder="Password"
           secureTextEntry
+          value={password}
+          onChangeText={setPassword}
         />
       </View>
 
       <AuthButton
         title="Sign In"
-        onPress={() => {
-          // TODO: Implement login
-        }}
+        onPress={handleLogin}
+        loading={loading}
       />
 
       <View style={styles.dividerContainer}>

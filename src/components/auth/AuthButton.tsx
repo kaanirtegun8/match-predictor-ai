@@ -1,14 +1,24 @@
-import { TouchableOpacity, Text, StyleSheet, TouchableOpacityProps } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Colors } from '@/constants/Colors';
 
-interface AuthButtonProps extends TouchableOpacityProps {
+export interface AuthButtonProps {
   title: string;
+  onPress: () => void;
+  loading?: boolean;
 }
 
-export function AuthButton({ title, style, ...props }: AuthButtonProps) {
+export function AuthButton({ title, onPress, loading }: AuthButtonProps) {
   return (
-    <TouchableOpacity style={[styles.button, style]} {...props}>
-      <Text style={styles.buttonText}>{title}</Text>
+    <TouchableOpacity 
+      style={styles.button} 
+      onPress={onPress}
+      disabled={loading}
+    >
+      {loading ? (
+        <ActivityIndicator color="white" />
+      ) : (
+        <Text style={styles.buttonText}>{title}</Text>
+      )}
     </TouchableOpacity>
   );
 }
@@ -16,12 +26,12 @@ export function AuthButton({ title, style, ...props }: AuthButtonProps) {
 const styles = StyleSheet.create({
   button: {
     backgroundColor: Colors.primary,
-    padding: 15,
+    padding: 16,
     borderRadius: 8,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: 'white',
     fontSize: 16,
     fontWeight: '600',
   },
