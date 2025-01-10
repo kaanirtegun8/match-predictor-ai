@@ -1,30 +1,35 @@
 import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { useSegments, useRouter } from 'expo-router';
+import { useAuth } from '@/hooks/useAuth';
 
-// This is a simple auth check, you'll need to implement actual Firebase auth
-function useProtectedRoute(isAuthenticated: boolean) {
+function useProtectedRoute() {
   const segments = useSegments();
   const router = useRouter();
+  const { isAuthenticated, loading } = useAuth();
 
   useEffect(() => {
+    if (loading) return;
+
     const inAuthGroup = segments[0]?.includes('(auth)');
+    const inTabsGroup = segments[0]?.includes('(tabs)');
     
     if (!isAuthenticated && !inAuthGroup) {
-      // Redirect to the sign-in page
-      router.replace({ pathname: '/(auth)/login' } as any);
+      router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuthGroup) {
-      // Redirect to the main app
-      router.replace({ pathname: '/(tabs)/bulletin' } as any);
+      router.replace('/(tabs)/bulletin');
+    } else if (!inAuthGroup && !inTabsGroup) {
+      // If we're not in any group, redirect based on auth state
+      router.replace(isAuthenticated ? '/(tabs)/bulletin' : '/(auth)/login');
     }
-  }, [isAuthenticated, segments]);
+  }, [isAuthenticated, loading, segments]);
 }
 
 export default function RootLayout() {
-  // TODO: Implement actual auth state check with Firebase
-  const isAuthenticated = false;
-  
-  useProtectedRoute(isAuthenticated);
+  const { loading } = useAuth();
+  useProtectedRoute();
+
+  if (loading) return null;
 
   return (
     <Stack>
