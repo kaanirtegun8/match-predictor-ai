@@ -86,22 +86,24 @@ export function useAuth() {
 
   const signInWithGoogle = async () => {
     try {
-      console.log('Google Sign-In initialized');
       if (!request) {
-        console.error('Google Sign-In not initialized properly');
         throw new Error('Google Sign-In not initialized properly');
       }
-      console.log('Google Sign-In initialized properly');
+
       const result = await promptAsync({
         showInRecents: true
       });
-      console.log('Google Sign-In result:', result);
+      
       if (result.type === 'success') {
+        const { id_token, access_token } = result.params;
+
         return { success: true };
       }
+      
       return { success: false, error: 'Google sign in was cancelled' };
     } catch (error: any) {
       console.error('Google Sign-In Error:', error);
+
       return { success: false, error: error.message };
     }
   };

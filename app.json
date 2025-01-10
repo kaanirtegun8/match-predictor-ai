@@ -24,7 +24,20 @@
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.matchpredictorai.matchpredictorai"
+      "package": "com.matchpredictorai.matchpredictorai",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.googleusercontent.apps.179297295436-2a5c7q41tsqjqj0bl1ketd1jitgmuqhr",
+              "host": "oauth2redirect"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./src/assets/images/favicon.png"
@@ -40,7 +53,7 @@
         }
       ]
     ],
-    "scheme": "match-predictor",
+    "scheme": "com.matchpredictorai.matchpredictorai",
     "experiments": {
       "typedRoutes": true
     },
