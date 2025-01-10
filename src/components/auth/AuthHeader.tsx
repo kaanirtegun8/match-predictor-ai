@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import LottieView from 'lottie-react-native';
+import { Colors } from '@/constants/Colors';
 
 interface AuthHeaderProps {
   title: string;
@@ -27,7 +28,7 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 32,
   },
   animation: {
     width: width * 0.6,
@@ -37,15 +38,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: Colors.text,
     textAlign: 'center',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.textSecondary,
     textAlign: 'center',
     paddingHorizontal: 20,
-    lineHeight: 18,
+    lineHeight: 20,
   },
 }); 

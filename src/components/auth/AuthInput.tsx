@@ -1,15 +1,11 @@
 import { TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { Colors } from '@/constants/Colors';
 
-interface AuthInputProps extends TextInputProps {
-  // Add any additional props here
-}
-
-export function AuthInput({ style, ...props }: AuthInputProps) {
+export function AuthInput(props: TextInputProps) {
   return (
     <TextInput
-      style={[styles.input, style]}
-      placeholderTextColor="#666"
-      autoCapitalize="none"
+      style={styles.input}
+      placeholderTextColor={Colors.inputPlaceholder}
       {...props}
     />
   );
@@ -17,11 +13,12 @@ export function AuthInput({ style, ...props }: AuthInputProps) {
 
 const styles = StyleSheet.create({
   input: {
+    backgroundColor: Colors.inputBackground,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: Colors.inputBorder,
+    borderRadius: 10,
     padding: 15,
-    borderRadius: 8,
-    backgroundColor: '#f8f8f8',
     fontSize: 16,
+    color: Colors.inputText,
   },
 }); 
