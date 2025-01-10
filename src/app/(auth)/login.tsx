@@ -66,11 +66,7 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.socialButtonsContainer}>
-        <GoogleSignInButton
-          onPress={() => {
-            // TODO: Implement Google Sign-In
-          }}
-        />
+        <GoogleSignInButton />
         <View style={styles.socialButtonSpacer} />
         <FacebookSignInButton
           onPress={() => {

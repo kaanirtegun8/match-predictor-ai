@@ -1,6 +1,7 @@
-import { TouchableOpacity, Text, StyleSheet, View, Animated, Pressable } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, View, Animated, Pressable, ActivityIndicator } from 'react-native';
 import { SvgXml } from 'react-native-svg';
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 
 const googleLogo = `
 <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
@@ -11,12 +12,10 @@ const googleLogo = `
 </svg>
 `;
 
-interface GoogleSignInButtonProps {
-  onPress: () => void;
-}
-
-export function GoogleSignInButton({ onPress }: GoogleSignInButtonProps) {
+export function GoogleSignInButton() {
   const scale = useRef(new Animated.Value(1)).current;
+  const [isLoading, setIsLoading] = useState(false);
+  const { signInWithGoogle } = useAuth();
 
   const animateScale = useCallback((value: number) => {
     Animated.spring(scale, {
@@ -27,21 +26,43 @@ export function GoogleSignInButton({ onPress }: GoogleSignInButtonProps) {
     }).start();
   }, []);
 
+  const handlePress = async () => {
+    try {
+      setIsLoading(true);
+      const result = await signInWithGoogle();
+      if (!result.success) {
+        // You might want to show an error toast here
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <Pressable 
       onPressIn={() => animateScale(0.97)}
       onPressOut={() => animateScale(1)}
-      onPress={onPress}
+      onPress={handlePress}
+      disabled={isLoading}
     >
       <Animated.View style={[
         styles.button,
         { transform: [{ scale }] }
       ]}>
         <View style={styles.iconContainer}>
-          <SvgXml xml={googleLogo} width={18} height={18} />
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#4285F4" />
+          ) : (
+            <SvgXml xml={googleLogo} width={18} height={18} />
+          )}
         </View>
         <View style={styles.separator} />
-        <Text style={styles.text}>Sign in with Google</Text>
+        <Text style={styles.text}>
+          {isLoading ? 'Signing in...' : 'Sign in with Google'}
+        </Text>
       </Animated.View>
     </Pressable>
   );
