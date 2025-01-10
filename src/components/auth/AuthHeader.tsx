@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Platform } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { Colors } from '@/constants/Colors';
 
@@ -10,13 +10,15 @@ interface AuthHeaderProps {
 export function AuthHeader({ title, subtitle }: AuthHeaderProps) {
   return (
     <View style={styles.container}>
-      <LottieView
-        source={require('@/assets/animations/soccer-animation.json')}
-        autoPlay
-        loop
-        speed={0.7}
-        style={styles.animation}
-      />
+      {Platform.OS !== 'web' && (
+        <LottieView
+          source={require('@/assets/animations/soccer-animation.json')}
+          autoPlay
+          loop
+          speed={0.7}
+          style={styles.animation}
+        />
+      )}
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </View>

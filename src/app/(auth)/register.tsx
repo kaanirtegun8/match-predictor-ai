@@ -26,7 +26,7 @@ export default function RegisterScreen() {
 
     try {
       setLoading(true);
-      const result = await signUp(email, password);
+      const result = await signUp(email, password, fullName);
       if (!result.success) {
         Alert.alert('Error', result.error || 'Failed to sign up');
       }
@@ -85,11 +85,7 @@ export default function RegisterScreen() {
       </View>
 
       <View style={styles.socialButtonsContainer}>
-        <GoogleSignInButton
-          onPress={() => {
-            // TODO: Implement Google Sign-In
-          }}
-        />
+        <GoogleSignInButton />
         <View style={styles.socialButtonSpacer} />
         <FacebookSignInButton
           onPress={() => {
