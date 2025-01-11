@@ -17,7 +17,7 @@ export default function TabLayout() {
         name="bulletin"
         options={{
           title: 'Matches',
-          headerTitle: 'Today\'s Matches',
+          headerTitle: 'Matches',
           tabBarIcon: ({ color }) => (
             <FontAwesome name="list" size={24} color={color} />
           ),
