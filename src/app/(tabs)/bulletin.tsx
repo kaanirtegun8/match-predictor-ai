@@ -1,21 +1,150 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { useCallback, useEffect, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+
+import { FilterBar, LeagueSection, ThemedText, ThemedView } from '../../components';
+import { Competition, Match, getWeeklyMatches } from '../../services/footballApi';
+
+function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
+  return matches.reduce<Record<string, Match[]>>((acc, match) => {
+    const leagueId = match.competition.id.toString();
+    if (!acc[leagueId]) {
+      acc[leagueId] = [];
+    }
+    acc[leagueId].push(match);
+    return acc;
+  }, {});
+}
 
 export default function BulletinScreen() {
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const loadMatches = useCallback(async () => {
+    try {
+      setLoading(true);
+      const today = new Date();
+      const nextWeek = new Date(today);
+      nextWeek.setDate(today.getDate() + 7);
+      
+      const dateFrom = today.toISOString().split('T')[0];
+      const dateTo = nextWeek.toISOString().split('T')[0];
+      
+      const weeklyMatches = await getWeeklyMatches(dateFrom, dateTo);
+      
+      // Filter matches to only show TIMED matches
+      const timedMatches = weeklyMatches.matches.filter(match => 
+        match.status === 'TIMED' || match.status === 'SCHEDULED'
+      );
+      
+      // Extract unique competitions from TIMED matches only
+      const uniqueCompetitions = Array.from(
+        new Map(timedMatches.map((match: Match) => [match.competition.id, match.competition])).values()
+      ) as Competition[];
+      setCompetitions(uniqueCompetitions);
+
+      // Filter matches based on selected competition
+      let filteredMatches = timedMatches;
+      if (selectedCompetition) {
+        filteredMatches = filteredMatches.filter(
+          (match: Match) => match.competition.id === selectedCompetition.id
+        );
+      }
+
+      setMatches(filteredMatches);
+    } catch (error) {
+      console.error('Error loading matches:', error);
+      setMatches([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedCompetition]);
+
+  useEffect(() => {
+    loadMatches();
+  }, [loadMatches]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await loadMatches();
+    setRefreshing(false);
+  }, [loadMatches]);
+
+  const groupedMatches = groupMatchesByLeague(matches);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <ThemedView style={styles.loadingContainer}>
+          <ThemedText>Loading matches...</ThemedText>
+        </ThemedView>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Bülten</Text>
-    </View>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <FilterBar
+          competitions={competitions}
+          selectedCompetition={selectedCompetition}
+          onCompetitionSelect={setSelectedCompetition}
+        />
+        {Object.entries(groupedMatches).map(([leagueId, leagueMatches]) => (
+          <LeagueSection
+            key={leagueId}
+            matches={leagueMatches}
+          />
+        ))}
+        {matches.length === 0 && (
+          <ThemedView style={styles.emptyContainer}>
+            <ThemedText style={styles.emptyText}>
+              No matches found
+            </ThemedText>
+          </ThemedView>
+        )}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  content: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  scrollContent: {
+    paddingBottom: 20,
+    backgroundColor: '#f5f5f5',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  emptyContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#f5f5f5',
   },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  emptyText: {
+    fontSize: 16,
+    color: '#666',
   },
 }); 
