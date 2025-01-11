@@ -3,146 +3,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { ThemedText, ThemedView } from '@/components';
 import { Standing, StandingsResponse, getLeagueStandings } from '@/services/footballApi';
 
-const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    container: {
-        flex: 1,
-        paddingBottom: 32,
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    header: {
-        padding: 16,
-        backgroundColor: '#fff',
-        flexDirection: 'row',
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    backButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    backText: {
-        fontSize: 16,
-        marginLeft: 4,
-        color: '#65a30d',
-    },
-    competitionInfo: {
-        padding: 16,
-        alignItems: 'center',
-        marginBottom: 16,
-    },
-    competitionLogo: {
-        width: 40,
-        height: 40,
-        marginBottom: 8,
-    },
-    competitionName: {
-        fontSize: 18,
-        fontWeight: '600',
-        color: '#333',
-    },
-    tableContainer: {
-        backgroundColor: '#fff',
-        marginHorizontal: 16,
-        borderRadius: 12,
-        overflow: 'hidden',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2,
-        },
-        shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
-    },
-    tableHeader: {
-        flexDirection: 'row',
-        backgroundColor: '#65a30d',
-        paddingVertical: 12,
-        paddingHorizontal: 8,
-    },
-    headerCell: {
-        color: '#fff',
-        fontSize: 11,
-        fontWeight: '600',
-        textAlign: 'center',
-    },
-    tableRow: {
-        flexDirection: 'row',
-        paddingVertical: 12,
-        paddingHorizontal: 8,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-    },
-    cell: {
-        fontSize: 13,
-        color: '#333',
-        textAlign: 'center',
-    },
-    positionCell: {
-        width: 25,
-    },
-    teamCell: {
-        flex: 1,
-        marginRight: 8,
-    },
-    teamInfo: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        marginRight: 8,
-        maxWidth: '45%',
-    },
-    teamLogo: {
-        width: 20,
-        height: 20,
-        minWidth: 20,
-    },
-    teamName: {
-        fontSize: 12,
-        color: '#333',
-        flex: 1,
-    },
-    statsCell: {
-        width: 28,
-    },
-    pointsCell: {
-        width: 32,
-        fontWeight: '600',
-    },
-    teamInfoBackground: {
-        backgroundColor: '#fff',
-        borderRadius: 4,
-    },
-    highlightedRow: {
-        backgroundColor: '#ecfccb',
-    },
-    whiteText: {
-        color: '#365314',
-    },
-});
 
 export default function StandingsScreen() {
     const { id, homeTeamId, awayTeamId } = useLocalSearchParams();
@@ -273,4 +136,161 @@ export default function StandingsScreen() {
             </ScrollView>
         </SafeAreaView>
     );
-} 
+}
+
+
+const styles = StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: '#f8fafc',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    container: {
+        flex: 1,
+        paddingBottom: 32,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    header: {
+        padding: 16,
+        backgroundColor: '#fff',
+        flexDirection: 'row',
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 2,
+        elevation: 2,
+        marginBottom: 8,
+    },
+    backButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f1f5f9',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 8,
+    },
+    backText: {
+        fontSize: 15,
+        marginLeft: 4,
+        color: '#334155',
+        fontWeight: '500',
+    },
+    competitionInfo: {
+        padding: 20,
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    competitionLogo: {
+        width: 48,
+        height: 48,
+        marginBottom: 12,
+    },
+    competitionName: {
+        fontSize: 20,
+        fontWeight: '600',
+        color: '#0f172a',
+        textAlign: 'center',
+        marginHorizontal: 24,
+    },
+    tableContainer: {
+        backgroundColor: '#fff',
+        marginHorizontal: 16,
+        borderRadius: 16,
+        overflow: 'hidden',
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        elevation: 2,
+    },
+    tableHeader: {
+        flexDirection: 'row',
+        backgroundColor: '#65a30d',
+        paddingVertical: 14,
+        paddingHorizontal: 12,
+    },
+    headerCell: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '600',
+        textAlign: 'center',
+        textTransform: 'uppercase',
+        letterSpacing: 0.5,
+    },
+    tableRow: {
+        flexDirection: 'row',
+        paddingVertical: 12,
+        paddingHorizontal: 12,
+        backgroundColor: '#fff',
+        alignItems: 'center',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9',
+    },
+    cell: {
+        fontSize: 13,
+        color: '#475569',
+        textAlign: 'center',
+    },
+    positionCell: {
+        width: 28,
+        fontWeight: '600',
+        color: '#0f172a',
+    },
+    teamCell: {
+        flex: 1,
+        marginRight: 8,
+    },
+    teamInfo: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+        marginRight: 8,
+        maxWidth: '45%',
+    },
+    teamLogo: {
+        width: 24,
+        height: 24,
+        minWidth: 24,
+    },
+    teamName: {
+        fontSize: 13,
+        color: '#0f172a',
+        flex: 1,
+        fontWeight: '500',
+    },
+    statsCell: {
+        width: 32,
+        color: '#475569',
+    },
+    pointsCell: {
+        width: 36,
+        fontWeight: '600',
+        color: '#0f172a',
+        fontSize: 14,
+    },
+    teamInfoBackground: {
+        backgroundColor: '#fff',
+        borderRadius: 4,
+    },
+    highlightedRow: {
+        backgroundColor: '#f0fdf4',
+    },
+    whiteText: {
+        color: '#166534',
+        fontWeight: '500',
+    },
+});
