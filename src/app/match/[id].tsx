@@ -240,7 +240,7 @@ export default function MatchDetailScreen() {
               </ThemedView>
               <TouchableOpacity 
                 style={styles.analysisButton}
-                onPress={() => console.log('Analyze clicked:', match.id)}>
+                onPress={() => router.push(`/analyze/${match.id}`)}>
                 <ThemedText style={styles.analysisButtonText}>Analyze</ThemedText>
                 <Ionicons name="arrow-forward" size={18} color="#000" />
               </TouchableOpacity>

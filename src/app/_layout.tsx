@@ -4,7 +4,7 @@ import { useSegments, useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 
 // Define valid root routes that don't need redirection
-const VALID_ROOT_ROUTES = ['match', 'standings', 'predictions'];
+const VALID_ROOT_ROUTES = ['match', 'standings', 'predictions', 'analyze'];
 
 function useProtectedRoute() {
   const segments = useSegments();
@@ -42,6 +42,7 @@ export default function RootLayout() {
       <Stack.Screen name="predictions" options={{ presentation: 'modal' }} />
       <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
     </Stack>
   );
 }
