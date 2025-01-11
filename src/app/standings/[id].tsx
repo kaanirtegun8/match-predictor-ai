@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     backText: {
         fontSize: 16,
         marginLeft: 4,
-        color: '#1282A2',
+        color: '#65a30d',
     },
     competitionInfo: {
         padding: 16,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     },
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: '#1282A2',
+        backgroundColor: '#65a30d',
         paddingVertical: 12,
         paddingHorizontal: 8,
     },
@@ -137,10 +137,10 @@ const styles = StyleSheet.create({
         borderRadius: 4,
     },
     highlightedRow: {
-        backgroundColor: '#1282A2',
+        backgroundColor: '#ecfccb',
     },
     whiteText: {
-        color: '#fff',
+        color: '#365314',
     },
 });
 

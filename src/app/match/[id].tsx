@@ -138,7 +138,7 @@ export default function MatchDetailScreen() {
           {/* Competition Info */}
           <TouchableOpacity 
             style={styles.competitionInfoSimple}
-            onPress={() => console.log('Competition clicked:', match.competition.id)}>
+            onPress={() => router.push(`/standings/${match.competition.id}?homeTeamId=${match.homeTeam.id}&awayTeamId=${match.awayTeam.id}`)}>
             <Image
               source={{ uri: match.competition.emblem }}
               style={styles.competitionLogo}
