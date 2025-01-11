@@ -1,5 +1,6 @@
-import { StyleSheet, View, Image } from 'react-native';
-import { Competition, Match } from '../services/footballApi';
+import { StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { router } from 'expo-router';
+import { Match } from '../services/footballApi';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
 import { MatchCard } from './MatchCard';
@@ -9,25 +10,29 @@ interface LeagueSectionProps {
 }
 
 export function LeagueSection({ matches }: LeagueSectionProps) {
-  if (matches.length === 0) return null;
+  if (!matches || matches.length === 0) return null;
+
   const competition = matches[0].competition;
+
+  const handleHeaderPress = () => {
+    router.push(`/standings/${competition.id}`);
+  };
 
   return (
     <ThemedView style={styles.container}>
-      <ThemedView style={styles.header}>
-        <Image
-          source={{ uri: competition.emblem }}
-          style={styles.leagueLogo}
-          resizeMode="contain"
-        />
-        <ThemedText style={styles.leagueName}>{competition.name}</ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.matchesContainer}>
-        {matches.map((match) => (
-          <MatchCard 
-            key={match.id} 
-            match={match} 
+      <TouchableOpacity onPress={handleHeaderPress}>
+        <ThemedView style={styles.header}>
+          <Image
+            source={{ uri: competition.emblem }}
+            style={styles.logo}
+            resizeMode="contain"
           />
+          <ThemedText style={styles.title}>{competition.name}</ThemedText>
+        </ThemedView>
+      </TouchableOpacity>
+      <ThemedView style={styles.matchList}>
+        {matches.map((match) => (
+          <MatchCard key={match.id} match={match} />
         ))}
       </ThemedView>
     </ThemedView>
@@ -59,6 +64,8 @@ const styles = StyleSheet.create({
     padding: 12,
     backgroundColor: '#65a30d',
     gap: 12,
+    borderTopEndRadius: 12,
+    borderTopStartRadius: 12,
   },
   logo: {
     width: 24,

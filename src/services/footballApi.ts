@@ -111,6 +111,31 @@ export interface HeadToHead {
   matches: Match[];
 }
 
+export interface Standing {
+  position: number;
+  team: {
+    id: number;
+    name: string;
+    crest: string;
+    shortName: string;
+  };
+  playedGames: number;
+  won: number;
+  draw: number;
+  lost: number;
+  points: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+}
+
+export interface StandingsResponse {
+  competition: Competition;
+  standings: {
+    table: Standing[];
+  }[];
+}
+
 export async function getWeeklyMatches(dateFrom: string, dateTo: string): Promise<MatchResponse> {
   try {
     const response = await fetch(
@@ -183,4 +208,19 @@ export async function GetMatchDetail(matchId: number): Promise<Match> {
         headers: { 'X-Auth-Token': API_TOKEN },
     });
     return response.json();
+}
+
+export async function getLeagueStandings(leagueId: number): Promise<StandingsResponse> {
+  const response = await fetch(`${BASE_URL}/competitions/${leagueId}/standings`, {
+    headers: {
+      'X-Auth-Token': API_TOKEN,
+    },
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch standings');
+  }
+
+  const data = await response.json();
+  return data;
 }
