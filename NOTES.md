@@ -12,26 +12,28 @@ src/
 │   │   ├── bulletin.tsx  # Matches list
 │   │   ├── account.tsx   # User profile & settings
 │   │   └── _layout.tsx   # Tab bar configuration
+│   ├── match/       # Match details & analysis
+│   │   └── [id].tsx
+│   ├── standings/   # League standings
+│   │   └── [id].tsx
+│   ├── analyze/     # Match analysis
+│   │   └── [id].tsx
 │   └── _layout.tsx  # Root layout with auth protection
 ├── components/
 │   ├── auth/        # Authentication related components
-│   │   ├── AuthButton.tsx
-│   │   ├── AuthInput.tsx
-│   │   ├── AuthHeader.tsx
-│   │   ├── GoogleSignInButton.tsx
-│   │   ├── FacebookSignInButton.tsx
-│   │   └── index.ts
-│   └── common/      # Shared components
-├── config/
-│   └── firebase.ts  # Firebase configuration
-├── hooks/
-│   └── useAuth.ts   # Authentication hook
+│   ├── themed/      # Themed components
+│   │   ├── ThemedText.tsx
+│   │   └── ThemedView.tsx
+│   ├── FilterBar.tsx
+│   ├── LeagueSection.tsx
+│   ├── MatchCard.tsx
+│   └── RichText.tsx
 ├── services/
-│   └── auth.ts      # Auth services
-├── constants/
-│   └── Colors.ts    # App theme colors
-└── assets/
-    └── animations/  # Lottie animation files
+│   ├── auth.ts      # Auth services
+│   ├── footballApi.ts # Football data API
+│   └── openaiApi.ts  # OpenAI integration
+└── models/
+    └── AnalyzeResponseModel.ts
 ```
 
 ## Completed Features
@@ -42,41 +44,50 @@ src/
 - ✅ Google Sign-In (iOS & Android)
 - ✅ Protected routes
 - ✅ User state management with Firebase Auth
+- ✅ Match listing with league filtering
+- ✅ League standings view
+- ✅ Match details screen
+- ✅ Basic match analysis with OpenAI
 
 ## In Progress
-- Match listing UI
-- Firestore setup for match data
-
-## Features to Add
-
-### Phase 1
-- Match listing UI
-- Basic match prediction algorithm
-- User profile management
-- Match history
-- Basic statistics
-
-### Phase 2
-- Facebook Sign-In
-- Advanced match predictions
-- Detailed analytics
-- Push notifications
-- Settings page
-- Dark mode support
-
-## Technical Debt
-- Add proper error handling
-- Implement loading states
-- Add form validation
-- Improve type safety
-- Add unit tests
-- Add E2E tests
+- Advanced match analysis
+- Performance optimizations
+- UI/UX improvements
 
 ## Known Issues
-- None at the moment
+1. Performance Issues:
+   - Bulletin screen: Slow initial load of matches
+   - Match detail screen: Performance lag when loading data
+   - Analysis screen: Delay in OpenAI response
+
+2. API Integration:
+   - Need to implement proper error handling for API failures
+   - Rate limiting considerations for football-data.org API
+   - OpenAI API response parsing improvements needed
+
+3. UI/UX:
+   - iOS specific spacing issues in some components
+   - Need to optimize images and implement proper loading states
+   - Improve error states and user feedback
 
 ## Next Steps
-1. Create match listing UI
-2. Set up Firestore for match data
-3. Design and implement basic match prediction algorithm
-4. Add user profile management 
+1. Optimize bulletin screen performance:
+   - Implement pagination for matches
+   - Add proper loading states
+   - Cache API responses
+
+2. Improve match detail screen:
+   - Optimize data loading
+   - Add loading skeletons
+   - Implement data caching
+
+3. Enhance analysis feature:
+   - Improve OpenAI prompt engineering
+   - Add retry mechanism for failed requests
+   - Implement result caching
+
+4. General improvements:
+   - Add proper error boundaries
+   - Implement analytics
+   - Add unit tests
+   - Optimize bundle size 
