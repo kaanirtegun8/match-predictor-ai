@@ -1,5 +1,5 @@
 export const API_TOKEN = process.env.EXPO_PUBLIC_FOOTBALL_DATA_API_KEY as string;
-export const BASE_URL = 'http://api.football-data.org/v4';
+export const BASE_URL = 'https://api.football-data.org/v4';
 
 if (!API_TOKEN) {
   throw new Error('EXPO_PUBLIC_FOOTBALL_DATA_API_KEY is not defined in environment variables');

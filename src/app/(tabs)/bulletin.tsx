@@ -87,7 +87,6 @@ export default function BulletinScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
@@ -113,7 +112,6 @@ export default function BulletinScreen() {
           </ThemedView>
         )}
       </ScrollView>
-    </SafeAreaView>
   );
 }
 
