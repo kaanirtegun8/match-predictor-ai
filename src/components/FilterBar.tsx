@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
-import { Competition } from '../services/footballApi';
+import { Competition } from '../models';
 
 interface FilterBarProps {
   competitions: Competition[];

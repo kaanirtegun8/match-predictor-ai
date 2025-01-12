@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import { Match } from './footballApi';
-import { AnalyzeResponseModel } from '@/models/AnalyzeResponseModel';
+import { Match } from '../models';
+import { AnalyzeResponseModel } from '../models';
 
 // Initialize OpenAI client
 const openai = new OpenAI({

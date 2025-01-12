@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { FilterBar, LeagueSection, ThemedText, ThemedView } from '../../components';
-import { Competition, Match, getWeeklyMatches } from '../../services/footballApi';
+import { Competition, Match } from '../../models';
+import { getWeeklyMatches } from '../../services/footballApi';
 
 function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
   return matches.reduce<Record<string, Match[]>>((acc, match) => {
