@@ -1,8 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
-
 import { FilterBar, LeagueSection, ThemedText, ThemedView } from '../../components';
 import { Competition, Match } from '../../models';
 import { getWeeklyMatches } from '../../services/footballApi';
@@ -51,7 +49,6 @@ export default function BulletinScreen() {
         match.status === 'TIMED' || match.status === 'SCHEDULED'
       );
 
-      // Extract unique competitions from TIMED matches only
       const uniqueCompetitions = Array.from(
         new Map(timedMatches.map((match: Match) => [match.competition.id, match.competition])).values()
       ) as Competition[];

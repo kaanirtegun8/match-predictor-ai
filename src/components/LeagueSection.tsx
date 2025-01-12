@@ -1,9 +1,9 @@
 import { StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { router } from 'expo-router';
-import { Match } from '../services/footballApi';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
 import { MatchCard } from './MatchCard';
+import { Match } from '@/models';
 
 interface LeagueSectionProps {
   matches: Match[];

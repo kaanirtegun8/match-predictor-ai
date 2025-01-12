@@ -7,10 +7,11 @@ import { Image } from 'react-native';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { GetMatchDetail, Match } from '../../services/footballApi';
+import { GetMatchDetail } from '../../services/footballApi';
 import { AnalyzeResponseModel } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { RichText } from '../../components/RichText';
+import { Match } from '@/models';
 
 export default function AnalyzeScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -78,7 +79,7 @@ export default function AnalyzeScreen() {
           {/* Competition Info */}
           <TouchableOpacity 
             style={styles.competitionInfo}
-            onPress={() => router.push(`/standings/${match.competition.id}`)}>
+            onPress={() => router.push(`/standings/${match.competition.id}?homeTeamId=${match.homeTeam.id}&awayTeamId=${match.awayTeam.id}`)}>
             <Image
               source={{ uri: match.competition.emblem }}
               style={styles.competitionLogo}

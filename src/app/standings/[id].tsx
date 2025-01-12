@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText, ThemedView } from '@/components';
-import { Standing, StandingsResponse, getLeagueStandings } from '@/services/footballApi';
+import { getLeagueStandings } from '@/services/footballApi';
+import { StandingsResponse } from '@/models';
+import { Standing } from '@/models';
 
 
 export default function StandingsScreen() {

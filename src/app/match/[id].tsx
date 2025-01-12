@@ -6,8 +6,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { Match, HeadToHead, getHeadToHead, getTeamRecentMatches, GetMatchDetail } from '../../services/footballApi';
+import { getHeadToHead, getTeamRecentMatches, GetMatchDetail } from '../../services/footballApi';
 import dateUtils from '../../utils/date';
+import { HeadToHead } from '@/models';
+import { Match } from '@/models';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
