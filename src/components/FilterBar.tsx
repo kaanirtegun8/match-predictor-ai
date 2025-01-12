@@ -3,7 +3,7 @@ import { StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
-import { Competition } from '../services/footballApi';
+import { Competition } from '../models';
 
 interface FilterBarProps {
   competitions: Competition[];
@@ -18,7 +18,6 @@ export function FilterBar({
 }: FilterBarProps) {
   return (
     <ThemedView style={styles.container}>
-      {/* League Filter */}
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
@@ -83,10 +82,11 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   leagueScroll: {
-    paddingHorizontal: 16,
   },
   leagueContent: {
     gap: 8,
+    paddingHorizontal: 16,
+    paddingEnd: 24,
   },
   leagueButton: {
     flexDirection: 'row',

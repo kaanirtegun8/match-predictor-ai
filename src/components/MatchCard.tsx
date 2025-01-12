@@ -1,9 +1,9 @@
 import { StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { router } from 'expo-router';
 
-import { Match } from '../services/footballApi';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
+import { Match } from '@/models';
 
 interface MatchCardProps {
   match: Match;
