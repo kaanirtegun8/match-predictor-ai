@@ -1,15 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { getHeadToHead, getTeamRecentMatches, GetMatchDetail } from '../../services/footballApi';
 import dateUtils from '../../utils/date';
 import { HeadToHead } from '@/models';
 import { Match } from '@/models';
+import { getMatchDetails, getHeadToHeadFromCache, getTeamRecentMatchesFromCache } from '../../services/bulletinService';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -28,61 +28,54 @@ function getTeamForm(matches: Match[], teamId: number): string[] {
 }
 
 export default function MatchDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
-  const [loading, setLoading] = useState(true);
   const [h2h, setH2h] = useState<HeadToHead | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [homeTeamForm, setHomeTeamForm] = useState<string[]>([]);
-  const [awayTeamForm, setAwayTeamForm] = useState<string[]>([]);
+  const [homeTeamMatches, setHomeTeamMatches] = useState<Match[]>([]);
+  const [awayTeamMatches, setAwayTeamMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    loadMatchDetails();
-  }, [id]);
-
-  useEffect(() => {
-    if (match) {
-      Promise.all([
-        getTeamRecentMatches(match.homeTeam.id),
-        getTeamRecentMatches(match.awayTeam.id)
-      ]).then(([homeMatches, awayMatches]) => {
-        setHomeTeamForm(getTeamForm(homeMatches, match.homeTeam.id));
-        setAwayTeamForm(getTeamForm(awayMatches, match.awayTeam.id));
-      }).catch(error => {
-        console.error('Error loading team forms:', error);
-      });
-    }
-  }, [match]);
-
-  async function loadMatchDetails() {
+  async function loadMatchData() {
     try {
       setLoading(true);
-      setError(null);
-
-      const matchId = parseInt(id, 10);
-      if (isNaN(matchId)) {
-        throw new Error('Invalid match ID');
-      }
-
-      const response = await GetMatchDetail(matchId);
-      setMatch(response);
-
-      try {
-        const [h2hData] = await Promise.all([
-          getHeadToHead(response.id),
+      const matchDetails = await getMatchDetails(id as string);
+      
+      if (matchDetails) {
+        setMatch(matchDetails);
+        
+        // Load additional data using cached functions
+        const [h2hData, homeMatches, awayMatches] = await Promise.all([
+          getHeadToHeadFromCache(id as string),
+          getTeamRecentMatchesFromCache(id as string, matchDetails.homeTeam.id),
+          getTeamRecentMatchesFromCache(id as string, matchDetails.awayTeam.id)
         ]);
+
         setH2h(h2hData);
-      } catch (h2hError) {
-        console.error('Error loading head to head data:', h2hError);
+        setHomeTeamMatches(homeMatches);
+        setAwayTeamMatches(awayMatches);
       }
     } catch (error) {
-      console.error('Error fetching match details:', error);
-      setError(error instanceof Error ? error.message : 'An error occurred');
-      setMatch(null);
+      console.error('Error loading match data:', error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }
+
+  useEffect(() => {
+    if (id) {
+      loadMatchData();
+    }
+  }, [id]);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    loadMatchData();
+  }, [id]);
+
+  const homeTeamForm = getTeamForm(homeTeamMatches, match?.homeTeam.id ?? 0);
+  const awayTeamForm = getTeamForm(awayTeamMatches, match?.awayTeam.id ?? 0);
 
   if (loading) {
     return (
@@ -95,14 +88,14 @@ export default function MatchDetailScreen() {
     );
   }
 
-  if (error || !match) {
+  if (!match) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ThemedView style={[styles.container, styles.centerContent]}>
-          <ThemedText style={styles.errorText}>{error || 'Match not found'}</ThemedText>
+          <ThemedText style={styles.errorText}>Match not found</ThemedText>
           <TouchableOpacity 
             style={styles.retryButton}
-            onPress={loadMatchDetails}>
+            onPress={() => router.push(`/match/${id}`)}>
             <ThemedText style={styles.retryButtonText}>Retry</ThemedText>
           </TouchableOpacity>
         </ThemedView>
@@ -125,7 +118,14 @@ export default function MatchDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.scrollView}>
+      <ScrollView 
+        style={styles.scrollView}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
+        }>
         <ThemedView style={styles.container}>
           {/* Header */}
           <ThemedView style={styles.header}>
