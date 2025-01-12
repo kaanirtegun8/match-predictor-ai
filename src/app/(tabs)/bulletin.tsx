@@ -18,11 +18,20 @@ function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
 }
 
 export default function BulletinScreen() {
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  useEffect(() => {
+    if (selectedCompetition) {
+      setMatches(allMatches.filter(match => match.competition.id === selectedCompetition.id));
+    } else {
+      setMatches(allMatches);
+    }
+  }, [selectedCompetition, allMatches]);
 
   const loadMatches = useCallback(async () => {
     try {
@@ -30,39 +39,33 @@ export default function BulletinScreen() {
       const today = new Date();
       const nextWeek = new Date(today);
       nextWeek.setDate(today.getDate() + 7);
-      
+
       const dateFrom = today.toISOString().split('T')[0];
       const dateTo = nextWeek.toISOString().split('T')[0];
-      
+
       const weeklyMatches = await getWeeklyMatches(dateFrom, dateTo);
-      
+
       // Filter matches to only show TIMED matches
-      const timedMatches = weeklyMatches.matches.filter(match => 
+      const timedMatches = weeklyMatches.matches.filter(match =>
         match.status === 'TIMED' || match.status === 'SCHEDULED'
       );
-      
+
       // Extract unique competitions from TIMED matches only
       const uniqueCompetitions = Array.from(
         new Map(timedMatches.map((match: Match) => [match.competition.id, match.competition])).values()
       ) as Competition[];
       setCompetitions(uniqueCompetitions);
 
-      // Filter matches based on selected competition
-      let filteredMatches = timedMatches;
-      if (selectedCompetition) {
-        filteredMatches = filteredMatches.filter(
-          (match: Match) => match.competition.id === selectedCompetition.id
-        );
-      }
-
-      setMatches(filteredMatches);
+      setAllMatches(timedMatches);
+      setMatches(timedMatches);
     } catch (error) {
       console.error('Error loading matches:', error);
+      setAllMatches([]);
       setMatches([]);
     } finally {
       setLoading(false);
     }
-  }, [selectedCompetition]);
+  }, []);
 
   useEffect(() => {
     loadMatches();
@@ -87,33 +90,31 @@ export default function BulletinScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }>
-        <FilterBar
-          competitions={competitions}
-          selectedCompetition={selectedCompetition}
-          onCompetitionSelect={setSelectedCompetition}
+    <ScrollView
+      style={styles.content}
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }>
+      <FilterBar
+        competitions={competitions}
+        selectedCompetition={selectedCompetition}
+        onCompetitionSelect={setSelectedCompetition}
+      />
+      {Object.entries(groupedMatches).map(([leagueId, leagueMatches]) => (
+        <LeagueSection
+          key={leagueId}
+          matches={leagueMatches}
         />
-        {Object.entries(groupedMatches).map(([leagueId, leagueMatches]) => (
-          <LeagueSection
-            key={leagueId}
-            matches={leagueMatches}
-          />
-        ))}
-        {matches.length === 0 && (
-          <ThemedView style={styles.emptyContainer}>
-            <ThemedText style={styles.emptyText}>
-              No matches found
-            </ThemedText>
-          </ThemedView>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+      ))}
+      {matches.length === 0 && (
+        <ThemedView style={styles.emptyContainer}>
+          <ThemedText style={styles.emptyText}>
+            No matches found
+          </ThemedText>
+        </ThemedView>
+      )}
+    </ScrollView>
   );
 }
 
