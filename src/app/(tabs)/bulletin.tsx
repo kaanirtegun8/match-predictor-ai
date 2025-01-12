@@ -3,7 +3,7 @@ import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FilterBar, LeagueSection, ThemedText, ThemedView } from '../../components';
 import { Competition, Match } from '../../models';
-import { getWeeklyMatches } from '../../services/footballApi';
+import { getDailyBulletin } from '../../services/bulletinService';
 
 function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
   return matches.reduce<Record<string, Match[]>>((acc, match) => {
@@ -35,27 +35,24 @@ export default function BulletinScreen() {
   const loadMatches = useCallback(async () => {
     try {
       setLoading(true);
-      const today = new Date();
-      const nextWeek = new Date(today);
-      nextWeek.setDate(today.getDate() + 7);
+      const bulletin = await getDailyBulletin();
+      
+      if (bulletin) {
+        const timedMatches = bulletin.matches.filter(match =>
+          match.status === 'TIMED' || match.status === 'SCHEDULED'
+        );
 
-      const dateFrom = today.toISOString().split('T')[0];
-      const dateTo = nextWeek.toISOString().split('T')[0];
+        const uniqueCompetitions = Array.from(
+          new Map(timedMatches.map((match: Match) => [match.competition.id, match.competition])).values()
+        ) as Competition[];
 
-      const weeklyMatches = await getWeeklyMatches(dateFrom, dateTo);
-
-      // Filter matches to only show TIMED matches
-      const timedMatches = weeklyMatches.matches.filter(match =>
-        match.status === 'TIMED' || match.status === 'SCHEDULED'
-      );
-
-      const uniqueCompetitions = Array.from(
-        new Map(timedMatches.map((match: Match) => [match.competition.id, match.competition])).values()
-      ) as Competition[];
-      setCompetitions(uniqueCompetitions);
-
-      setAllMatches(timedMatches);
-      setMatches(timedMatches);
+        setCompetitions(uniqueCompetitions);
+        setAllMatches(timedMatches);
+        setMatches(timedMatches);
+      } else {
+        setAllMatches([]);
+        setMatches([]);
+      }
     } catch (error) {
       console.error('Error loading matches:', error);
       setAllMatches([]);
