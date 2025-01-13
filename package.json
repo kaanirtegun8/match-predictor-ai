@@ -12,6 +12,11 @@
   "jest": {
     "preset": "jest-expo"
   },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": false
+    }
+  },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@lottiefiles/dotlottie-react": "^0.6.5",
