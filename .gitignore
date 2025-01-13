@@ -38,3 +38,12 @@ yarn-error.*
 
 # GoogleService-Info.plist
 GoogleService-Info.plist
+
+# iOS
+*.ipa
+*.xcworkspace
+*.xcodeproj
+*.xcworkspace
+
+/ios
+/android
