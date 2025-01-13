@@ -14,7 +14,9 @@
   },
   "expo": {
     "doctor": {
-      "reactNativeDirectoryCheck": false
+      "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false
+      }
     }
   },
   "dependencies": {
