@@ -89,3 +89,12 @@ yarn-error.*
 *.tsbuildinfo
 
 # @end expo-cli
+=======
+# Firebase Functions
+functions/node_modules/
+functions/lib/
+functions/.env
+functions/.runtimeconfig.json
+functions/ui-debug.log
+functions/.firebase/
+functions/firebase-debug.log
