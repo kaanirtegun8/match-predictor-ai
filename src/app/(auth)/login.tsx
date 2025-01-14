@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, Platform, Alert } from 'react-native';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHeader } from '@/components/auth';
 import { Colors } from '@/constants/Colors';
@@ -66,11 +66,7 @@ export default function LoginScreen() {
       </View>
 
       <View style={styles.socialButtonsContainer}>
-        <GoogleSignInButton
-          onPress={() => {
-            // TODO: Implement Google Sign-In
-          }}
-        />
+        <GoogleSignInButton />
         <View style={styles.socialButtonSpacer} />
         <FacebookSignInButton
           onPress={() => {

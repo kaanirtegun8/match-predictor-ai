@@ -17,14 +17,27 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.matchpredictor.app"
+      "bundleIdentifier": "com.matchpredictorai.matchpredictorai"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.matchpredictor.app"
+      "package": "com.matchpredictorai.matchpredictorai",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "com.googleusercontent.apps.179297295436-2a5c7q41tsqjqj0bl1ketd1jitgmuqhr",
+              "host": "oauth2redirect"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ]
     },
     "web": {
       "favicon": "./src/assets/images/favicon.png"
@@ -40,9 +53,17 @@
         }
       ]
     ],
-    "scheme": "match-predictor",
+    "scheme": "com.matchpredictorai.matchpredictorai",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "262b4a7a-cd03-411f-9e14-b4e3ad764812"
+      }
     }
   }
 }
