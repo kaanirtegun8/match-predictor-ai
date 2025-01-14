@@ -36,6 +36,7 @@ export const useSubscription = () => {
   const loadPackages = async () => {
     try {
       const availablePackages = await getAvailablePackages();
+      console.log("availablePackages:", availablePackages);
       setPackages(availablePackages);
     } catch (error) {
       console.error('Failed to load packages:', error);

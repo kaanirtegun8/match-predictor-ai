@@ -35,9 +35,14 @@ export const initializeRevenueCat = async () => {
 export const getAvailablePackages = async (): Promise<PurchasesPackage[]> => {
   try {
     const offerings = await Purchases.getOfferings();
+    
+    if (!offerings.current) {
+      console.log('No current offering found');
+      return [];
+    }
+    
     return offerings.current?.availablePackages ?? [];
   } catch (error: unknown) {
-    console.error('Failed to get packages:', error);
     return [];
   }
 };

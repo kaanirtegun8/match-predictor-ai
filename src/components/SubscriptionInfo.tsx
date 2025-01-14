@@ -10,10 +10,7 @@ export const SubscriptionInfo = () => {
   const router = useRouter();
 
   const handleManageSubscription = () => {
-    router.push({
-      pathname: '/(tabs)/bulletin',
-      params: { screen: 'subscription' }
-    });
+    router.push('/(tabs)/subscription');
   };
 
   return (
