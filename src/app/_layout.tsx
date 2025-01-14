@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { useSegments, useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 
 // Define valid root routes that don't need redirection
 const VALID_ROOT_ROUTES = ['match', 'standings', 'predictions', 'analyze'];
@@ -36,13 +37,15 @@ export default function RootLayout() {
   if (loading) return null;
 
   return (
-    <Stack>
-      <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="predictions" options={{ presentation: 'modal' }} />
-      <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
-      <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
-    </Stack>
+    <SubscriptionProvider>
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="predictions" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
+        <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
+      </Stack>
+    </SubscriptionProvider>
   );
 }

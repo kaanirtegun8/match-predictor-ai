@@ -24,6 +24,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="subscription"
+        options={{
+          title: 'Premium',
+          headerTitle: 'Premium Features',
+          tabBarIcon: ({ color }) => (
+            <FontAwesome name="star" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="account"
         options={{
           title: 'Account',

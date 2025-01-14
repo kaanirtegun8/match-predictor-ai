@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
+import { SubscriptionInfo } from '@/components/SubscriptionInfo';
 
 export default function AccountScreen() {
   const { signOut, user } = useAuth();
@@ -9,6 +10,8 @@ export default function AccountScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>My Profile</Text>
       <Text style={styles.email}>{user?.email}</Text>
+      
+      <SubscriptionInfo />
       
       <View style={styles.buttonContainer}>
         <AuthButton
