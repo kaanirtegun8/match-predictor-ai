@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FilterBar, LeagueSection, ThemedText, ThemedView } from '../../components';
-import { Competition, Match } from '../../models';
+import { Match } from '../../models/Match';
 import { getDailyBulletin } from '../../services/bulletinService';
 
 function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
@@ -17,20 +17,10 @@ function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
 }
 
 export default function BulletinScreen() {
-  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
-  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+  const [selectedCompetition, setSelectedCompetition] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    if (selectedCompetition) {
-      setMatches(allMatches.filter(match => match.competition.id === selectedCompetition.id));
-    } else {
-      setMatches(allMatches);
-    }
-  }, [selectedCompetition, allMatches]);
 
   const loadMatches = useCallback(async () => {
     try {
@@ -38,24 +28,12 @@ export default function BulletinScreen() {
       const bulletin = await getDailyBulletin();
       
       if (bulletin) {
-        const timedMatches = bulletin.matches.filter(match =>
-          match.status === 'TIMED' || match.status === 'SCHEDULED'
-        );
-
-        const uniqueCompetitions = Array.from(
-          new Map(timedMatches.map((match: Match) => [match.competition.id, match.competition])).values()
-        ) as Competition[];
-
-        setCompetitions(uniqueCompetitions);
-        setAllMatches(timedMatches);
-        setMatches(timedMatches);
+        setMatches(bulletin.matches);
       } else {
-        setAllMatches([]);
         setMatches([]);
       }
     } catch (error) {
       console.error('Error loading matches:', error);
-      setAllMatches([]);
       setMatches([]);
     } finally {
       setLoading(false);
@@ -72,7 +50,15 @@ export default function BulletinScreen() {
     setRefreshing(false);
   }, [loadMatches]);
 
-  const groupedMatches = groupMatchesByLeague(matches);
+  const filteredMatches = selectedCompetition
+    ? matches.filter(match => match.competition.id.toString() === selectedCompetition)
+    : matches;
+
+  const competitions = Array.from(
+    new Map(matches.map(match => [match.competition.id, match.competition])).values()
+  );
+
+  const groupedMatches = groupMatchesByLeague(filteredMatches);
 
   if (loading) {
     return (
@@ -93,7 +79,7 @@ export default function BulletinScreen() {
       }>
       <FilterBar
         competitions={competitions}
-        selectedCompetition={selectedCompetition}
+        selectedCompetitionId={selectedCompetition}
         onCompetitionSelect={setSelectedCompetition}
       />
       {Object.entries(groupedMatches).map(([leagueId, leagueMatches]) => (
@@ -102,7 +88,7 @@ export default function BulletinScreen() {
           matches={leagueMatches}
         />
       ))}
-      {matches.length === 0 && (
+      {filteredMatches.length === 0 && (
         <ThemedView style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>
             No matches found

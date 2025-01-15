@@ -7,12 +7,12 @@ import { Image } from 'react-native';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { GetMatchDetail } from '../../services/footballApi';
 import { AnalyzeResponseModel } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
-import { RichText } from '../../components/RichText';
 import { Match } from '@/models';
 import { PremiumFeature } from '@/components/PremiumFeature';
+import { getMatchDetails } from '@/services/matchService';
+import { RichText } from '@/components/RichText';
 
 export default function AnalyzeScreen() {
   const { id } = useLocalSearchParams();
@@ -24,8 +24,10 @@ export default function AnalyzeScreen() {
   useEffect(() => {
     const loadMatch = async () => {
       try {
-        const matchData = await GetMatchDetail(Number(id));
-        setMatch(matchData);
+        const matchData = await getMatchDetails(id as string);
+        if (matchData) {
+          setMatch(matchData.details);
+        }
       } catch (error) {
         console.error('Failed to load match:', error);
       } finally {
