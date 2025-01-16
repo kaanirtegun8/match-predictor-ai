@@ -7,16 +7,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
 import dateUtils from '../../utils/date';
-import { HeadToHead } from '@/models';
-import { Match } from '@/models';
-import { getMatchDetails, getHeadToHeadFromCache, getTeamRecentMatchesFromCache } from '../../services/bulletinService';
+import { Match } from '@/models/Match';
+import { getMatchDetails } from '../../services/matchService';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
     .map(match => {
       const isHomeTeam = match.homeTeam.id === teamId;
-      const homeScore = match.score.fullTime.home ?? 0;
-      const awayScore = match.score.fullTime.away ?? 0;
+      const homeScore = match.score?.fullTime.home ?? 0;
+      const awayScore = match.score?.fullTime.away ?? 0;
       
       if (homeScore === awayScore) return 'D';
       if (isHomeTeam) {
@@ -30,7 +29,7 @@ function getTeamForm(matches: Match[], teamId: number): string[] {
 export default function MatchDetailScreen() {
   const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
-  const [h2h, setH2h] = useState<HeadToHead | null>(null);
+  const [h2h, setH2h] = useState<Match[]>([]);
   const [homeTeamMatches, setHomeTeamMatches] = useState<Match[]>([]);
   const [awayTeamMatches, setAwayTeamMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,18 +41,10 @@ export default function MatchDetailScreen() {
       const matchDetails = await getMatchDetails(id as string);
       
       if (matchDetails) {
-        setMatch(matchDetails);
-        
-        // Load additional data using cached functions
-        const [h2hData, homeMatches, awayMatches] = await Promise.all([
-          getHeadToHeadFromCache(id as string),
-          getTeamRecentMatchesFromCache(id as string, matchDetails.homeTeam.id),
-          getTeamRecentMatchesFromCache(id as string, matchDetails.awayTeam.id)
-        ]);
-
-        setH2h(h2hData);
-        setHomeTeamMatches(homeMatches);
-        setAwayTeamMatches(awayMatches);
+        setMatch(matchDetails.details);
+        setH2h(matchDetails.h2h);
+        setHomeTeamMatches(matchDetails.homeRecentMatches);
+        setAwayTeamMatches(matchDetails.awayRecentMatches);
       }
     } catch (error) {
       console.error('Error loading match data:', error);
@@ -103,7 +94,7 @@ export default function MatchDetailScreen() {
     );
   }
 
-  const matchDate = new Date(match.utcDate);
+  const matchDate = new Date(match.utcDate ?? match.kickoff);
   const formattedDate = matchDate.toLocaleDateString('en-GB', {
     weekday: 'long',
     year: 'numeric',
@@ -147,7 +138,7 @@ export default function MatchDetailScreen() {
               resizeMode="contain"
             />
             <ThemedText style={styles.competitionName}>
-              {match.competition.name} - Matchday {match.matchday}
+              {match.competition.name} {match.matchday ? `- Matchday ${match.matchday}` : ''}
             </ThemedText>
           </TouchableOpacity>
 
@@ -198,7 +189,7 @@ export default function MatchDetailScreen() {
               {isFinished || isLive ? (
                 <ThemedView style={styles.scoreContainer}>
                   <ThemedText style={styles.score}>
-                    {match.score.fullTime.home}-{match.score.fullTime.away}
+                    {match.score?.fullTime.home}-{match.score?.fullTime.away}
                   </ThemedText>
                 </ThemedView>
               ) : (
@@ -250,15 +241,15 @@ export default function MatchDetailScreen() {
           </ThemedView>
 
           {/* Recent Matches */}
-          {h2h && (
+          {h2h.length > 0 && (
             <ThemedView style={styles.recentMatchesContainer}>
               <ThemedView style={styles.sectionHeader}>
                 <Ionicons name="time-outline" size={18} color="#2E7D32" />
                 <ThemedText style={styles.sectionTitle}>Head to Head</ThemedText>
               </ThemedView>
               <ThemedView style={styles.recentMatches}>
-                {h2h.matches.slice(0, 5).map((match) => {
-                  const matchDate = new Date(match.utcDate);
+                {h2h.slice(0, 5).map((match) => {
+                  const matchDate = new Date(match.utcDate ?? match.kickoff);
                   const formattedDate = matchDate.toLocaleDateString('en-GB', {
                     day: 'numeric',
                     month: 'short',
@@ -279,7 +270,7 @@ export default function MatchDetailScreen() {
                       </ThemedView>
                       
                       <ThemedText style={styles.recentMatchScore}>
-                        {match.score.fullTime.home}-{match.score.fullTime.away}
+                        {match.score?.fullTime.home}-{match.score?.fullTime.away}
                       </ThemedText>
                       
                       <ThemedView style={styles.recentMatchTeam}>
@@ -319,6 +310,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBottom: 24,
+  },
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   header: {
     padding: 16,
@@ -509,84 +504,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'uppercase',
   },
-  centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#1282A2',
-  },
-  errorText: {
-    marginTop: 16,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#E74C3C',
-    textAlign: 'center',
-  },
-  retryButton: {
-    marginTop: 16,
-    padding: 12,
-    backgroundColor: '#1282A2',
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  analysisContainer: {
-    marginHorizontal: 16,
-    marginVertical: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    backgroundColor: '#fff',
-    padding: 16,
-  },
-  analysisContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  analysisLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  analysisTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  analysisSubtitle: {
-    fontSize: 10,
-    color: '#666',
-  },
-  analysisButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFD700',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  analysisButtonText: {
-    color: '#000',
-    fontSize: 14,
-    fontWeight: '600',
-  },
   formRow: {
     flexDirection: 'row',
     gap: 4,
-    marginVertical: 8,
+    marginBottom: 8,
   },
   formIndicator: {
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
@@ -604,5 +529,67 @@ const styles = StyleSheet.create({
   },
   drawIndicator: {
     backgroundColor: '#FFA726',
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 16,
+    color: '#666',
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#666',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#1282A2',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  analysisContainer: {
+    marginHorizontal: 16,
+    marginBottom: 24,
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#e0e0e0',
+    padding: 16,
+  },
+  analysisContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  analysisLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  analysisTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+  },
+  analysisSubtitle: {
+    fontSize: 13,
+    color: '#666',
+  },
+  analysisButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  analysisButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#000',
   },
 }); 

@@ -1,4 +1,5 @@
-import { Match, MatchResponse, HeadToHead, StandingsResponse } from '../models';
+import { MatchResponse } from 'functions/src/types/models';
+import { Match, HeadToHead, StandingsResponse } from '../models';
 
 export const API_TOKEN = process.env.EXPO_PUBLIC_FOOTBALL_DATA_API_KEY as string;
 export const BASE_URL = 'https://api.football-data.org/v4';
