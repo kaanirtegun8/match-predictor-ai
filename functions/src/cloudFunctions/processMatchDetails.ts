@@ -8,10 +8,14 @@ const footballApiKey = defineSecret("FOOTBALL_API_KEY");
 // Helper function to delay execution
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Constants for batch processing
+const BATCH_SIZE = 10; // Process 10 matches per function call
+const DELAY_BETWEEN_MATCHES = 30000; // 30 seconds between matches
+
 /**
  * Cloud Function that processes match details for today's bulletin
  * Triggered when a document is created or updated in the triggers collection
- * Processes matches in batches to avoid rate limiting
+ * Processes matches in batches to avoid rate limiting and timeout
  */
 export const processMatchDetailsV2 = onDocumentWritten({
   document: "triggers/{triggerId}",
@@ -48,16 +52,18 @@ export const processMatchDetailsV2 = onDocumentWritten({
   }
 
   const matches = bulletinData?.matches || [];
-  let lastProcessedIndex = bulletinData?.lastProcessedIndex || 0;
-
-  // Process matches in batches
-  const batchSize = 2; // Process 2 matches per minute
+  const lastProcessedIndex = bulletinData?.lastProcessedIndex || 0;
   const totalMatches = matches.length;
 
-  while (lastProcessedIndex < totalMatches) {
-    const batch = matches.slice(lastProcessedIndex, lastProcessedIndex + batchSize);
+  // Calculate the end index for this batch
+  const endIndex = Math.min(lastProcessedIndex + BATCH_SIZE, totalMatches);
+  const currentBatch = matches.slice(lastProcessedIndex, endIndex);
 
-    for (const match of batch) {
+  console.log(`\n📊 Processing matches ${lastProcessedIndex + 1} to ${endIndex} of ${totalMatches}`);
+
+  // Process current batch
+  for (const match of currentBatch) {
+    try {
       // Fetch match details
       const matchDetails = await getMatchDetail(footballApiKey.value(), match.id);
       const h2h = await getHeadToHead(footballApiKey.value(), match.id);
@@ -75,20 +81,31 @@ export const processMatchDetailsV2 = onDocumentWritten({
 
       console.log(`✅ Saved details for match ${match.id}`);
 
-      // Delay to respect API rate limits
-      await delay(30000); // 30 seconds delay
+      // Delay between matches
+      await delay(DELAY_BETWEEN_MATCHES);
+    } catch (error) {
+      console.error(`❌ Error processing match ${match.id}:`, error);
+      // Continue with next match even if current one fails
     }
-
-    lastProcessedIndex += batchSize;
-
-    // Update Firestore with the last processed index
-    await bulletinRef.update({lastProcessedIndex});
-
-    // Delay before processing the next batch
-    await delay(60000); // 1 minute delay
   }
 
-  // Mark all details as processed
-  await bulletinRef.update({allDetailsProcessed: true});
-  console.log("✅ All matches have been processed for date:", date);
+  // Update the last processed index
+  await bulletinRef.update({
+    lastProcessedIndex: endIndex,
+    allDetailsProcessed: endIndex >= totalMatches,
+  });
+
+  // If there are more matches to process, create a new trigger
+  if (endIndex < totalMatches) {
+    const newTriggerId = `${date}_${Date.now()}`;
+    await admin.firestore().collection("triggers").doc(newTriggerId).set({
+      type: "processMatchDetails",
+      date,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      status: "pending",
+    });
+    console.log("🔄 Created new trigger for next batch");
+  } else {
+    console.log("✅ All matches have been processed");
+  }
 });

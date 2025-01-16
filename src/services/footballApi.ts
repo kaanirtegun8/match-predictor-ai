@@ -1,5 +1,7 @@
 import { MatchResponse } from 'functions/src/types/models';
 import { Match, HeadToHead, StandingsResponse } from '../models';
+import { db } from '../config/firebase';
+import { getDoc, doc } from 'firebase/firestore';
 
 export const API_TOKEN = process.env.EXPO_PUBLIC_FOOTBALL_DATA_API_KEY as string;
 export const BASE_URL = 'https://api.football-data.org/v4';
@@ -83,16 +85,32 @@ export async function GetMatchDetail(matchId: number): Promise<Match> {
 }
 
 export async function getLeagueStandings(leagueId: number): Promise<StandingsResponse> {
-  const response = await fetch(`${BASE_URL}/competitions/${leagueId}/standings`, {
-    headers: {
-      'X-Auth-Token': API_TOKEN,
-    },
-  });
-  
-  if (!response.ok) {
-    throw new Error('Failed to fetch standings');
-  }
+  try {
+    // Try to get from Firebase first
+    console.log("🔍 Checking Firebase for standings...");
+    const today = new Date().toISOString().split('T')[0];
+    const standingsDoc = await getDoc(doc(db, `dailyBulletins/${today}/standings/${leagueId}`));
 
-  const data = await response.json();
-  return data;
+    if (standingsDoc.exists()) {
+      console.log("✅ Standings found in Firebase cache");
+      return standingsDoc.data() as StandingsResponse;
+    }
+
+    console.log("❌ Standings not found in Firebase, fetching from API...");
+    const response = await fetch(`${BASE_URL}/competitions/${leagueId}/standings`, {
+      headers: {
+        'X-Auth-Token': API_TOKEN,
+      },
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch standings');
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching standings:', error);
+    throw error;
+  }
 }
