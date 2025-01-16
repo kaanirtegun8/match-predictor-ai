@@ -1,7 +1,21 @@
 export interface Match {
   id: number;
+  competition: {
+    id: number;
+    name: string;
+    emblem: string;
+  };
   kickoff: string;
   status: string;
+  matchday: number;
+  utcDate?: string;
+  venue?: string;
+  score?: {
+    fullTime: {
+      home: number | null;
+      away: number | null;
+    };
+  };
   homeTeam: {
     id: number;
     name: string;
@@ -14,20 +28,6 @@ export interface Match {
     shortName: string;
     crest: string;
   };
-  competition: {
-    id: number;
-    name: string;
-    emblem: string;
-  };
-  score?: {
-    fullTime: {
-      home: number | null;
-      away: number | null;
-    };
-  };
-  venue?: string;
-  matchday?: number;
-  utcDate?: string;
 }
 
 export interface DailyBulletin {

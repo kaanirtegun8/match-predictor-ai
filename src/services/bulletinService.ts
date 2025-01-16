@@ -1,5 +1,5 @@
 import { db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection } from 'firebase/firestore';
 import { DailyBulletin, Match } from '../models/Match';
 import { API_TOKEN, BASE_URL } from './footballApi';
 
@@ -11,7 +11,16 @@ export async function getDailyBulletin(): Promise<DailyBulletin | null> {
     
     if (bulletinSnap.exists()) {
       console.log('✅ Daily bulletin found in Firestore');
-      return bulletinSnap.data() as DailyBulletin;
+      const bulletin = bulletinSnap.data() as DailyBulletin;
+      
+      // Filter matches with status TIMED
+      const timedMatches = bulletin.matches.filter((match: Match) => match.status === 'TIMED');
+      console.log(`✅ Found ${timedMatches.length} upcoming matches with status TIMED`);
+      
+      return {
+        ...bulletin,
+        matches: timedMatches
+      };
     }
 
     // If not in Firestore, fetch from API
@@ -33,9 +42,13 @@ export async function getDailyBulletin(): Promise<DailyBulletin | null> {
     const data = await response.json();
     console.log('✅ Successfully fetched matches from API');
     
+    // Filter API response matches by status TIMED
+    const timedMatches = data.matches.filter((match: Match) => match.status === 'TIMED');
+    console.log(`✅ Found ${timedMatches.length} upcoming matches with status TIMED from API`);
+    
     return {
       fetchDate: today,
-      matches: data.matches,
+      matches: timedMatches,
     };
 
   } catch (error) {
@@ -52,7 +65,8 @@ export async function getMatchDetails(matchId: string): Promise<{
 } | null> {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const matchDetailsRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
+    const bulletinRef = doc(db, 'dailyBulletins', today);
+    const matchDetailsRef = doc(collection(bulletinRef, 'matchDetails'), matchId);
     const matchDetailsSnap = await getDoc(matchDetailsRef);
     
     if (matchDetailsSnap.exists()) {
@@ -64,6 +78,7 @@ export async function getMatchDetails(matchId: string): Promise<{
       };
     }
 
+    console.log('⚠️ Match details not found in Firestore');
     return null;
   } catch (error) {
     console.error('Error fetching match details:', error);
