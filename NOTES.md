@@ -53,26 +53,34 @@ src/
 
 ### Cloud Functions
 
-#### 1. updateDailyBulletin ✅
-- **Trigger**: Runs daily at 00:00 (Europe/Istanbul)
-- **Purpose**: Fetches and saves daily match data
+#### 1. fetchDailyBulletin ✅
+- **Trigger**: Scheduled, runs daily at 04:00 (Europe/Istanbul)
+- **Purpose**: Fetches and saves daily match data and standings
 - **Process**:
-  1. Fetches weekly matches from API
-  2. Filters TIMED and SCHEDULED matches
-  3. Saves to Firebase
-  4. Creates match queue
+  1. Fetches matches for next 2 days from API
+  2. Saves matches to Firebase
+  3. Fetches and saves standings for each competition
+  4. Creates a trigger document for match details processing
+  5. Implements rate limiting (6s delay between standings)
 
-#### 2. processMatchGroups ✅
-- **Trigger**: On new document creation in matchQueue collection
-- **Purpose**: Processes match details
+#### 2. processMatchDetailsV2 ✅
+- **Trigger**: On document write in `triggers` collection
+- **Purpose**: Processes detailed match information in batches
 - **Process**:
-  1. Splits matches into groups of 2
-  2. For each group:
-     - Match details
-     - Head-to-head data
-     - Recent matches
-  3. Waits 60 seconds
-  4. Processes next group
+  1. Processes matches in batches of 10
+  2. For each match in batch:
+     - Fetches match details
+     - Fetches head-to-head data
+     - Fetches recent matches for both teams
+  3. Waits 30 seconds between matches
+  4. Creates new trigger for next batch if needed
+
+#### 3. manualFetchBulletin ✅
+- **Type**: HTTP endpoint
+- **Purpose**: Manual testing and triggering of bulletin fetch
+- **Features**:
+  - Can specify custom date via query parameter
+  - Uses same logic as scheduled function
 
 ### Firebase Structure
 
@@ -81,19 +89,25 @@ src/
 dailyBulletins/
   ├── 2024-01-13/
   │   ├── matches: Match[]
-  │   └── matchDetails: {
-  │       [matchId]: {
-  │           details: MatchDetails,
-  │           h2h: HeadToHead,
-  │           recentMatches_[teamId]: Match[]
-  │       }
-  │   }
+  │   ├── allDetailsProcessed: boolean
+  │   ├── lastProcessedIndex: number
+  │   ├── standings (collection)/
+  │   │   └── {competitionId}/
+  │   │       └── standingsData
+  │   └── matchDetails (collection)/
+  │       └── {matchId}/
+  │           ├── details: Match
+  │           ├── h2h: Match[]
+  │           ├── homeRecentMatches: Match[]
+  │           ├── awayRecentMatches: Match[]
+  │           └── lastUpdated: timestamp
 
-matchQueue/
-  ├── current/
-  │   ├── date: string
-  │   ├── status: string
-  │   └── matches: QueueMatch[]
+triggers/
+  └── {triggerId}/
+      ├── type: "processMatchDetails"
+      ├── date: string
+      ├── timestamp: timestamp
+      └── status: string
 ```
 
 #### Planned Structure 🔄
@@ -197,3 +211,53 @@ dailyBulletins/
    - Implement analytics
    - Add unit tests
    - Optimize bundle size 
+
+## Recent Updates & Manual Testing Guide
+
+### Firebase Cache Implementation ✅
+- [x] Implemented Firebase caching for standings data
+- [x] Added cache check before API calls
+- [x] Structure: `dailyBulletins/${date}/standings/${leagueId}`
+
+### Manual Testing Steps 🧪
+
+#### Standing Cache Testing
+1. Open standings page for a league
+2. Check console logs:
+   - "🔍 Checking Firebase for standings..." should appear
+   - Either "✅ Standings found in Firebase cache" or "❌ Standings not found in Firebase" will follow
+3. Verify data display:
+   - Table should show correct standings
+   - Loading states should work properly
+
+#### Cloud Function Testing
+1. Monitor Firestore:
+   - Check `dailyBulletins` collection for new documents
+   - Verify `standings` subcollection is populated
+2. Function Logs:
+   - Check Firebase Console > Functions
+   - Verify successful execution
+   - Monitor for any errors
+
+#### Manual Trigger URLs 🔗
+- **Manual Fetch Bulletin**:
+  ```
+  https://europe-west1-match-predictor-ai.cloudfunctions.net/manualFetchBulletin
+  ```
+  - Optional query parameter: `?date=YYYY-MM-DD`
+  - Example: `https://europe-west1-match-predictor-ai.cloudfunctions.net/manualFetchBulletin?date=2024-01-20`
+  - If no date provided, uses current date
+
+### Performance Improvements ✅
+- [x] Optimized standings data retrieval
+- [x] Implemented proper Firebase document structure
+- [x] Added console logging for debugging
+
+### Known Issues & Monitoring
+1. Cache Validation:
+   - Need to implement cache invalidation strategy
+   - Consider implementing TTL for cached data
+
+2. Error States:
+   - Handle Firebase connection errors
+   - Implement fallback to API when Firebase fails 
