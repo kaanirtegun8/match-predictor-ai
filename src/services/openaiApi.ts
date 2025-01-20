@@ -1,12 +1,34 @@
 import OpenAI from 'openai';
-import { Match } from '../models';
-import { AnalyzeResponseModel } from '../models';
+import { Match } from '@/models';
+import { AnalyzeResponseModel, RiskLevel, Prediction } from '@/models/AnalyzeResponseModel';
 
 // Initialize OpenAI client
 const openai = new OpenAI({
     apiKey: process.env.EXPO_PUBLIC_OPENAI_API_KEY,
     dangerouslyAllowBrowser: true
 });
+
+interface OpenAIPrediction extends Omit<Prediction, 'isRisky'> {
+  isRisky: boolean;
+}
+
+interface OpenAIResponse {
+  description: string;
+  predicts: Array<{
+    id: string;
+    type: string;
+    prediction: string;
+    probability: number;
+    evidence: string;
+    isRisky: RiskLevel;
+  }>;
+}
+
+const calculateRiskLevel = (probability: number): RiskLevel => {
+  if (probability >= 0.75) return 'SAFE';
+  if (probability >= 0.60) return 'MODERATE';
+  return 'RISKY';
+};
 
 export async function analyzeMatch(matchData: Match): Promise<AnalyzeResponseModel> {
     try {
@@ -101,7 +123,17 @@ export async function analyzeMatch(matchData: Match): Promise<AnalyzeResponseMod
             if (!parsedContent.description || !Array.isArray(parsedContent.predicts)) {
                 throw new Error('Invalid response structure');
             }
-            return parsedContent as AnalyzeResponseModel;
+
+            // Transform the response to include calculated risk levels
+            const transformedResponse = {
+                ...parsedContent as OpenAIResponse,
+                predicts: (parsedContent as OpenAIResponse).predicts.map(predict => ({
+                    ...predict,
+                    isRisky: calculateRiskLevel(predict.probability)
+                }))
+            };
+
+            return transformedResponse;
         } catch (parseError) {
             console.error('Failed to parse OpenAI response:', content);
             throw new Error('Invalid JSON response from OpenAI');

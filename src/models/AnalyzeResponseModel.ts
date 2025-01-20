@@ -1,13 +1,15 @@
-export interface AnalyzeResponseModel {
-    description: string;
-    predicts: Predict[];
-}
+export type RiskLevel = 'RISKY' | 'MODERATE' | 'SAFE';
 
-export interface Predict {
+export interface Prediction {
     id: string;
     type: string;
     prediction: string;
     probability: number;
     evidence: string;
-    isRisky: boolean;
+    isRisky: RiskLevel;
+}
+
+export interface AnalyzeResponseModel {
+    description: string;
+    predicts: Prediction[];
 } 
