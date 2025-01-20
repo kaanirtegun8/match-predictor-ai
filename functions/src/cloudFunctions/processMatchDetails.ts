@@ -2,15 +2,17 @@ import * as admin from "firebase-admin";
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 import {defineSecret} from "firebase-functions/params";
 import {getMatchDetail, getHeadToHead, getTeamRecentMatches} from "../services/footballApi";
+import {ApiMatch} from "../types/models";
 
 const footballApiKey = defineSecret("FOOTBALL_API_KEY");
 
 // Helper function to delay execution
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Constants for batch processing
+// Constants for rate limiting
 const BATCH_SIZE = 10; // Process 10 matches per function call
 const DELAY_BETWEEN_MATCHES = 30000; // 30 seconds between matches
+const DELAY_BETWEEN_API_CALLS = 6000; // 6 seconds between API calls
 
 /**
  * Cloud Function that processes match details for today's bulletin
@@ -64,11 +66,47 @@ export const processMatchDetailsV2 = onDocumentWritten({
   // Process current batch
   for (const match of currentBatch) {
     try {
+      console.log(`\n🔄 Processing match ${match.id}...`);
+
       // Fetch match details
+      console.log("📥 Fetching match details...");
       const matchDetails = await getMatchDetail(footballApiKey.value(), match.id);
+      await delay(DELAY_BETWEEN_API_CALLS);
+
+      // Fetch head-to-head
+      console.log("📥 Fetching head-to-head...");
       const h2h = await getHeadToHead(footballApiKey.value(), match.id);
-      const homeRecentMatches = await getTeamRecentMatches(footballApiKey.value(), matchDetails.homeTeam.id);
-      const awayRecentMatches = await getTeamRecentMatches(footballApiKey.value(), matchDetails.awayTeam.id);
+      await delay(DELAY_BETWEEN_API_CALLS);
+
+      // Initialize recent matches as empty arrays
+      let homeRecentMatches: ApiMatch[] = [];
+      let awayRecentMatches: ApiMatch[] = [];
+
+      // Try to fetch home team recent matches
+      try {
+        console.log(`📥 Fetching recent matches for home team (${matchDetails.homeTeam.name})...`);
+        homeRecentMatches = await getTeamRecentMatches(footballApiKey.value(), matchDetails.homeTeam.id);
+        await delay(DELAY_BETWEEN_API_CALLS);
+      } catch (error: any) {
+        if (error.message?.includes("403")) {
+          console.log(`ℹ️ Recent matches not available for ${matchDetails.homeTeam.name} (requires higher tier)`);
+        } else {
+          throw error;
+        }
+      }
+
+      // Try to fetch away team recent matches
+      try {
+        console.log(`📥 Fetching recent matches for away team (${matchDetails.awayTeam.name})...`);
+        awayRecentMatches = await getTeamRecentMatches(footballApiKey.value(), matchDetails.awayTeam.id);
+        await delay(DELAY_BETWEEN_API_CALLS);
+      } catch (error: any) {
+        if (error.message?.includes("403")) {
+          console.log(`ℹ️ Recent matches not available for ${matchDetails.awayTeam.name} (requires higher tier)`);
+        } else {
+          throw error;
+        }
+      }
 
       // Save match details to Firestore
       await bulletinRef.collection("matchDetails").doc(match.id.toString()).set({
@@ -79,13 +117,19 @@ export const processMatchDetailsV2 = onDocumentWritten({
         lastUpdated: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      console.log(`✅ Saved details for match ${match.id}`);
+      console.log(`✅ Saved all details for match ${match.id}`);
 
       // Delay between matches
       await delay(DELAY_BETWEEN_MATCHES);
-    } catch (error) {
+    } catch (error: any) {
       console.error(`❌ Error processing match ${match.id}:`, error);
-      // Continue with next match even if current one fails
+      // Save failed match info
+      await admin.firestore().collection("failedMatches").doc(match.id.toString()).set({
+        matchId: match.id,
+        date,
+        error: error.message,
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
     }
   }
 

@@ -245,7 +245,7 @@ dailyBulletins/
   https://europe-west1-match-predictor-ai.cloudfunctions.net/manualFetchBulletin
   ```
   - Optional query parameter: `?date=YYYY-MM-DD`
-  - Example: `https://europe-west1-match-predictor-ai.cloudfunctions.net/manualFetchBulletin?date=2024-01-20`
+  - Example: `https://europe-west1-match-predictor-ai.cloudfunctions.net/manualFetchBulletin?date=2025-01-20`
   - If no date provided, uses current date
 
 ### Performance Improvements ✅
