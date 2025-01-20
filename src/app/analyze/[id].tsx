@@ -10,7 +10,6 @@ import { ThemedView } from '../../components/themed/ThemedView';
 import { AnalyzeResponseModel } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
-import { PremiumFeature } from '@/components/PremiumFeature';
 import { getMatchDetails } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
 
@@ -27,6 +26,9 @@ export default function AnalyzeScreen() {
         const matchData = await getMatchDetails(id as string);
         if (matchData) {
           setMatch(matchData.details);
+          // Automatically trigger analysis when match is loaded
+          const result = await analyzeMatch(matchData.details);
+          setAnalysis(result);
         }
       } catch (error) {
         console.error('Failed to load match:', error);
@@ -37,20 +39,6 @@ export default function AnalyzeScreen() {
 
     loadMatch();
   }, [id]);
-
-  const handleAnalyze = async () => {
-    if (!match) return;
-
-    setAnalyzing(true);
-    try {
-      const result = await analyzeMatch(match);
-      setAnalysis(result);
-    } catch (error) {
-      console.error('Failed to analyze match:', error);
-    } finally {
-      setAnalyzing(false);
-    }
-  };
 
   if (loading) {
     return (
@@ -98,52 +86,30 @@ export default function AnalyzeScreen() {
           </ThemedView>
 
           {/* Analysis Content */}
-          <PremiumFeature
-            featureId="advanced_analysis"
-            fallback={
-              <ThemedView style={styles.basicAnalysis}>
-                <ThemedText style={styles.basicAnalysisText}>
-                  Basic match statistics are available in the match details.
-                  Upgrade to Premium for AI-powered analysis and predictions.
-                </ThemedText>
+          {!analysis ? (
+            <ThemedView style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#007AFF" />
+              <ThemedText style={styles.loadingText}>Analyzing match...</ThemedText>
+            </ThemedView>
+          ) : (
+            <ThemedView style={styles.analysisContent}>
+              <ThemedView style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Match Analysis</ThemedText>
+                <RichText text={analysis.description} style={styles.analysisText} />
               </ThemedView>
-            }
-          >
-            {!analysis ? (
-              <TouchableOpacity
-                style={styles.analyzeButton}
-                onPress={handleAnalyze}
-                disabled={analyzing}
-              >
-                {analyzing ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <Ionicons name="analytics" size={20} color="#fff" style={styles.buttonIcon} />
-                    <ThemedText style={styles.buttonText}>Analyze Match</ThemedText>
-                  </>
-                )}
-              </TouchableOpacity>
-            ) : (
-              <ThemedView style={styles.analysisContent}>
-                <ThemedView style={styles.section}>
-                  <ThemedText style={styles.sectionTitle}>Match Analysis</ThemedText>
-                  <RichText text={analysis.description} style={styles.analysisText} />
-                </ThemedView>
 
-                <ThemedView style={styles.section}>
-                  <ThemedText style={styles.sectionTitle}>Predictions</ThemedText>
-                  {analysis.predicts.map((predict, index) => (
-                    <ThemedView key={index} style={styles.predictionItem}>
-                      <ThemedText style={styles.predictionType}>{predict.type}</ThemedText>
-                      <ThemedText style={styles.predictionValue}>{predict.prediction}</ThemedText>
-                      <RichText text={predict.evidence} style={styles.evidenceText} />
-                    </ThemedView>
-                  ))}
-                </ThemedView>
+              <ThemedView style={styles.section}>
+                <ThemedText style={styles.sectionTitle}>Predictions</ThemedText>
+                {analysis.predicts.map((predict, index) => (
+                  <ThemedView key={index} style={styles.predictionItem}>
+                    <ThemedText style={styles.predictionType}>{predict.type}</ThemedText>
+                    <ThemedText style={styles.predictionValue}>{predict.prediction}</ThemedText>
+                    <RichText text={predict.evidence} style={styles.evidenceText} />
+                  </ThemedView>
+                ))}
               </ThemedView>
-            )}
-          </PremiumFeature>
+            </ThemedView>
+          )}
         </ThemedView>
       </ScrollView>
     </SafeAreaView>
@@ -256,6 +222,16 @@ const styles = StyleSheet.create({
   evidenceText: {
     fontSize: 14,
     lineHeight: 20,
+    color: '#666',
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
     color: '#666',
   },
 }); 
