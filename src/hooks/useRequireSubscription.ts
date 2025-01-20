@@ -1,10 +1,10 @@
 import { useEffect } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { useSubscription } from './useSubscription';
 
 export const useRequireSubscription = () => {
-  const { isSubscribed, isLoading } = useSubscriptionContext();
+  const { isSubscribed, isLoading } = useSubscription();
   const router = useRouter();
 
   useEffect(() => {

@@ -22,7 +22,7 @@ export default function PremiumScreen() {
     setLoading(true);
     try {
       await purchase(selectedPackage);
-      router.back();
+      router.push('/success');
     } catch (error) {
       console.error('Purchase error:', error);
     } finally {

@@ -65,7 +65,7 @@ export const checkSubscriptionStatus = async (): Promise<{ isActive: boolean; cu
   try {
     const customerInfo = await Purchases.getCustomerInfo();
     return {
-      isActive: Object.values(customerInfo.entitlements.active).length > 0,
+      isActive: Object.values(customerInfo.activeSubscriptions).length > 0,
       customerInfo
     };
   } catch (error: unknown) {

@@ -1,4 +1,4 @@
-import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { useSubscription } from "./useSubscription";
 
 export interface PremiumFeature {
   id: string;
@@ -8,7 +8,7 @@ export interface PremiumFeature {
 }
 
 export const usePremiumFeatures = () => {
-  const { isSubscribed } = useSubscriptionContext();
+  const { isSubscribed } = useSubscription();
 
   const features: PremiumFeature[] = [
     {

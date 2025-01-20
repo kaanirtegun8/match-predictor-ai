@@ -19,6 +19,7 @@ export const useSubscription = () => {
   useEffect(() => {
     const init = async () => {
       try {
+        console.log("init");
         await initializeRevenueCat();
         await loadPackages();
         await checkStatus();
@@ -36,7 +37,6 @@ export const useSubscription = () => {
   const loadPackages = async () => {
     try {
       const availablePackages = await getAvailablePackages();
-      //console.log("availablePackages:", availablePackages);
       setPackages(availablePackages);
     } catch (error) {
       console.error('Failed to load packages:', error);
@@ -46,6 +46,7 @@ export const useSubscription = () => {
   // Check subscription status
   const checkStatus = async () => {
     try {
+      console.log("checkStatus");
       const { isActive, customerInfo: info } = await checkSubscriptionStatus();
       setIsSubscribed(isActive);
       setCustomerInfo(info);

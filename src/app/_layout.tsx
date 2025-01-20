@@ -2,7 +2,6 @@ import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 import { useSegments, useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
-import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 
 // Define valid root routes that don't need redirection
@@ -39,7 +38,6 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider>
-      <SubscriptionProvider>
         <Stack>
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
@@ -53,7 +51,6 @@ export default function RootLayout() {
           <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
           <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
         </Stack>
-      </SubscriptionProvider>
     </ThemeProvider>
   );
 }

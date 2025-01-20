@@ -4,12 +4,13 @@ import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
-import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/hooks/useSubscription';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 
 export const SubscriptionInfo = () => {
-  const { isSubscribed, customerInfo } = useSubscriptionContext();
+  const { isSubscribed, customerInfo } = useSubscription();
+  console.log(isSubscribed);
   const { isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
   const router = useRouter();
@@ -20,22 +21,32 @@ export const SubscriptionInfo = () => {
 
   return (
     <TouchableOpacity 
-      style={[styles.container, { backgroundColor: colors.inputBackground }]} 
+      style={[
+        styles.container, 
+        { 
+          backgroundColor: isSubscribed ? colors.primary + '15' : colors.inputBackground,
+          borderColor: isSubscribed ? colors.primary : 'transparent',
+          borderWidth: isSubscribed ? 1 : 0,
+        }
+      ]} 
       onPress={handleManageSubscription}
     >
       <View style={styles.content}>
         <View style={[styles.iconContainer, { 
-          backgroundColor: colors.background,
+          backgroundColor: isSubscribed ? colors.primary + '20' : colors.background,
           shadowColor: colors.text
         }]}>
           <FontAwesome
             name="star"
             size={24}
-            color={isSubscribed ? '#FFD700' : colors.textSecondary}
+            color={isSubscribed ? colors.primary : colors.textSecondary}
           />
         </View>
         <View style={styles.textContainer}>
-          <ThemedText style={styles.title}>
+          <ThemedText style={[
+            styles.title,
+            isSubscribed && { color: colors.primary }
+          ]}>
             {isSubscribed ? 'Premium Member' : 'Free Member'}
           </ThemedText>
           <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -50,7 +61,11 @@ export const SubscriptionInfo = () => {
             </ThemedText>
           )}
         </View>
-        <FontAwesome name="chevron-right" size={16} color={colors.textSecondary} />
+        <FontAwesome 
+          name="chevron-right" 
+          size={16} 
+          color={isSubscribed ? colors.primary : colors.textSecondary} 
+        />
       </View>
     </TouchableOpacity>
   );
