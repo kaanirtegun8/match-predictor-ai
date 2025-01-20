@@ -3,9 +3,10 @@ import { useEffect } from 'react';
 import { useSegments, useRouter } from 'expo-router';
 import { useAuth } from '@/hooks/useAuth';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 
 // Define valid root routes that don't need redirection
-const VALID_ROOT_ROUTES = ['match', 'standings', 'predictions', 'analyze'];
+const VALID_ROOT_ROUTES = ['match', 'standings', 'predictions', 'analyze', 'premium'];
 
 function useProtectedRoute() {
   const segments = useSegments();
@@ -37,15 +38,22 @@ export default function RootLayout() {
   if (loading) return null;
 
   return (
-    <SubscriptionProvider>
-      <Stack>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="predictions" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
-      </Stack>
-    </SubscriptionProvider>
+    <ThemeProvider>
+      <SubscriptionProvider>
+        <Stack>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="predictions" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="premium" options={{ 
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+            headerShown: false,
+          }} />
+          <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
+          <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
+        </Stack>
+      </SubscriptionProvider>
+    </ThemeProvider>
   );
 }

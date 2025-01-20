@@ -1,15 +1,19 @@
 import { StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { router } from 'expo-router';
-
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
 import { Match } from '@/models';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Colors } from '@/constants/Colors';
 
 interface MatchCardProps {
   match: Match;
 }
 
 export function MatchCard({ match }: MatchCardProps) {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
+  
   const matchDate = new Date(match.utcDate);
   const formattedDate = matchDate.toLocaleDateString('en-GB', {
     weekday: 'short',
@@ -24,15 +28,19 @@ export function MatchCard({ match }: MatchCardProps) {
 
   return (
     <TouchableOpacity
-      style={styles.container}
+      style={[styles.container, { borderBottomColor: colors.border }]}
       onPress={() => router.push(`/match/${match.id}`)}>
       <ThemedView style={styles.content}>
         {/* Date and Status */}
         <ThemedView style={styles.dateContainer}>
-          <ThemedText style={styles.date}>{formattedDate}</ThemedText>
+          <ThemedText style={[styles.date, { color: colors.textSecondary }]}>
+            {formattedDate}
+          </ThemedText>
           {isLive && (
             <ThemedView style={styles.liveContainer}>
-              <ThemedText style={styles.liveIndicator}>LIVE</ThemedText>
+              <ThemedText style={[styles.liveIndicator, { color: colors.error }]}>
+                LIVE
+              </ThemedText>
             </ThemedView>
           )}
         </ThemedView>
@@ -46,7 +54,7 @@ export function MatchCard({ match }: MatchCardProps) {
               style={styles.teamLogo}
               resizeMode="contain"
             />
-            <ThemedText style={styles.teamName} numberOfLines={1}>
+            <ThemedText style={[styles.teamName, { color: colors.text }]} numberOfLines={1}>
               {match.homeTeam.shortName || match.homeTeam.name}
             </ThemedText>
           </ThemedView>
@@ -55,7 +63,8 @@ export function MatchCard({ match }: MatchCardProps) {
           <ThemedView style={styles.scoreContainer}>
             <ThemedText style={[
               styles.score,
-              isLive && styles.liveScore
+              { color: colors.text },
+              isLive && { color: colors.error }
             ]}>
               {isFinished || isLive
                 ? `${match.score.fullTime.home} - ${match.score.fullTime.away}`
@@ -65,7 +74,7 @@ export function MatchCard({ match }: MatchCardProps) {
 
           {/* Away Team */}
           <ThemedView style={[styles.teamContainer, styles.awayTeam]}>
-            <ThemedText style={[styles.teamName, styles.awayTeamName]} numberOfLines={1}>
+            <ThemedText style={[styles.teamName, styles.awayTeamName, { color: colors.text }]} numberOfLines={1}>
               {match.awayTeam.shortName || match.awayTeam.name}
             </ThemedText>
             <Image
@@ -85,7 +94,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
   },
   content: {
     gap: 4,
@@ -97,7 +105,6 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12,
-    color: '#666',
   },
   liveContainer: {
     flexDirection: 'row',
@@ -106,12 +113,6 @@ const styles = StyleSheet.create({
   },
   liveIndicator: {
     fontSize: 12,
-    color: '#ff4444',
-    fontWeight: '600',
-  },
-  liveMinute: {
-    fontSize: 12,
-    color: '#ff4444',
     fontWeight: '600',
   },
   matchInfo: {
@@ -134,7 +135,6 @@ const styles = StyleSheet.create({
   },
   teamName: {
     fontSize: 14,
-    color: '#333',
   },
   awayTeamName: {
     textAlign: 'right',
@@ -145,9 +145,5 @@ const styles = StyleSheet.create({
   score: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
-  },
-  liveScore: {
-    color: '#ff4444',
   },
 }); 

@@ -1,17 +1,24 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { SubscriptionInfo } from '@/components/SubscriptionInfo';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function AccountScreen() {
   const { signOut, user } = useAuth();
+  const { isDark } = useTheme();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>My Profile</Text>
-      <Text style={styles.email}>{user?.email}</Text>
+    <ThemedView style={styles.container}>
+      <ThemedText style={styles.title}>My Profile</ThemedText>
+      <ThemedText style={styles.email}>{user?.email}</ThemedText>
       
       <SubscriptionInfo />
+      
+      <ThemeToggle />
       
       <View style={styles.buttonContainer}>
         <AuthButton
@@ -19,7 +26,7 @@ export default function AccountScreen() {
           onPress={signOut}
         />
       </View>
-    </View>
+    </ThemedView>
   );
 }
 
@@ -27,7 +34,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
@@ -36,7 +42,6 @@ const styles = StyleSheet.create({
   },
   email: {
     fontSize: 16,
-    color: '#666',
     marginBottom: 30,
   },
   buttonContainer: {

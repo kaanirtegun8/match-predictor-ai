@@ -4,6 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FilterBar, LeagueSection, ThemedText, ThemedView } from '../../components';
 import { Match } from '../../models/Match';
 import { getDailyBulletin } from '../../services/bulletinService';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Colors } from '@/constants/Colors';
 
 function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
   return matches.reduce<Record<string, Match[]>>((acc, match) => {
@@ -17,6 +19,8 @@ function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
 }
 
 export default function BulletinScreen() {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,7 +66,7 @@ export default function BulletinScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
         <ThemedView style={styles.loadingContainer}>
           <ThemedText>Loading matches...</ThemedText>
         </ThemedView>
@@ -72,10 +76,14 @@ export default function BulletinScreen() {
 
   return (
     <ScrollView
-      style={styles.content}
-      contentContainerStyle={styles.scrollContent}
+      style={[styles.content, { backgroundColor: colors.background }]}
+      contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        <RefreshControl 
+          refreshing={refreshing} 
+          onRefresh={onRefresh}
+          tintColor={colors.text}
+        />
       }>
       <FilterBar
         competitions={competitions}
@@ -102,31 +110,25 @@ export default function BulletinScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   content: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
   },
   scrollContent: {
     paddingBottom: 20,
-    backgroundColor: '#f5f5f5',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
   },
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5',
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
   },
 }); 
