@@ -3,6 +3,13 @@ import { doc, getDoc, collection } from 'firebase/firestore';
 import { DailyBulletin, Match } from '../models/Match';
 import { API_TOKEN, BASE_URL } from './footballApi';
 
+// Helper function to check if a match has started
+function hasMatchStarted(match: Match): boolean {
+  const now = new Date();
+  const matchDate = new Date(match.kickoff ?? match.utcDate);
+  return now > matchDate;
+}
+
 export async function getDailyBulletin(): Promise<DailyBulletin | null> {
   try {
     const today = new Date().toISOString().split('T')[0];
@@ -13,13 +20,15 @@ export async function getDailyBulletin(): Promise<DailyBulletin | null> {
       console.log('✅ Daily bulletin found in Firestore');
       const bulletin = bulletinSnap.data() as DailyBulletin;
       
-      // Filter matches with status TIMED
-      const timedMatches = bulletin.matches.filter((match: Match) => match.status === 'TIMED');
-      console.log(`✅ Found ${timedMatches.length} upcoming matches with status TIMED`);
+      // Filter matches that are TIMED and haven't started yet
+      const upcomingMatches = bulletin.matches.filter((match: Match) => 
+        match.status === 'TIMED' && !hasMatchStarted(match)
+      );
+      console.log(`✅ Found ${upcomingMatches.length} upcoming matches that haven't started yet`);
       
       return {
         ...bulletin,
-        matches: timedMatches
+        matches: upcomingMatches
       };
     }
 
@@ -42,13 +51,15 @@ export async function getDailyBulletin(): Promise<DailyBulletin | null> {
     const data = await response.json();
     console.log('✅ Successfully fetched matches from API');
     
-    // Filter API response matches by status TIMED
-    const timedMatches = data.matches.filter((match: Match) => match.status === 'TIMED');
-    console.log(`✅ Found ${timedMatches.length} upcoming matches with status TIMED from API`);
+    // Filter API response matches that are TIMED and haven't started yet
+    const upcomingMatches = data.matches.filter((match: Match) => 
+      match.status === 'TIMED' && !hasMatchStarted(match)
+    );
+    console.log(`✅ Found ${upcomingMatches.length} upcoming matches that haven't started yet from API`);
     
     return {
       fetchDate: today,
-      matches: timedMatches,
+      matches: upcomingMatches,
     };
 
   } catch (error) {
