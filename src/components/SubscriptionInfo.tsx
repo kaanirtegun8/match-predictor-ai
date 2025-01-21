@@ -9,15 +9,41 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 
 export const SubscriptionInfo = () => {
-  const { isSubscribed, customerInfo } = useSubscription();
-  console.log(isSubscribed);
+  const { isSubscribed, customerInfo, isLoading } = useSubscription();
   const { isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
   const router = useRouter();
 
   const handleManageSubscription = () => {
-    router.push('/premium');
+    if (isSubscribed) {
+      router.push('/subscription-details');
+    } else {
+      router.push('/premium');
+    }
   };
+
+  if (isLoading) {
+    return (
+      <ThemedView 
+        style={[
+          styles.container, 
+          { backgroundColor: colors.inputBackground }
+        ]}>
+        <View style={styles.content}>
+          <View style={[styles.iconContainer, { 
+            backgroundColor: colors.background,
+            shadowColor: colors.text
+          }]}>
+            <View style={[styles.skeleton, { backgroundColor: colors.border }]} />
+          </View>
+          <View style={styles.textContainer}>
+            <View style={[styles.skeleton, styles.titleSkeleton, { backgroundColor: colors.border }]} />
+            <View style={[styles.skeleton, styles.subtitleSkeleton, { backgroundColor: colors.border }]} />
+          </View>
+        </View>
+      </ThemedView>
+    );
+  }
 
   return (
     <TouchableOpacity 
@@ -110,5 +136,18 @@ const styles = StyleSheet.create({
   },
   expirationDate: {
     fontSize: 12,
+  },
+  skeleton: {
+    borderRadius: 4,
+    opacity: 0.3,
+  },
+  titleSkeleton: {
+    height: 16,
+    width: '40%',
+    marginBottom: 8,
+  },
+  subtitleSkeleton: {
+    height: 14,
+    width: '60%',
   },
 }); 

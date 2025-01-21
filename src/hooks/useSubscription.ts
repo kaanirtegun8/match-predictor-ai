@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert } from 'react-native';
+import { Alert, Linking, Platform } from 'react-native';
 import { CustomerInfo, PurchasesPackage } from 'react-native-purchases';
 import {
   initializeRevenueCat,
@@ -99,6 +99,20 @@ export const useSubscription = () => {
     }
   }, []);
 
+  const handleCancelSubscription = useCallback(() => {
+    // Unfortunately, you cannot directly cancel a subscription programmatically in
+    // either App Store or Play Store. Instead, you must direct the user to the
+    // subscriptions management page for their platform.
+    
+    if (Platform.OS === 'ios') {
+      // This may open the subscriptions management page in iOS
+      Linking.openURL('https://apps.apple.com/account/subscriptions');
+    } else {
+      // This should open the subscriptions management page in Android
+      Linking.openURL('https://play.google.com/store/account/subscriptions');
+    }
+  }, []);
+
   return {
     isLoading,
     packages,
@@ -107,5 +121,6 @@ export const useSubscription = () => {
     purchase: handlePurchase,
     restore: handleRestore,
     checkStatus,
+    cancelSubscription: handleCancelSubscription,
   };
 }; 

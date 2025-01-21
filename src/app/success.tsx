@@ -31,7 +31,14 @@ export default function SuccessScreen() {
         {/* Button */}
         <TouchableOpacity
           style={[styles.button, { backgroundColor: colors.primary }]}
-          onPress={() => router.push('/(tabs)/bulletin')}>
+          onPress={() => {
+            // First close all modals
+            router.back();
+            // Then navigate to bulletin
+            setTimeout(() => {
+              router.replace('/(tabs)/bulletin');
+            }, 100);
+          }}>
           <ThemedText style={[styles.buttonText, { color: colors.buttonText }]}>
             Start Exploring
           </ThemedText>
