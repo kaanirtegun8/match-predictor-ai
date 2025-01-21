@@ -10,21 +10,36 @@ interface MatchCardProps {
   match: Match;
 }
 
-export function MatchCard({ match }: MatchCardProps) {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
+const formatMatchDate = (utcDate: string | undefined): string => {
+  if (!utcDate) return 'Date not available';
   
-  const matchDate = new Date(match.utcDate);
-  const formattedDate = matchDate.toLocaleDateString('en-GB', {
-    weekday: 'short',
+  const date = new Date(utcDate);
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   });
+};
 
+const getScore = (match: Match): string => {
+  if (!match.score) return 'vs';
+  if (match.status === 'FINISHED') {
+    return `${match.score.fullTime.home} - ${match.score.fullTime.away}`;
+  }
+  if (match.status === 'IN_PLAY' || match.status === 'PAUSED') {
+    return `${match.score.fullTime.home ?? 0} - ${match.score.fullTime.away ?? 0}`;
+  }
+  return 'vs';
+};
+
+export function MatchCard({ match }: MatchCardProps) {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
+  
+  const formattedDate = formatMatchDate(match.utcDate);
+  const score = getScore(match);
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED';
-  const isFinished = match.status === 'FINISHED';
 
   return (
     <TouchableOpacity
@@ -66,9 +81,7 @@ export function MatchCard({ match }: MatchCardProps) {
               { color: colors.text },
               isLive && { color: colors.error }
             ]}>
-              {isFinished || isLive
-                ? `${match.score.fullTime.home} - ${match.score.fullTime.away}`
-                : 'vs'}
+              {score}
             </ThemedText>
           </ThemedView>
 
