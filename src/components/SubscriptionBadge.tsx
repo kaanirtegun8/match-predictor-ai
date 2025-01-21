@@ -2,14 +2,14 @@ import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface SubscriptionBadgeProps {
   showLabel?: boolean;
 }
 
 export const SubscriptionBadge = ({ showLabel = true }: SubscriptionBadgeProps) => {
-  const { isSubscribed } = useSubscriptionContext();
+  const { isSubscribed } = useSubscription();
   const router = useRouter();
 
   const handlePress = () => {
