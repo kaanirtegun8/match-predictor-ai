@@ -3,21 +3,21 @@
     "name": "Match Predictor AI",
     "slug": "match-predictor-ai",
     "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./src/assets/images/icon.png",
-    "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "splash": {
       "image": "./src/assets/images/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.matchpredictorai.matchpredictorai"
+      "bundleIdentifier": "com.matchpredictorai.matchpredictorai",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -51,7 +51,8 @@
             "useFrameworks": "static"
           }
         }
-      ]
+      ],
+      "expo-dev-client"
     ],
     "scheme": "com.matchpredictorai.matchpredictorai",
     "experiments": {
@@ -64,6 +65,9 @@
       "eas": {
         "projectId": "262b4a7a-cd03-411f-9e14-b4e3ad764812"
       }
+    },
+    "developmentClient": {
+      "silentLaunch": true
     }
   }
 }

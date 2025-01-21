@@ -1,40 +1,36 @@
-import { Competition } from './Competition';
-import { Team } from './Team';
-import { Score } from './Score';
-import { Lineup } from './Lineup';
-
 export interface Match {
   id: number;
-  utcDate: string;
+  competition: {
+    id: number;
+    name: string;
+    emblem: string;
+  };
+  kickoff: string;
   status: string;
   matchday: number;
-  stage: string;
-  group: string | null;
-  lastUpdated: string;
-  score: Score;
-  homeTeam: Team;
-  awayTeam: Team;
-  competition: Competition;
+  utcDate?: string;
   venue?: string;
-  homeTeamLineup?: Lineup;
-  awayTeamLineup?: Lineup;
-}
-
-export interface MatchResponse {
-  matches: Match[];
-  resultSet: {
-    count: number;
-    competitions: string;
-    first: string;
-    last: string;
-    played: number;
+  score?: {
+    fullTime: {
+      home: number | null;
+      away: number | null;
+    };
+  };
+  homeTeam: {
+    id: number;
+    name: string;
+    shortName: string;
+    crest: string;
+  };
+  awayTeam: {
+    id: number;
+    name: string;
+    shortName: string;
+    crest: string;
   };
 }
 
-export interface MatchAnalysisInput {
-  homeTeam: string;
-  awayTeam: string;
-  score: string;
-  stats?: any;
-  highlights?: string[];
+export interface DailyBulletin {
+  fetchDate: string;
+  matches: Match[];
 } 

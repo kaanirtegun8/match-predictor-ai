@@ -1,15 +1,19 @@
+import React from 'react';
 import { View, ViewProps } from 'react-native';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Colors } from '@/constants/Colors';
 
-interface ThemedViewProps extends ViewProps {}
+export const ThemedView: React.FC<ViewProps> = ({ style, ...props }) => {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
 
-export function ThemedView(props: ThemedViewProps) {
   return (
-    <View 
-      {...props}
+    <View
       style={[
-        { backgroundColor: '#fff' },
-        props.style
+        { backgroundColor: colors.background },
+        style,
       ]}
+      {...props}
     />
   );
-} 
+}; 

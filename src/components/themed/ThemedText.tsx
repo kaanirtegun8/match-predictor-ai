@@ -1,15 +1,19 @@
+import React from 'react';
 import { Text, TextProps } from 'react-native';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Colors } from '@/constants/Colors';
 
-interface ThemedTextProps extends TextProps {}
+export const ThemedText: React.FC<TextProps> = ({ style, ...props }) => {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
 
-export function ThemedText(props: ThemedTextProps) {
   return (
-    <Text 
-      {...props}
+    <Text
       style={[
-        { color: '#000' },
-        props.style
+        { color: colors.text },
+        style,
       ]}
+      {...props}
     />
   );
-} 
+}; 

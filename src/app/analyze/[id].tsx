@@ -4,145 +4,233 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { GetMatchDetail } from '../../services/footballApi';
-import { AnalyzeResponseModel } from '../../models/AnalyzeResponseModel';
+import { AnalyzeResponseModel, RiskLevel } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
-import { RichText } from '../../components/RichText';
 import { Match } from '@/models';
+import { getMatchDetails } from '@/services/matchService';
+import { RichText } from '@/components/RichText';
+
+const getRiskStyles = (risk: RiskLevel) => {
+  switch (risk) {
+    case 'RISKY':
+      return styles.riskyBadge;
+    case 'MODERATE':
+      return styles.moderateBadge;
+    case 'SAFE':
+      return styles.safeBadge;
+    default:
+      return {};
+  }
+};
+
+const calculateRiskLevel = (probability: number): RiskLevel => {
+  if (probability >= 0.75) return 'SAFE';
+  if (probability >= 0.60) return 'MODERATE';
+  return 'RISKY';
+};
 
 export default function AnalyzeScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
   const [analysis, setAnalysis] = useState<AnalyzeResponseModel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [loadingStep, setLoadingStep] = useState<number>(1);
+  const [loadingMessage, setLoadingMessage] = useState<string>('Retrieving match statistics...');
+  const [expandedPredictions, setExpandedPredictions] = useState<number[]>([]);
+
+  const togglePrediction = (index: number) => {
+    setExpandedPredictions(prev => 
+      prev.includes(index) 
+        ? prev.filter(i => i !== index)
+        : [...prev, index]
+    );
+  };
 
   useEffect(() => {
-    if (!id) return;
-    loadMatchDetails();
+    const loadMatch = async () => {
+      try {
+        setLoadingStep(1);
+        setLoadingMessage('Retrieving match statistics...');
+        const matchData = await getMatchDetails(id as string);
+        
+        if (matchData) {
+          setMatch(matchData.details);
+          setLoadingStep(2);
+          setLoadingMessage('Analyzing team performances...');
+          
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          setLoadingStep(3);
+          setLoadingMessage('Generating AI predictions...');
+          const result = await analyzeMatch(matchData.details);
+          
+          
+          setLoadingStep(4);
+          setLoadingMessage('Finalizing match insights...');
+          await new Promise(resolve => setTimeout(resolve, 800));
+          
+          setAnalysis(result);
+        }
+      } catch (error) {
+        console.error('Failed to load match:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadMatch();
   }, [id]);
 
-  async function loadMatchDetails() {
-    try {
-      setLoading(true);
-      setError(null);
-      const matchData = await GetMatchDetail(Number(id));
-      setMatch(matchData);
-      const result = await analyzeMatch(matchData);
-      setAnalysis(result);
-    } catch (error) {
-      console.error('Error:', error);
-      setError('Failed to load match analysis');
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#65a30d" />
-          <ThemedText style={styles.loadingText}>Analyzing match...</ThemedText>
+  const LoadingSteps = () => (
+    <ThemedView style={styles.loadingContainer}>
+      {[
+        'Retrieving match statistics...',
+        'Analyzing team performances...',
+        'Generating AI predictions...',
+        'Finalizing match insights...'
+      ].map((step, index) => (
+        <ThemedView key={index} style={styles.loadingStep}>
+          <ThemedView style={styles.stepIndicator}>
+            {index + 1 === loadingStep && (
+              <ActivityIndicator size="small" color="#007AFF" />
+            )}
+            {index + 1 < loadingStep && (
+              <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+            )}
+            {index + 1 > loadingStep && (
+              <ThemedView style={styles.emptyStep} />
+            )}
+          </ThemedView>
+          <ThemedText style={[
+            styles.loadingText,
+            index + 1 === loadingStep && styles.activeStep,
+            index + 1 < loadingStep && styles.completedStep
+          ]}>
+            {step}
+          </ThemedText>
         </ThemedView>
+      ))}
+    </ThemedView>
+  );
+
+  if (loading && !match) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
       </SafeAreaView>
     );
   }
 
   if (!match) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.errorContainer}>
-          <ThemedText style={styles.errorText}>Match not found</ThemedText>
-        </ThemedView>
+      <SafeAreaView style={styles.container}>
+        <ThemedText>Match not found</ThemedText>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <ThemedView style={styles.container}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView}>
+        <ThemedView style={styles.content}>
           {/* Header */}
           <ThemedView style={styles.header}>
-            <TouchableOpacity 
-              style={styles.backButton} 
+            <TouchableOpacity
+              style={styles.backButton}
               onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color="#65a30d" />
+              <Ionicons name="chevron-back" size={24} color="#000" />
               <ThemedText style={styles.backText}>Back</ThemedText>
             </TouchableOpacity>
           </ThemedView>
 
-          {/* Competition Info */}
-          <TouchableOpacity 
-            style={styles.competitionInfo}
-            onPress={() => router.push(`/standings/${match.competition.id}?homeTeamId=${match.homeTeam.id}&awayTeamId=${match.awayTeam.id}`)}>
+          {/* Match Info */}
+          <ThemedView style={styles.matchInfo}>
             <Image
               source={{ uri: match.competition.emblem }}
               style={styles.competitionLogo}
               resizeMode="contain"
             />
-            <ThemedText style={styles.competitionName}>
-              {match.competition.name} - Matchday {match.matchday}
-            </ThemedText>
-          </TouchableOpacity>
+            
+            <ThemedView style={styles.teamsContainer}>
+              <ThemedText style={styles.teamName}>
+                {match.homeTeam.name}
+              </ThemedText>
+              <ThemedText style={styles.vsText}>vs</ThemedText>
+              <ThemedText style={styles.teamName}>
+                {match.awayTeam.name}
+              </ThemedText>
+            </ThemedView>
 
-          {/* Match Info */}
-          <ThemedView style={styles.matchContainer}>
-            <ThemedView style={styles.teamsRow}>
-              <ThemedView style={styles.teamContainer}>
-                <Image
-                  source={{ uri: match.homeTeam.crest }}
-                  style={styles.teamLogo}
-                  resizeMode="contain"
-                />
-                <ThemedText style={styles.teamName} numberOfLines={2}>
-                  {match.homeTeam.name}
-                </ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.scoreContainer}>
-                <ThemedText style={styles.vsText}>vs</ThemedText>
-              </ThemedView>
-              <ThemedView style={styles.teamContainer}>
-                <Image
-                  source={{ uri: match.awayTeam.crest }}
-                  style={styles.teamLogo}
-                  resizeMode="contain"
-                />
-                <ThemedText style={styles.teamName} numberOfLines={2}>
-                  {match.awayTeam.name}
-                </ThemedText>
+            <ThemedView style={styles.matchDetails}>
+              <ThemedText style={styles.competitionName}>
+                {match.competition.name}
+              </ThemedText>
+              
+              <ThemedView style={styles.metadataContainer}>
+                <ThemedView style={styles.badge}>
+                  <ThemedText style={styles.badgeText}>
+                    Matchday {match.matchday}
+                  </ThemedText>
+                </ThemedView>
+                
+                {match.utcDate && (
+                  <ThemedView style={styles.badge}>
+                    <ThemedText style={styles.badgeText}>
+                      {new Date(match.utcDate).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })} • {new Date(match.utcDate).toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </ThemedText>
+                  </ThemedView>
+                )}
               </ThemedView>
             </ThemedView>
           </ThemedView>
 
-          {/* Analysis Section */}
-          <ThemedView style={styles.analysisSection}>
-            {analysis ? (
-              <ThemedView style={styles.analysisContent}>
-                {/* Description */}
-                <ThemedView style={styles.descriptionCard}>
-                  <RichText style={styles.descriptionText} text={analysis.description} />
+          {/* Analysis Content */}
+          {!analysis ? (
+            <LoadingSteps />
+          ) : (
+            <ThemedView style={styles.analysisContent}>
+              {/* Match Analysis Section */}
+              <ThemedView style={styles.analysisSection}>
+                <ThemedView style={styles.sectionHeader}>
+                  <Ionicons name="analytics-outline" size={24} color="#1e40af" />
+                  <ThemedText style={styles.sectionTitle}>Match Analysis</ThemedText>
                 </ThemedView>
+                <ThemedView style={styles.analysisCard}>
+                  <RichText text={analysis.description} style={styles.analysisText} />
+                </ThemedView>
+              </ThemedView>
 
-                {/* Predictions */}
-                <ThemedView style={styles.predictionsContainer}>
-                  {analysis.predicts.map((predict) => (
-                    <ThemedView key={predict.id} style={[
-                      styles.predictionCard,
-                      predict.isRisky && styles.riskyCard
-                    ]}>
-                      <ThemedView style={styles.predictionHeader}>
-                        <ThemedText style={styles.predictionType}>{predict.type}</ThemedText>
+              {/* Predictions Section */}
+              <ThemedView style={styles.predictionsSection}>
+                <ThemedView style={styles.sectionHeader}>
+                  <Ionicons name="podium-outline" size={24} color="#1e40af" />
+                  <ThemedText style={styles.sectionTitle}>Predictions</ThemedText>
+                </ThemedView>
+                
+                {analysis.predicts.map((predict, index) => (
+                  <ThemedView key={index} style={styles.predictionCard}>
+                    <ThemedView style={styles.predictionHeader}>
+                      <ThemedView style={styles.predictionMain}>
+                        <ThemedText style={styles.predictionType}>
+                          {predict.type}
+                        </ThemedText>
+                        
                         <ThemedView style={[
-                          styles.probabilityBadge,
-                          { backgroundColor: getProbabilityColor(predict.probability) }
+                          styles.riskBadge,
+                          getRiskStyles(calculateRiskLevel(predict.probability))
                         ]}>
-                          <ThemedText style={styles.probabilityText}>
-                            {Math.round(predict.probability * 100)}%
+                          <ThemedText style={styles.riskBadgeText}>
+                            {calculateRiskLevel(predict.probability)}
                           </ThemedText>
                         </ThemedView>
                       </ThemedView>
@@ -151,248 +239,290 @@ export default function AnalyzeScreen() {
                         {predict.prediction}
                       </ThemedText>
 
-                      <ThemedView style={styles.evidenceContainer}>
-                        <RichText style={styles.evidenceText} text={predict.evidence} />
-                      </ThemedView>
-
-                      {predict.isRisky && (
-                        <ThemedView style={styles.riskyBadge}>
-                          <Ionicons name="warning" size={16} color="#f59e0b" />
-                          <ThemedText style={styles.riskyText}>Risky Prediction</ThemedText>
-                        </ThemedView>
-                      )}
+                      <ThemedText style={styles.probabilityText}>
+                        {Math.round(predict.probability * 100)}% Confidence
+                      </ThemedText>
                     </ThemedView>
-                  ))}
-                </ThemedView>
+
+                    <TouchableOpacity 
+                      style={styles.evidenceToggle}
+                      onPress={() => togglePrediction(index)}>
+                      <ThemedText style={styles.evidenceToggleText}>
+                        {expandedPredictions.includes(index) ? 'Hide Details' : 'Show Details'}
+                      </ThemedText>
+                      <Ionicons 
+                        name={expandedPredictions.includes(index) ? "chevron-up" : "chevron-down"} 
+                        size={16} 
+                        color="#666" 
+                      />
+                    </TouchableOpacity>
+
+                    {expandedPredictions.includes(index) && (
+                      <ThemedView style={styles.evidenceContainer}>
+                        <RichText text={predict.evidence} style={styles.evidenceText} />
+                      </ThemedView>
+                    )}
+                  </ThemedView>
+                ))}
               </ThemedView>
-            ) : error ? (
-              <ThemedText style={styles.errorText}>{error}</ThemedText>
-            ) : null}
-          </ThemedView>
+            </ThemedView>
+          )}
         </ThemedView>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-const getProbabilityColor = (probability: number) => {
-  if (probability >= 0.7) return '#65a30d';
-  if (probability >= 0.5) return '#f59e0b';
-  return '#ef4444';
-};
-
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#fff',
   },
   scrollView: {
     flex: 1,
   },
-  container: {
-    flex: 1,
-    paddingBottom: 24,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#64748b',
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
+  content: {
+    padding: 20,
   },
   header: {
-    padding: 16,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 2,
+    marginBottom: 20,
   },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f1f5f9',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
   },
   backText: {
-    fontSize: 15,
+    fontSize: 16,
     marginLeft: 4,
-    color: '#65a30d',
-    fontWeight: '500',
   },
-  competitionInfo: {
-    padding: 20,
+  matchInfo: {
+    width: '100%',
+    marginBottom: 24,
     alignItems: 'center',
   },
   competitionLogo: {
-    width: 40,
-    height: 40,
-    marginBottom: 8,
+    width: 44,
+    height: 44,
+    marginBottom: 16,
   },
-  competitionName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#0f172a',
-    textAlign: 'center',
-  },
-  matchContainer: {
-    marginVertical: 16,
-    marginHorizontal: 16,
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  teamsRow: {
+  teamsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
-  },
-  teamContainer: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  scoreContainer: {
+    justifyContent: 'center',
+    marginBottom: 16,
     paddingHorizontal: 20,
   },
-  teamLogo: {
-    width: 64,
-    height: 64,
-    marginBottom: 12,
-  },
   teamName: {
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: '600',
-    color: '#0f172a',
+    color: '#000',
+    flex: 1,
     textAlign: 'center',
   },
   vsText: {
-    fontSize: 20,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  analysisSection: {
+    fontSize: 16,
+    color: '#666',
     marginHorizontal: 16,
   },
-  analysisContent: {
-    gap: 16,
+  matchDetails: {
+    alignItems: 'center',
   },
-  descriptionCard: {
-    backgroundColor: '#fff',
-    padding: 16,
+  competitionName: {
+    fontSize: 15,
+    color: '#666',
+    marginBottom: 12,
+  },
+  metadataContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  badge: {
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  badgeText: {
+    fontSize: 13,
+    color: '#475569',
+  },
+  basicAnalysis: {
+    backgroundColor: '#f8f9fa',
     borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+  },
+  basicAnalysisText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  analyzeButton: {
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  analysisContent: {
+    marginTop: 24,
+  },
+  analysisSection: {
+    marginBottom: 32,
+  },
+  predictionsSection: {
+    marginBottom: 32,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1e40af',
+    marginLeft: 8,
+  },
+  analysisCard: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
   },
-  descriptionText: {
-    fontSize: 15,
+  analysisText: {
+    fontSize: 16,
     lineHeight: 24,
     color: '#334155',
   },
-  predictionsContainer: {
-    gap: 16,
-  },
   predictionCard: {
     backgroundColor: '#fff',
-    padding: 16,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  riskyCard: {
+    padding: 16,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#f59e0b33',
+    borderColor: '#e2e8f0',
   },
   predictionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     marginBottom: 12,
+  },
+  predictionMain: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
   predictionType: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#0f172a',
-  },
-  probabilityBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  probabilityText: {
-    fontSize: 14,
-    color: '#fff',
-    fontWeight: '500',
+    color: '#1e293b',
   },
   predictionValue: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#65a30d',
-    marginBottom: 12,
+    color: '#0f172a',
+    marginVertical: 8,
+  },
+  probabilityText: {
+    fontSize: 14,
+    color: '#64748b',
+  },
+  riskBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  riskyBadge: {
+    backgroundColor: '#fee2e2',
+  },
+  moderateBadge: {
+    backgroundColor: '#fef3c7',
+  },
+  safeBadge: {
+    backgroundColor: '#dcfce7',
+  },
+  riskBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#1e293b',
+  },
+  evidenceToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    marginTop: 8,
+  },
+  evidenceToggleText: {
+    fontSize: 14,
+    color: '#666',
+    marginRight: 4,
   },
   evidenceContainer: {
-    backgroundColor: '#f8fafc',
-    padding: 12,
-    borderRadius: 8,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
   },
   evidenceText: {
     fontSize: 14,
     lineHeight: 20,
-    color: '#475569',
+    color: '#64748b',
   },
-  riskyBadge: {
+  loadingContainer: {
+    padding: 20,
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    marginTop: 20,
+  },
+  loadingStep: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 12,
-    padding: 8,
-    backgroundColor: '#f59e0b11',
-    borderRadius: 8,
+    marginBottom: 16,
   },
-  riskyText: {
-    color: '#f59e0b',
-    fontSize: 14,
+  stepIndicator: {
+    width: 24,
+    height: 24,
+    marginRight: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyStep: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#ddd',
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  activeStep: {
+    color: '#007AFF',
     fontWeight: '600',
-    marginLeft: 6,
   },
-  errorText: {
-    color: '#ef4444',
-    fontSize: 14,
-    textAlign: 'center',
-    marginTop: 16,
+  completedStep: {
+    color: '#4CAF50',
+    textDecorationLine: 'line-through',
   },
 }); 
