@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl } from 'react-native';
+import React, { useEffect, useState, useRef } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '../../components/themed/ThemedText';
@@ -34,6 +34,32 @@ export default function MatchDetailScreen() {
   const [awayTeamMatches, setAwayTeamMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Border animation
+  const borderAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animate = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(borderAnim, {
+            toValue: 1,
+            duration: 3000,
+            easing: Easing.linear,
+            useNativeDriver: false,
+          }),
+          Animated.timing(borderAnim, {
+            toValue: 0,
+            duration: 3000,
+            easing: Easing.linear,
+            useNativeDriver: false,
+          })
+        ])
+      ).start();
+    };
+
+    animate();
+  }, []);
 
   async function loadMatchData() {
     try {
@@ -222,22 +248,44 @@ export default function MatchDetailScreen() {
           </ThemedView>
 
           {/* Analysis Request Section */}
-          <ThemedView style={styles.analysisContainer}>
-            <ThemedView style={styles.analysisContent}>
-              <ThemedView style={styles.analysisLeft}>
-                <Ionicons name="trending-up" size={20} color="#FFD700" />
-                <ThemedView>
-                  <ThemedText style={styles.analysisTitle}>Match Analysis</ThemedText>
-                  <ThemedText style={styles.analysisSubtitle}>AI-Powered insights and predictions</ThemedText>
+          <ThemedView style={styles.analysisOuterContainer}>
+            <Animated.View style={[
+              styles.animatedBorder,
+              {
+                borderColor: borderAnim.interpolate({
+                  inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+                  outputRange: [
+                    '#FFD700', // Altın sarısı
+                    '#FF6B6B', // Mercan kırmızısı
+                    '#4CAF50', // Yeşil
+                    '#2196F3', // Mavi
+                    '#9C27B0', // Mor
+                    '#FF9800', // Turuncu
+                    '#00BCD4', // Cyan
+                    '#F44336', // Kırmızı
+                    '#8BC34A', // Açık yeşil
+                    '#E91E63', // Pembe
+                    '#FFD700'  // Tekrar sarı (smooth geçiş için)
+                  ]
+                })
+              }
+            ]}>
+              <ThemedView style={styles.analysisContent}>
+                <ThemedView style={styles.analysisLeft}>
+                  <Ionicons name="trending-up" size={24} color="#FFD700" />
+                  <ThemedView style={styles.textContainer}>
+                    <ThemedText style={styles.analysisTitle}>Match Analysis</ThemedText>
+                    <ThemedText style={styles.analysisSubtitle}>AI-Powered insights and predictions</ThemedText>
+                  </ThemedView>
                 </ThemedView>
+                <TouchableOpacity 
+                  style={[styles.analysisButton, { backgroundColor: '#FFD700' }]}
+                  onPress={() => router.push(`/analyze/${match.id}`)}>
+                  <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>Analyze</ThemedText>
+                  <Ionicons name="arrow-forward" size={18} color="#000" />
+                </TouchableOpacity>
               </ThemedView>
-              <TouchableOpacity 
-                style={styles.analysisButton}
-                onPress={() => router.push(`/analyze/${match.id}`)}>
-                <ThemedText style={styles.analysisButtonText}>Analyze</ThemedText>
-                <Ionicons name="arrow-forward" size={18} color="#000" />
-              </TouchableOpacity>
-            </ThemedView>
+            </Animated.View>
           </ThemedView>
 
           {/* Recent Matches */}
@@ -551,41 +599,65 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  analysisContainer: {
+  analysisOuterContainer: {
     marginHorizontal: 16,
     marginBottom: 24,
+  },
+  animatedBorder: {
+    borderWidth: 1,
     borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e0e0e0',
-    padding: 16,
+    backgroundColor: '#fff',
+    shadowColor: '#1282A2',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   analysisContent: {
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 16,
   },
   analysisLeft: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    flex: 1,
+  },
+  textContainer: {
+    flex: 1,
+    flexShrink: 1,
   },
   analysisTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#FFD700',
   },
   analysisSubtitle: {
     fontSize: 13,
     color: '#666',
+    flexShrink: 1,
   },
   analysisButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: '#FFD700',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   analysisButtonText: {
     fontSize: 14,
