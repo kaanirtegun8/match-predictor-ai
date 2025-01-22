@@ -294,6 +294,7 @@ const styles = StyleSheet.create({
   backText: {
     fontSize: 16,
     marginLeft: 4,
+    color: '#1282A2',
   },
   matchInfo: {
     width: '100%',

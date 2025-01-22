@@ -51,7 +51,7 @@ export default function StandingsScreen() {
                         <TouchableOpacity
                             style={styles.backButton}
                             onPress={() => router.back()}>
-                            <Ionicons name="chevron-back" size={24} color="#000" />
+                            <Ionicons name="chevron-back" size={24} color="#1282A2" />
                             <ThemedText style={styles.backText}>Back</ThemedText>
                         </TouchableOpacity>
                     </ThemedView>
@@ -144,7 +144,7 @@ export default function StandingsScreen() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: 'white',
     },
     scrollView: {
         flex: 1,
@@ -163,29 +163,17 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         flexDirection: 'row',
         alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 1,
-        },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
-        marginBottom: 8,
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderBottomColor: '#e0e0e0',
     },
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f1f5f9',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 8,
     },
     backText: {
-        fontSize: 15,
+        fontSize: 16,
         marginLeft: 4,
-        color: '#334155',
-        fontWeight: '500',
+        color: '#1282A2',
     },
     competitionInfo: {
         padding: 20,
@@ -220,7 +208,7 @@ const styles = StyleSheet.create({
     },
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: '#65a30d',
+        backgroundColor: '#1282A2',
         paddingVertical: 14,
         paddingHorizontal: 12,
     },
@@ -253,46 +241,42 @@ const styles = StyleSheet.create({
     },
     teamCell: {
         flex: 1,
-        marginRight: 8,
+        textAlign: 'left',
+        paddingLeft: 8,
+    },
+    statsCell: {
+        width: 28,
+        textAlign: 'center',
+    },
+    pointsCell: {
+        width: 32,
+        textAlign: 'center',
+        fontWeight: 'bold',
     },
     teamInfo: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        marginRight: 8,
-        maxWidth: '45%',
+        gap: 8,
     },
     teamLogo: {
-        width: 24,
-        height: 24,
-        minWidth: 24,
+        width: 20,
+        height: 20,
     },
     teamName: {
-        fontSize: 13,
-        color: '#0f172a',
         flex: 1,
-        fontWeight: '500',
-    },
-    statsCell: {
-        width: 32,
+        fontSize: 13,
         color: '#475569',
-    },
-    pointsCell: {
-        width: 36,
-        fontWeight: '600',
-        color: '#0f172a',
-        fontSize: 14,
     },
     teamInfoBackground: {
         backgroundColor: '#fff',
         borderRadius: 4,
     },
     highlightedRow: {
-        backgroundColor: '#f0fdf4',
+        backgroundColor: '#E3F2FD',
     },
     whiteText: {
-        color: '#166534',
+        color: '#1282A2',
         fontWeight: '500',
     },
 });
