@@ -75,9 +75,20 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#fff',
     gap: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   selectedItem: {
     backgroundColor: '#65a30d',
+    borderColor: '#65a30d',
   },
   filterText: {
     fontSize: 13,
