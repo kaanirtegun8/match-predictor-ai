@@ -11,19 +11,20 @@ export async function getMatchDetails(matchId: string): Promise<{
   awayRecentMatches: Match[];
 } | null> {
   try {
-    // First try to get from Firestore
+    // Get from today's bulletin in Firestore
     const today = new Date().toISOString().split('T')[0];
     const matchDetailsRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
     const matchDetailsSnap = await getDoc(matchDetailsRef);
     
     if (matchDetailsSnap.exists()) {
       console.log('✅ Match details found in Firestore');
-      return matchDetailsSnap.data() as {
+      const data = matchDetailsSnap.data() as {
         details: Match;
         h2h: Match[];
         homeRecentMatches: Match[];
         awayRecentMatches: Match[];
       };
+      return data;
     }
 
     // If not in Firestore, fetch from API
@@ -118,5 +119,27 @@ export const saveMatchAnalysis = async (matchId: string, analysis: AnalyzeRespon
     } catch (error) {
         console.error('❌ Error saving match analysis:', error);
         return false;
+    }
+};
+
+export const getMatchAnalysis = async (matchId: string): Promise<AnalyzeResponseModel | null> => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
+        const matchSnap = await getDoc(matchRef);
+        
+        if (matchSnap.exists()) {
+            const data = matchSnap.data();
+            if (data.analysis) {
+                console.log('✅ Analysis found for match:', matchId);
+                return data.analysis as AnalyzeResponseModel;
+            }
+        }
+        
+        console.log('⚠️ No analysis found for match:', matchId);
+        return null;
+    } catch (error) {
+        console.error('❌ Error getting match analysis:', error);
+        return null;
     }
 }; 

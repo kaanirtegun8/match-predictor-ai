@@ -11,7 +11,7 @@ import { ThemedView } from '../../components/themed/ThemedView';
 import { AnalyzeResponseModel, RiskLevel } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
-import { getMatchDetails, saveMatchAnalysis } from '@/services/matchService';
+import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
 
 const getRiskStyles = (risk: RiskLevel) => {
@@ -59,26 +59,46 @@ export default function AnalyzeScreen() {
         
         if (matchData) {
           setMatch(matchData.details);
-          setLoadingStep(2);
-          setLoadingMessage('Analyzing team performances...');
           
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          setLoadingStep(3);
-          setLoadingMessage('Generating AI predictions...');
-          const result = await analyzeMatch(matchData.details);
-          
-          // Save analysis to database
-          const saved = await saveMatchAnalysis(id as string, result);
-          if (!saved) {
-            console.error('❌ Failed to save match analysis');
+          // Check if analysis exists in Firestore
+          const existingAnalysis = await getMatchAnalysis(id as string);
+          if (existingAnalysis) {
+            console.log('✅ Match analysis found in Firestore, using cached data');
+            setLoadingStep(2);
+            setLoadingMessage('Loading cached analysis...');
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            setLoadingStep(3);
+            setLoadingMessage('Processing insights...');
+            await new Promise(resolve => setTimeout(resolve, 600));
+            
+            setLoadingStep(4);
+            setLoadingMessage('Finalizing match insights...');
+            await new Promise(resolve => setTimeout(resolve, 400));
+            
+            setAnalysis(existingAnalysis);
+          } else {
+            console.log('⚠️ No analysis found in Firestore, generating new analysis...');
+            setLoadingStep(2);
+            setLoadingMessage('Analyzing team performances...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            setLoadingStep(3);
+            setLoadingMessage('Generating AI predictions...');
+            const result = await analyzeMatch(matchData.details);
+            
+            // Save analysis to database
+            const saved = await saveMatchAnalysis(id as string, result);
+            if (!saved) {
+              console.error('❌ Failed to save match analysis');
+            }
+            
+            setLoadingStep(4);
+            setLoadingMessage('Finalizing match insights...');
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            setAnalysis(result);
           }
-          
-          setLoadingStep(4);
-          setLoadingMessage('Finalizing match insights...');
-          await new Promise(resolve => setTimeout(resolve, 800));
-          
-          setAnalysis(result);
         }
       } catch (error) {
         console.error('Failed to load match:', error);

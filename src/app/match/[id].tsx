@@ -120,7 +120,7 @@ export default function MatchDetailScreen() {
     );
   }
 
-  const matchDate = new Date(match.utcDate ?? match.kickoff);
+  const matchDate = new Date(match.utcDate);
   const formattedDate = matchDate.toLocaleDateString('en-GB', {
     weekday: 'long',
     year: 'numeric',
