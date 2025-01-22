@@ -11,7 +11,7 @@ import { ThemedView } from '../../components/themed/ThemedView';
 import { AnalyzeResponseModel, RiskLevel } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
-import { getMatchDetails } from '@/services/matchService';
+import { getMatchDetails, saveMatchAnalysis } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
 
 const getRiskStyles = (risk: RiskLevel) => {
@@ -68,6 +68,11 @@ export default function AnalyzeScreen() {
           setLoadingMessage('Generating AI predictions...');
           const result = await analyzeMatch(matchData.details);
           
+          // Save analysis to database
+          const saved = await saveMatchAnalysis(id as string, result);
+          if (!saved) {
+            console.error('❌ Failed to save match analysis');
+          }
           
           setLoadingStep(4);
           setLoadingMessage('Finalizing match insights...');

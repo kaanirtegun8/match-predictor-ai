@@ -1,7 +1,8 @@
 import { db } from '../config/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, setDoc, updateDoc } from 'firebase/firestore';
 import { Match } from '../models/Match';
 import { API_TOKEN, BASE_URL } from './footballApi';
+import { AnalyzeResponseModel } from '../models/AnalyzeResponseModel';
 
 export async function getMatchDetails(matchId: string): Promise<{
   details: Match;
@@ -92,4 +93,30 @@ async function fetchTeamMatchesFromAPI(matchId: number, type: 'home' | 'away'): 
   
   const data = await response.json();
   return data.matches;
-} 
+}
+
+export const saveMatchAnalysis = async (matchId: string, analysis: AnalyzeResponseModel) => {
+    try {
+        const today = new Date().toISOString().split('T')[0];
+        const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
+        
+        await updateDoc(matchRef, {
+            analysis: {
+                description: analysis.description,
+                predicts: analysis.predicts.map(predict => ({
+                    type: predict.type,
+                    prediction: predict.prediction,
+                    probability: predict.probability,
+                    evidence: predict.evidence
+                })),
+                analyzedAt: new Date().toISOString()
+            }
+        });
+
+        console.log('✅ Match analysis saved successfully to Firestore:', matchId);
+        return true;
+    } catch (error) {
+        console.error('❌ Error saving match analysis:', error);
+        return false;
+    }
+}; 
