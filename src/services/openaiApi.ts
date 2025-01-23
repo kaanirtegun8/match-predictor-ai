@@ -153,7 +153,7 @@ export async function analyzeMatch(matchData: {
 
         const completion = await openai.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "gpt-4-0613",
+            model: "gpt-4o-mini-2024-07-18", // dont change this 
             temperature: 0.7,
             max_tokens: 2000
         });

@@ -1,8 +1,9 @@
 import { db } from '../config/firebase';
-import { doc, getDoc, collection, query, where, getDocs, setDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { Match } from '../models/Match';
 import { API_TOKEN, BASE_URL } from './footballApi';
 import { AnalyzeResponseModel } from '../models/AnalyzeResponseModel';
+import { auth } from '@/config/firebase';
 
 export async function getMatchDetails(matchId: string): Promise<{
   details: Match;
@@ -111,31 +112,64 @@ async function fetchLeagueStandingsFromAPI(leagueId: number): Promise<any> {
 }
 
 export const saveMatchAnalysis = async (matchId: string, analysis: AnalyzeResponseModel) => {
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
-        
-        await updateDoc(matchRef, {
-            analysis: {
-                description: analysis.description,
-                predicts: analysis.predicts.map(predict => ({
-                    id: predict.id,
-                    type: predict.type,
-                    prediction: predict.prediction,
-                    probability: predict.probability,
-                    evidence: predict.evidence,
-                    isRisky: predict.isRisky
-                })),
-                analyzedAt: new Date().toISOString()
-            }
-        });
+  const today = new Date().toISOString().split('T')[0];
+  let matchDetails;
 
-        console.log('✅ Match analysis saved successfully');
-        return true;
-    } catch (error) {
-        console.error('❌ Error saving match analysis:', error);
-        return false;
+  // 1. Get match details first
+  try {
+    const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
+    const matchSnap = await getDoc(matchRef);
+    const matchData = matchSnap.data();
+    matchDetails = matchData?.details;
+    if (!matchDetails) {
+      console.error('❌ Match details not found');
+      return false;
     }
+  } catch (error) {
+    console.error('❌ Error getting match details:', error);
+    return false;
+  }
+  
+  // 2. Save match analysis to dailyBulletins
+  try {
+    const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
+    await setDoc(matchRef, { analysis }, { merge: true });
+    console.log('✅ Match analysis saved to dailyBulletins:', matchId);
+  } catch (error) {
+    console.error('❌ Error saving to dailyBulletins:', error);
+    return false;
+  }
+
+  // 3. Save to user's analyses collection
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      console.error('❌ No user logged in');
+      return false;
+    }
+
+    const analysisRef = doc(collection(db, 'users', user.uid, 'analyses'));
+    await setDoc(analysisRef, {
+      matchId,
+      leagueId: matchDetails.competition.id,
+      leagueName: matchDetails.competition.name,
+      homeTeamId: matchDetails.homeTeam.id,
+      homeTeamName: matchDetails.homeTeam.name,
+      awayTeamId: matchDetails.awayTeam.id,
+      awayTeamName: matchDetails.awayTeam.name,
+      analyzedAt: serverTimestamp(),
+    });
+    
+    console.log('✅ Analysis saved to user collection:', {
+      league: matchDetails.competition.name,
+      match: `${matchDetails.homeTeam.name} vs ${matchDetails.awayTeam.name}`
+    });
+  } catch (error) {
+    console.error('❌ Error saving to user collection:', error);
+    return false;
+  }
+
+  return true;
 };
 
 export const getMatchAnalysis = async (matchId: string): Promise<AnalyzeResponseModel | null> => {
