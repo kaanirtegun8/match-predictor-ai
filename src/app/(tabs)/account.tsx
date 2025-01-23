@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView } from 'react-native';
+import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { SubscriptionInfo } from '@/components/SubscriptionInfo';
@@ -8,11 +8,13 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useStats } from '@/hooks/useStats';
 
 export default function AccountScreen() {
   const { signOut, user, deleteAccount } = useAuth();
   const { isDark, toggleTheme } = useTheme();
   const { isSubscribed } = useSubscription();
+  const { stats, loading } = useStats();
 
   // Format creation date
   const memberSince = user?.metadata.creationTime 
@@ -69,26 +71,32 @@ export default function AccountScreen() {
       <ThemedView style={styles.section}>
         <ThemedText style={styles.sectionTitle}>Statistics</ThemedText>
         <ThemedView style={styles.statsGrid}>
-          {/* Total Analyses */}
-          <ThemedView style={styles.statCard}>
-            <Ionicons name="analytics-outline" size={24} color="#FFD700" />
-            <ThemedText style={styles.statNumber}>127</ThemedText>
-            <ThemedText style={styles.statLabel}>Total Analyses</ThemedText>
-          </ThemedView>
+          {loading ? (
+            <ActivityIndicator size="large" color="#FFD700" />
+          ) : (
+            <>
+              {/* Total Analyses */}
+              <ThemedView style={styles.statCard}>
+                <Ionicons name="analytics-outline" size={24} color="#FFD700" />
+                <ThemedText style={styles.statNumber}>{stats.totalMatches}</ThemedText>
+                <ThemedText style={styles.statLabel}>Total Analyses</ThemedText>
+              </ThemedView>
 
-          {/* Monthly Analyses */}
-          <ThemedView style={styles.statCard}>
-            <Ionicons name="calendar-outline" size={24} color="#FFD700" />
-            <ThemedText style={styles.statNumber}>23</ThemedText>
-            <ThemedText style={styles.statLabel}>This Month</ThemedText>
-          </ThemedView>
+              {/* Monthly Analyses */}
+              <ThemedView style={styles.statCard}>
+                <Ionicons name="calendar-outline" size={24} color="#FFD700" />
+                <ThemedText style={styles.statNumber}>{stats.monthlyMatches}</ThemedText>
+                <ThemedText style={styles.statLabel}>This Month</ThemedText>
+              </ThemedView>
 
-          {/* Most Active League */}
-          <ThemedView style={styles.statCard}>
-            <Ionicons name="trophy-outline" size={24} color="#FFD700" />
-            <ThemedText style={styles.statNumber}>Premier League</ThemedText>
-            <ThemedText style={styles.statLabel}>Most Active</ThemedText>
-          </ThemedView>
+              {/* Most Active League */}
+              <ThemedView style={styles.statCard}>
+                <Ionicons name="trophy-outline" size={24} color="#FFD700" />
+                <ThemedText style={styles.statNumber}>{stats.mostActiveLeague}</ThemedText>
+                <ThemedText style={styles.statLabel}>Most Active</ThemedText>
+              </ThemedView>
+            </>
+          )}
         </ThemedView>
       </ThemedView>
 
