@@ -14,7 +14,7 @@ import { auth, db } from '../config/firebase';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
-import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, deleteDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
 import { router } from 'expo-router';
 
 WebBrowser.maybeCompleteAuthSession();
@@ -116,30 +116,35 @@ export function useAuth() {
 
   const deleteAccount = async () => {
     try {
-      setLoading(true);
-      setError(null);
-
       const user = auth.currentUser;
       if (!user) {
-        throw new Error('No user found');
+        throw new Error('No user logged in');
       }
 
-      // Delete user data from Firestore
-      await deleteDoc(doc(db, 'users', user.uid));
+      // 1. Delete all user analyses first
+      const analysesRef = collection(db, 'users', user.uid, 'analyses');
+      const analysesSnapshot = await getDocs(analysesRef);
+      
+      const batch = writeBatch(db);
+      analysesSnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log('✅ User analyses deleted');
 
-      // Delete user from Firebase Auth
+      // 2. Delete user document
+      const userRef = doc(db, 'users', user.uid);
+      await deleteDoc(userRef);
+      console.log('✅ User document deleted');
+
+      // 3. Delete Firebase Auth account
       await deleteUser(user);
-
-      // Sign out and redirect to login
-      await signOut();
+      console.log('✅ User account deleted');
+      
       router.replace('/login');
-
-    } catch (error: any) {
+    } catch (error) {
       console.error('❌ Error deleting account:', error);
-      setError(error.message);
       throw error;
-    } finally {
-      setLoading(false);
     }
   };
 

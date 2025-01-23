@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator } from 'react-native';
+import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { SubscriptionInfo } from '@/components/SubscriptionInfo';
@@ -9,6 +9,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useStats } from '@/hooks/useStats';
+import { auth } from '@/config/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function AccountScreen() {
   const { signOut, user, deleteAccount } = useAuth();
@@ -28,25 +30,50 @@ export default function AccountScreen() {
   const handleDeleteAccount = () => {
     Alert.alert(
       "Delete Account",
-      "Are you sure you want to delete your account? This action cannot be undone.",
+      "This action cannot be undone. Please enter your password to confirm.",
       [
         {
           text: "Cancel",
           style: "cancel"
         },
         {
-          text: "Delete",
-          onPress: async () => {
-            try {
-              await deleteAccount();
-            } catch (error) {
-              Alert.alert("Error", "Failed to delete account. Please try again.");
-            }
-          },
-          style: "destructive"
+          text: "Continue",
+          style: "destructive",
+          onPress: () => {
+            // Show password prompt
+            Alert.prompt(
+              "Confirm Password",
+              "Please enter your password to delete your account",
+              [
+                {
+                  text: "Cancel",
+                  style: "cancel"
+                },
+                {
+                  text: "Delete Account",
+                  style: "destructive",
+                  onPress: async (password) => {
+                    if (!password) {
+                      Alert.alert("Error", "Password is required");
+                      return;
+                    }
+                    try {
+                      // Re-authenticate and delete
+                      if (user?.email) {
+                        await signInWithEmailAndPassword(auth, user.email, password);
+                        await deleteAccount();
+                      }
+                    } catch (error) {
+                      Alert.alert("Error", "Invalid password or something went wrong. Please try again.");
+                    }
+                  }
+                }
+              ],
+              "secure-text"
+            );
+          }
         }
-      ],
-      { cancelable: true }
+      ]
     );
   };
 
