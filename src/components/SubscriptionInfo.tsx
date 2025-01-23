@@ -1,153 +1,164 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { useRouter } from 'expo-router';
-import { FontAwesome } from '@expo/vector-icons';
-import { ThemedText } from './themed/ThemedText';
-import { ThemedView } from './themed/ThemedView';
+import { StyleSheet, TouchableOpacity } from 'react-native';
+import { ThemedText, ThemedView } from '@/components';
+import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useTheme } from '@/contexts/ThemeContext';
-import { Colors } from '@/constants/Colors';
+import { router } from 'expo-router';
 
-export const SubscriptionInfo = () => {
-  const { isSubscribed, customerInfo, isLoading } = useSubscription();
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
-  const router = useRouter();
-
-  const handleManageSubscription = () => {
-    if (isSubscribed) {
-      router.push('/subscription-details');
-    } else {
-      router.push('/premium');
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <ThemedView 
-        style={[
-          styles.container, 
-          { backgroundColor: colors.inputBackground }
-        ]}>
-        <View style={styles.content}>
-          <View style={[styles.iconContainer, { 
-            backgroundColor: colors.background,
-            shadowColor: colors.text
-          }]}>
-            <View style={[styles.skeleton, { backgroundColor: colors.border }]} />
-          </View>
-          <View style={styles.textContainer}>
-            <View style={[styles.skeleton, styles.titleSkeleton, { backgroundColor: colors.border }]} />
-            <View style={[styles.skeleton, styles.subtitleSkeleton, { backgroundColor: colors.border }]} />
-          </View>
-        </View>
-      </ThemedView>
-    );
+const PREMIUM_FEATURES = [
+  {
+    icon: 'analytics-outline',
+    title: 'Unlimited Analysis',
+    description: 'Analyze any match, anytime'
+  },
+  {
+    icon: 'bar-chart-outline',
+    title: 'Detailed Statistics',
+    description: 'Access to advanced stats'
+  },
+  {
+    icon: 'notifications-outline',
+    title: 'Match Alerts',
+    description: 'Get notified for important matches'
   }
+];
+
+export function SubscriptionInfo() {
+  const { isSubscribed } = useSubscription();
 
   return (
-    <TouchableOpacity 
-      style={[
-        styles.container, 
-        { 
-          backgroundColor: isSubscribed ? colors.primary + '15' : colors.inputBackground,
-          borderColor: isSubscribed ? colors.primary : 'transparent',
-          borderWidth: isSubscribed ? 1 : 0,
-        }
-      ]} 
-      onPress={handleManageSubscription}
-    >
-      <View style={styles.content}>
-        <View style={[styles.iconContainer, { 
-          backgroundColor: isSubscribed ? colors.primary + '20' : colors.background,
-          shadowColor: colors.text
-        }]}>
-          <FontAwesome
-            name="star"
-            size={24}
-            color={isSubscribed ? colors.primary : colors.textSecondary}
+    <ThemedView style={styles.container}>
+      {/* Current Plan */}
+      <ThemedView style={styles.planInfo}>
+        <ThemedView style={[
+          styles.planBadge,
+          { backgroundColor: isSubscribed ? '#FFD700' : '#6b7280' }
+        ]}>
+          <Ionicons 
+            name={isSubscribed ? "star" : "star-outline"} 
+            size={20} 
+            color="#fff" 
           />
-        </View>
-        <View style={styles.textContainer}>
-          <ThemedText style={[
-            styles.title,
-            isSubscribed && { color: colors.primary }
-          ]}>
-            {isSubscribed ? 'Premium Member' : 'Free Member'}
+          <ThemedText style={styles.planText}>
+            {isSubscribed ? 'Premium Plan' : 'Free Plan'}
           </ThemedText>
-          <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
-            {isSubscribed
-              ? 'You have access to all premium features'
-              : 'Upgrade to unlock all features'}
+        </ThemedView>
+        
+        {!isSubscribed && (
+          <ThemedText style={styles.limitText}>
+            5 analyses remaining this month
           </ThemedText>
-          {customerInfo?.latestExpirationDate && (
-            <ThemedText style={[styles.expirationDate, { color: colors.textSecondary }]}>
-              Next billing date:{' '}
-              {new Date(customerInfo.latestExpirationDate).toLocaleDateString()}
-            </ThemedText>
-          )}
-        </View>
-        <FontAwesome 
-          name="chevron-right" 
-          size={16} 
-          color={isSubscribed ? colors.primary : colors.textSecondary} 
+        )}
+      </ThemedView>
+
+      {/* Features List */}
+      <ThemedView style={styles.featuresList}>
+        {PREMIUM_FEATURES.map((feature, index) => (
+          <ThemedView key={index} style={styles.featureItem}>
+            <ThemedView style={[
+              styles.featureIcon,
+              { backgroundColor: isSubscribed ? '#FFD700' : '#6b7280' }
+            ]}>
+              <Ionicons name={feature.icon as any} size={20} color="#fff" />
+            </ThemedView>
+            <ThemedView style={styles.featureInfo}>
+              <ThemedText style={styles.featureTitle}>{feature.title}</ThemedText>
+              <ThemedText style={styles.featureDescription}>
+                {feature.description}
+              </ThemedText>
+            </ThemedView>
+          </ThemedView>
+        ))}
+      </ThemedView>
+
+      {/* Action Button */}
+      <TouchableOpacity
+        style={[
+          styles.actionButton,
+          { backgroundColor: isSubscribed ? '#6b7280' : '#FFD700' }
+        ]}
+        onPress={() => router.push('/premium')}>
+        <ThemedText style={[
+          styles.actionButtonText,
+          { color: isSubscribed ? '#fff' : '#1f2937' }
+        ]}>
+          {isSubscribed ? 'Manage Subscription' : 'Upgrade to Premium'}
+        </ThemedText>
+        <Ionicons 
+          name="arrow-forward" 
+          size={20} 
+          color={isSubscribed ? '#fff' : '#1f2937'} 
         />
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </ThemedView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 8,
+    width: '100%',
   },
-  content: {
+  planInfo: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  planBadge: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    marginBottom: 8,
   },
-  iconContainer: {
+  planText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 6,
+  },
+  limitText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  featuresList: {
+    marginBottom: 24,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  featureIcon: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
   },
-  textContainer: {
+  featureInfo: {
     flex: 1,
   },
-  title: {
+  featureTitle: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 4,
+    marginBottom: 2,
+    color: '#1f2937',
   },
-  subtitle: {
+  featureDescription: {
     fontSize: 14,
-    marginBottom: 4,
+    color: '#666',
   },
-  expirationDate: {
-    fontSize: 12,
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
   },
-  skeleton: {
-    borderRadius: 4,
-    opacity: 0.3,
-  },
-  titleSkeleton: {
-    height: 16,
-    width: '40%',
-    marginBottom: 8,
-  },
-  subtitleSkeleton: {
-    height: 14,
-    width: '60%',
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginRight: 8,
   },
 }); 
