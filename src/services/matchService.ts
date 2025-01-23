@@ -182,6 +182,22 @@ export const getMatchAnalysis = async (matchId: string): Promise<AnalyzeResponse
             const data = matchSnap.data();
             if (data.analysis) {
                 console.log('✅ Using cached analysis');
+                
+                // Check and save to user collection
+                const user = auth.currentUser;
+                if (user) {
+                    const userAnalysesRef = collection(db, 'users', user.uid, 'analyses');
+                    const q = query(userAnalysesRef, where('matchId', '==', matchId));
+                    const querySnapshot = await getDocs(q);
+                    
+                    if (querySnapshot.empty) {
+                        await saveMatchAnalysis(matchId, data.analysis);
+                        console.log('✅ Cached analysis saved to user collection');
+                    } else {
+                        console.log('ℹ️ Analysis already exists in user collection');
+                    }
+                }
+                
                 return data.analysis as AnalyzeResponseModel;
             }
         }
