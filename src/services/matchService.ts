@@ -9,42 +9,40 @@ export async function getMatchDetails(matchId: string): Promise<{
   h2h: Match[];
   homeRecentMatches: Match[];
   awayRecentMatches: Match[];
+  standings?: any;
 } | null> {
   try {
-    // Get from today's bulletin in Firestore
     const today = new Date().toISOString().split('T')[0];
     const matchDetailsRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
     const matchDetailsSnap = await getDoc(matchDetailsRef);
     
     if (matchDetailsSnap.exists()) {
       console.log('✅ Match details found in Firestore');
-      const data = matchDetailsSnap.data() as {
+      const matchData = matchDetailsSnap.data() as {
         details: Match;
         h2h: Match[];
         homeRecentMatches: Match[];
         awayRecentMatches: Match[];
       };
-      return data;
+
+      // Get standings from the correct collection
+      let standings = null;
+      if (matchData.details.competition.id) {
+        const standingsRef = doc(db, 'dailyBulletins', today, 'standings', matchData.details.competition.id.toString());
+        const standingsSnap = await getDoc(standingsRef);
+        if (standingsSnap.exists()) {
+          standings = standingsSnap.data();
+        }
+      }
+
+      return {
+        ...matchData,
+        standings
+      };
     }
 
-    // If not in Firestore, fetch from API
-    console.log('⚠️ Match details not found in Firestore, fetching from API...');
-    
-    const [matchDetails, h2h, homeMatches, awayMatches] = await Promise.all([
-      fetchMatchFromAPI(Number(matchId)),
-      fetchHeadToHeadFromAPI(Number(matchId)),
-      fetchTeamMatchesFromAPI(Number(matchId), 'home'),
-      fetchTeamMatchesFromAPI(Number(matchId), 'away')
-    ]);
-
-    console.log('✅ Successfully fetched match details from API');
-    
-    return {
-      details: matchDetails,
-      h2h: h2h.matches,
-      homeRecentMatches: homeMatches,
-      awayRecentMatches: awayMatches
-    };
+    console.log('❌ Match details not found in Firestore');
+    return null;
 
   } catch (error) {
     console.error('❌ Error fetching match details:', error);
@@ -96,6 +94,22 @@ async function fetchTeamMatchesFromAPI(matchId: number, type: 'home' | 'away'): 
   return data.matches;
 }
 
+async function fetchLeagueStandingsFromAPI(leagueId: number): Promise<any> {
+  const response = await fetch(
+    `${BASE_URL}/competitions/${leagueId}/standings`,
+    {
+      headers: { 'X-Auth-Token': API_TOKEN },
+    }
+  );
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch league standings from API');
+  }
+  
+  const data = await response.json();
+  return data.standings[0].table; // Getting the total standings table
+}
+
 export const saveMatchAnalysis = async (matchId: string, analysis: AnalyzeResponseModel) => {
     try {
         const today = new Date().toISOString().split('T')[0];
@@ -105,16 +119,18 @@ export const saveMatchAnalysis = async (matchId: string, analysis: AnalyzeRespon
             analysis: {
                 description: analysis.description,
                 predicts: analysis.predicts.map(predict => ({
+                    id: predict.id,
                     type: predict.type,
                     prediction: predict.prediction,
                     probability: predict.probability,
-                    evidence: predict.evidence
+                    evidence: predict.evidence,
+                    isRisky: predict.isRisky
                 })),
                 analyzedAt: new Date().toISOString()
             }
         });
 
-        console.log('✅ Match analysis saved successfully to Firestore:', matchId);
+        console.log('✅ Match analysis saved successfully');
         return true;
     } catch (error) {
         console.error('❌ Error saving match analysis:', error);
@@ -131,12 +147,12 @@ export const getMatchAnalysis = async (matchId: string): Promise<AnalyzeResponse
         if (matchSnap.exists()) {
             const data = matchSnap.data();
             if (data.analysis) {
-                console.log('✅ Analysis found for match:', matchId);
+                console.log('✅ Using cached analysis');
                 return data.analysis as AnalyzeResponseModel;
             }
         }
         
-        console.log('⚠️ No analysis found for match:', matchId);
+        console.log('⚠️ No cached analysis found');
         return null;
     } catch (error) {
         console.error('❌ Error getting match analysis:', error);
