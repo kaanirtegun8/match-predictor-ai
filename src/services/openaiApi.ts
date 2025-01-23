@@ -30,79 +30,132 @@ const calculateRiskLevel = (probability: number): RiskLevel => {
   return 'RISKY';
 };
 
-export async function analyzeMatch(matchData: Match): Promise<AnalyzeResponseModel> {
+export async function analyzeMatch(matchData: {
+    details: Match;
+    h2h: Match[];
+    homeRecentMatches: Match[];
+    awayRecentMatches: Match[];
+    standings?: any;
+}): Promise<AnalyzeResponseModel> {
     try {
-        const prompt = `You are a football match analyzer. Your task is to analyze this match and provide predictions.
-        You must respond with a valid JSON object and nothing else.
-        
-        Match Details: ${JSON.stringify(matchData)}
+        const homeForm = matchData.homeRecentMatches.map(m => {
+            const isHome = m.homeTeam.id === matchData.details.homeTeam.id;
+            return {
+                score: `${m.score.fullTime.home}-${m.score.fullTime.away}`,
+                result: m.score.winner,
+                position: isHome ? "HOME" : "AWAY",
+                wasWinner: isHome ? m.score.winner === "HOME_TEAM" : m.score.winner === "AWAY_TEAM"
+            };
+        });
 
-        Return this exact JSON structure, replacing the example values with your analysis:
+        const awayForm = matchData.awayRecentMatches.map(m => {
+            const isHome = m.homeTeam.id === matchData.details.awayTeam.id;
+            return {
+                score: `${m.score.fullTime.home}-${m.score.fullTime.away}`,
+                result: m.score.winner,
+                position: isHome ? "HOME" : "AWAY",
+                wasWinner: isHome ? m.score.winner === "HOME_TEAM" : m.score.winner === "AWAY_TEAM"
+            };
+        });
+
+        const h2h = matchData.h2h.map(m => ({
+            score: `${m.score.fullTime.home}-${m.score.fullTime.away}`,
+            winner: m.score.winner,
+            date: m.utcDate
+        }));
+
+        const standings = {
+            homeTeam: matchData.standings.standings[0].table.find((t: any) => t.team.id === matchData.details.homeTeam.id),
+            awayTeam: matchData.standings.standings[0].table.find((t: any) => t.team.id === matchData.details.awayTeam.id)
+        };
+
+        const prompt = `You are a football match analyzer. Analyze this match and provide predictions.
+        Respond with a valid JSON object only.
+        
+        Match: ${matchData.details.homeTeam.name} vs ${matchData.details.awayTeam.name}
+        Competition: ${matchData.details.competition.name}
+        Date: ${matchData.details.utcDate}
+        
+        Home Team Recent Form (Last 5): ${JSON.stringify(matchData.homeRecentMatches.map(m => ({
+            score: m.score.fullTime.home + '-' + m.score.fullTime.away,
+            result: m.score.winner
+        })))}
+        
+        Away Team Recent Form (Last 5): ${JSON.stringify(matchData.awayRecentMatches.map(m => ({
+            score: m.score.fullTime.home + '-' + m.score.fullTime.away,
+            result: m.score.winner
+        })))}
+        
+        Head to Head: ${JSON.stringify(matchData.h2h.map(m => ({
+            score: m.score.fullTime.home + '-' + m.score.fullTime.away,
+            winner: m.score.winner,
+            date: m.utcDate
+        })))}
+        
+        Standings Summary: ${JSON.stringify({
+            homeTeam: matchData.standings.standings[0].table.find((t: any) => t.team.id === matchData.details.homeTeam.id),
+            awayTeam: matchData.standings.standings[0].table.find((t: any) => t.team.id === matchData.details.awayTeam.id)
+        })}
+
+        Return this JSON structure:
         {
-            "description": "Brief 2-3 sentence overview of the match situation",
+            "description": "Brief match situation overview",
             "predicts": [
                 {
                     "id": "match-result",
                     "type": "Match Result",
                     "prediction": "1 or X or 2",
                     "probability": 0.75,
-                    "evidence": "• Key point 1\\n• Key point 2",
-                    "isRisky": false
+                    "evidence": "• Key point 1\\n• Key point 2"
                 },
                 {
                     "id": "total-goals",
                     "type": "Total Goals",
                     "prediction": "Over/Under 2.5",
                     "probability": 0.65,
-                    "evidence": "• Historical data\\n• Current form",
-                    "isRisky": false
+                    "evidence": "• Points"
                 },
                 {
                     "id": "both-teams-to-score",
                     "type": "Both Teams to Score",
                     "prediction": "Yes/No",
                     "probability": 0.70,
-                    "evidence": "• Attacking stats\\n• Defense performance",
-                    "isRisky": false
+                    "evidence": "• Points"
                 },
                 {
                     "id": "home-team-goals",
                     "type": "Home Team Goals",
                     "prediction": "Over/Under 1.5",
                     "probability": 0.60,
-                    "evidence": "• Home scoring record\\n• Opposition defense",
-                    "isRisky": false
+                    "evidence": "• Points"
                 },
                 {
                     "id": "away-team-goals",
                     "type": "Away Team Goals",
                     "prediction": "Over/Under 1.5",
                     "probability": 0.60,
-                    "evidence": "• Away scoring record\\n• Opposition defense",
-                    "isRisky": false
+                    "evidence": "• Points"
                 },
                 {
                     "id": "first-goal",
                     "type": "First Goal",
                     "prediction": "Home/Away/No Goal",
                     "probability": 0.55,
-                    "evidence": "• First goal statistics\\n• Starting strength",
-                    "isRisky": false
+                    "evidence": "• Points"
                 }
             ]
         }
 
         Rules:
-        1. Respond ONLY with the JSON object, no additional text
-        2. Keep probability values between 0 and 1
-        3. Use exactly the prediction values shown in the example
-        4. Use bullet points with • character in evidence
-        5. Make sure the JSON is valid and properly formatted`;
+        1. JSON only, no extra text
+        2. Probabilities between 0-1
+        3. Use bullet points with •`;
 
         const completion = await openai.chat.completions.create({
             messages: [{ role: "user", content: prompt }],
-            model: "gpt-4",
-            temperature: 0.7
+            model: "gpt-4-0613",
+            temperature: 0.7,
+            max_tokens: 2000
         });
 
         const content = completion.choices[0].message.content;
@@ -112,34 +165,42 @@ export async function analyzeMatch(matchData: Match): Promise<AnalyzeResponseMod
         }
 
         try {
-            // Remove any potential non-JSON text before parsing
             const jsonStart = content.indexOf('{');
             const jsonEnd = content.lastIndexOf('}') + 1;
             const jsonContent = content.slice(jsonStart, jsonEnd);
             
-            const parsedContent = JSON.parse(jsonContent);
-            
-            // Validate the response structure
-            if (!parsedContent.description || !Array.isArray(parsedContent.predicts)) {
-                throw new Error('Invalid response structure');
+            if (jsonStart === -1 || jsonEnd === 0 || jsonContent.trim() === '') {
+                console.error('❌ No valid JSON found in response');
+                throw new Error('No valid JSON found in response');
             }
 
-            // Transform the response to include calculated risk levels
-            const transformedResponse = {
-                ...parsedContent as OpenAIResponse,
-                predicts: (parsedContent as OpenAIResponse).predicts.map(predict => ({
-                    ...predict,
-                    isRisky: calculateRiskLevel(predict.probability)
-                }))
-            };
+            try {
+                const parsedContent = JSON.parse(jsonContent);
+                
+                if (!parsedContent.description || !Array.isArray(parsedContent.predicts)) {
+                    console.error('❌ Invalid response structure');
+                    throw new Error('Invalid response structure');
+                }
 
-            return transformedResponse;
+                const transformedResponse = {
+                    ...parsedContent as OpenAIResponse,
+                    predicts: (parsedContent as OpenAIResponse).predicts.map(predict => ({
+                        ...predict,
+                        isRisky: calculateRiskLevel(predict.probability)
+                    }))
+                };
+
+                return transformedResponse;
+            } catch (jsonError: any) {
+                console.error('❌ JSON Parse Error:', jsonError.message);
+                throw new Error('Invalid JSON response from OpenAI');
+            }
         } catch (parseError) {
-            console.error('Failed to parse OpenAI response:', content);
+            console.error('❌ Failed to parse OpenAI response');
             throw new Error('Invalid JSON response from OpenAI');
         }
     } catch (error) {
-        console.error('Error analyzing match:', error);
+        console.error('❌ Error analyzing match:', error);
         throw new Error('Failed to analyze match');
     }
 } 

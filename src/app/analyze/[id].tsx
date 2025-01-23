@@ -85,7 +85,13 @@ export default function AnalyzeScreen() {
             
             setLoadingStep(3);
             setLoadingMessage('Generating AI predictions...');
-            const result = await analyzeMatch(matchData.details);
+            const result = await analyzeMatch({
+                details: matchData.details,
+                h2h: matchData.h2h,
+                homeRecentMatches: matchData.homeRecentMatches,
+                awayRecentMatches: matchData.awayRecentMatches,
+                standings: matchData.standings
+            });
             
             // Save analysis to database
             const saved = await saveMatchAnalysis(id as string, result);
