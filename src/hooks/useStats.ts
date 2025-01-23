@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/config/firebase';
 import { useAuth } from './useAuth';
 
@@ -19,57 +19,54 @@ export const useStats = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    const fetchStats = async () => {
-      if (!user) return;
+    if (!user) return;
 
-      try {
-        setLoading(true);
-        const analysesRef = collection(db, 'users', user.uid, 'analyses');
-        
-        // Get total matches
-        const totalSnapshot = await getDocs(analysesRef);
-        const total = totalSnapshot.size;
+    setLoading(true);
+    const analysesRef = collection(db, 'users', user.uid, 'analyses');
+    
+    // Get monthly matches query
+    const startOfMonth = new Date();
+    startOfMonth.setDate(1);
+    startOfMonth.setHours(0, 0, 0, 0);
+    
+    const monthlyQuery = query(
+      analysesRef,
+      where('analyzedAt', '>=', startOfMonth)
+    );
 
-        // Get monthly matches
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        
-        const monthlyQuery = query(
-          analysesRef,
-          where('analyzedAt', '>=', startOfMonth)
-        );
-        const monthlySnapshot = await getDocs(monthlyQuery);
-        const monthly = monthlySnapshot.size;
+    // Real-time listener for all analyses
+    const unsubscribe = onSnapshot(analysesRef, (snapshot) => {
+      const total = snapshot.size;
+      const leagueCounts: { [key: string]: number } = {};
+      
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const leagueName = data.leagueName;
+        leagueCounts[leagueName] = (leagueCounts[leagueName] || 0) + 1;
+      });
 
-        // Get most active league
-        const leagueCounts: { [key: string]: number } = {};
-        totalSnapshot.forEach(doc => {
-          const data = doc.data();
-          const leagueName = data.leagueName;
-          leagueCounts[leagueName] = (leagueCounts[leagueName] || 0) + 1;
-        });
+      let mostActive = 'No matches yet';
+      if (Object.keys(leagueCounts).length > 0) {
+        mostActive = Object.entries(leagueCounts).reduce((a, b) => 
+          (a[1] > b[1] ? a : b)
+        )[0];
+      }
 
-        let mostActive = 'No matches yet';
-        if (Object.keys(leagueCounts).length > 0) {
-          mostActive = Object.entries(leagueCounts).reduce((a, b) => 
-            (a[1] > b[1] ? a : b)
-          )[0];
-        }
-
+      // Real-time listener for monthly matches
+      const monthlyUnsubscribe = onSnapshot(monthlyQuery, (monthlySnapshot) => {
         setStats({
           totalMatches: total,
-          monthlyMatches: monthly,
+          monthlyMatches: monthlySnapshot.size,
           mostActiveLeague: mostActive,
         });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-      } finally {
         setLoading(false);
-      }
-    };
+      });
 
-    fetchStats();
+      return () => monthlyUnsubscribe();
+    });
+
+    // Cleanup function
+    return () => unsubscribe();
   }, [user]);
 
   return { stats, loading };
