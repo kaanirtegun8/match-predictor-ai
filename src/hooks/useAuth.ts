@@ -7,18 +7,22 @@ import {
   User,
   GoogleAuthProvider,
   signInWithCredential,
-  updateProfile
+  updateProfile,
+  deleteUser
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
+import { doc, setDoc, deleteDoc } from 'firebase/firestore';
+import { router } from 'expo-router';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
@@ -110,13 +114,44 @@ export function useAuth() {
 
   const signOut = () => firebaseSignOut(auth);
 
+  const deleteAccount = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No user found');
+      }
+
+      // Delete user data from Firestore
+      await deleteDoc(doc(db, 'users', user.uid));
+
+      // Delete user from Firebase Auth
+      await deleteUser(user);
+
+      // Sign out and redirect to login
+      await signOut();
+      router.replace('/login');
+
+    } catch (error: any) {
+      console.error('❌ Error deleting account:', error);
+      setError(error.message);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     user,
     loading,
+    error,
     signIn,
     signUp,
     signOut,
     signInWithGoogle,
     isAuthenticated: !!user,
+    deleteAccount
   };
 } 
