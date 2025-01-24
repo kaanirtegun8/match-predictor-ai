@@ -20,6 +20,7 @@ const premiumLightColors = {
   inputText: '#222831',
   inputPlaceholder: '#999',
   socialButtonBorder: '#e1e1e1',
+  highlight: '#E3F2FD',
 } as const;
 
 const premiumDarkColors = {
@@ -44,6 +45,7 @@ const premiumDarkColors = {
   inputText: '#EEEEEE',
   inputPlaceholder: '#737373',
   socialButtonBorder: '#393E46',
+  highlight: '#E3F2FD',
 } as const;
 
 const lightColors = {
@@ -68,6 +70,7 @@ const lightColors = {
   inputText: '#222831',
   inputPlaceholder: '#999',
   socialButtonBorder: '#e1e1e1',
+  highlight: '#E3F2FD',
 } as const;
 
 const darkColors = {
@@ -92,6 +95,7 @@ const darkColors = {
   inputText: '#EEEEEE',
   inputPlaceholder: '#737373',
   socialButtonBorder: '#393E46',
+  highlight: '#ffd54f', // find better color
 } as const;
 
 export type ColorTheme = {
