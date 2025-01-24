@@ -45,11 +45,11 @@ export default function StandingsScreen() {
     }
 
     return (
-        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
-            <ScrollView style={[styles.scrollView, { backgroundColor: colors.background }]}>
-                <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.border }]}>
+            <ScrollView style={[styles.scrollView, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.container, { backgroundColor: colors.border }]}>
                     {/* Header */}
-                    <ThemedView style={[styles.header, { backgroundColor: colors.background }]}>
+                    <ThemedView style={[styles.header, { backgroundColor: colors.border }]}>
                         <TouchableOpacity
                             style={styles.backButton}
                             onPress={() => router.back()}>
@@ -60,7 +60,7 @@ export default function StandingsScreen() {
 
                     {/* Competition Info */}
                     {competition && (
-                        <ThemedView style={styles.competitionInfo}>
+                        <ThemedView style={[styles.competitionInfo, { backgroundColor: colors.border }]}>
                             <Image
                                 source={{ uri: competition.emblem }}
                                 style={styles.competitionLogo}
@@ -89,12 +89,20 @@ export default function StandingsScreen() {
                         </ThemedView>
 
                         {/* Table Rows */}
-                        {standings.map((standing) => {
+                        {standings.map((standing, index) => {
                             const isHighlighted = standing.team.id === Number(homeTeamId) || standing.team.id === Number(awayTeamId);
+                            const isEvenRow = index % 2 === 0;
                             return (
                                 <ThemedView
                                     key={`${standing.team.id}-${standing.position}`}
-                                    style={[styles.tableRow, isHighlighted && styles.highlightedRow, { backgroundColor: colors.inputBackground, borderColor: colors.border}]}>
+                                    style={[
+                                        styles.tableRow,
+                                        isHighlighted && { backgroundColor: colors.highlight },
+                                        !isHighlighted && { 
+                                            backgroundColor: isEvenRow ? colors.inputBackground : colors.background,
+                                            borderColor: colors.border
+                                        }
+                                    ]}>
                                     <ThemedText style={[styles.cell, styles.positionCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.position}
                                     </ThemedText>
@@ -165,7 +173,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         flexDirection: 'row',
         alignItems: 'center',
-        borderBottomWidth: StyleSheet.hairlineWidth,
+        shadowColor: '#000',
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     backButton: {
         flexDirection: 'row',
@@ -227,9 +242,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         backgroundColor: '#fff',
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderLeftWidth: 1,
-        borderRightWidth: 1,
     },
     cell: {
         fontSize: 13,
@@ -273,9 +285,6 @@ const styles = StyleSheet.create({
     teamInfoBackground: {
         backgroundColor: '#fff',
         borderRadius: 4,
-    },
-    highlightedRow: {
-        backgroundColor: '#E3F2FD',
     },
     whiteText: {
         color: '#1282A2',
