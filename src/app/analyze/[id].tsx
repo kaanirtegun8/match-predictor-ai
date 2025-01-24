@@ -13,6 +13,7 @@ import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
 import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const getRiskStyles = (risk: RiskLevel) => {
   switch (risk) {
@@ -41,7 +42,7 @@ export default function AnalyzeScreen() {
   const [loadingStep, setLoadingStep] = useState<number>(1);
   const [loadingMessage, setLoadingMessage] = useState<string>('Retrieving match statistics...');
   const [expandedPredictions, setExpandedPredictions] = useState<number[]>([]);
-
+  const { colors } = useTheme();
   const togglePrediction = (index: number) => {
     setExpandedPredictions(prev => 
       prev.includes(index) 
@@ -117,15 +118,15 @@ export default function AnalyzeScreen() {
   }, [id]);
 
   const LoadingSteps = () => (
-    <ThemedView style={styles.loadingContainer}>
+    <ThemedView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
       {[
         'Retrieving match statistics...',
         'Analyzing team performances...',
         'Generating AI predictions...',
         'Finalizing match insights...'
       ].map((step, index) => (
-        <ThemedView key={index} style={styles.loadingStep}>
-          <ThemedView style={styles.stepIndicator}>
+        <ThemedView key={index} style={[styles.loadingStep, { backgroundColor: colors.border }]}>
+          <ThemedView style={[styles.stepIndicator, { backgroundColor: colors.border }]}>
             {index + 1 === loadingStep && (
               <ActivityIndicator size="small" color="#007AFF" />
             )}
@@ -150,8 +151,8 @@ export default function AnalyzeScreen() {
 
   if (loading && !match) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <SafeAreaView style={[styles.container, { display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.border }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
@@ -165,52 +166,52 @@ export default function AnalyzeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <ThemedView style={styles.content}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.border }]}>
+      <ScrollView style={[styles.scrollView, { backgroundColor: colors.border }]}>
+        <ThemedView style={[styles.content, { backgroundColor: colors.border }]}>
           {/* Header */}
-          <ThemedView style={styles.header}>
+          <ThemedView style={[styles.header, { backgroundColor: colors.border }]}>
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color="#000" />
-              <ThemedText style={styles.backText}>Back</ThemedText>
+              <Ionicons name="chevron-back" size={24} color={colors.primary} />
+              <ThemedText style={[styles.backText, { color: colors.primary }]}>Back</ThemedText>
             </TouchableOpacity>
           </ThemedView>
 
           {/* Match Info */}
-          <ThemedView style={styles.matchInfo}>
+          <ThemedView style={[styles.matchInfo, { backgroundColor: colors.border, paddingVertical: 10 }]}>
             <Image
               source={{ uri: match.competition.emblem }}
               style={styles.competitionLogo}
               resizeMode="contain"
             />
             
-            <ThemedView style={styles.teamsContainer}>
-              <ThemedText style={styles.teamName}>
+            <ThemedView style={[styles.teamsContainer, { backgroundColor: colors.border }]}>
+              <ThemedText style={[styles.teamName, { color: colors.text }]}>
                 {match.homeTeam.name}
               </ThemedText>
-              <ThemedText style={styles.vsText}>vs</ThemedText>
-              <ThemedText style={styles.teamName}>
+              <ThemedText style={[styles.vsText, { color: colors.text }]}>vs</ThemedText>
+              <ThemedText style={[styles.teamName, { color: colors.text }]}>
                 {match.awayTeam.name}
               </ThemedText>
             </ThemedView>
 
-            <ThemedView style={styles.matchDetails}>
-              <ThemedText style={styles.competitionName}>
+            <ThemedView style={[styles.matchDetails, { backgroundColor: colors.border }]}>
+              <ThemedText style={[styles.competitionName, { color: colors.text }]}>
                 {match.competition.name}
               </ThemedText>
               
-              <ThemedView style={styles.metadataContainer}>
-                <ThemedView style={styles.badge}>
-                  <ThemedText style={styles.badgeText}>
+              <ThemedView style={[styles.metadataContainer, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
+                  <ThemedText style={[styles.badgeText, { color: colors.text }]}>
                     Matchday {match.matchday}
                   </ThemedText>
                 </ThemedView>
                 
                 {match.utcDate && (
-                  <ThemedView style={styles.badge}>
-                    <ThemedText style={styles.badgeText}>
+                  <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
+                    <ThemedText style={[styles.badgeText, { color: colors.text }]}>
                       {new Date(match.utcDate).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -229,30 +230,32 @@ export default function AnalyzeScreen() {
           {!analysis ? (
             <LoadingSteps />
           ) : (
-            <ThemedView style={styles.analysisContent}>
+            <ThemedView style={[styles.analysisContent, { backgroundColor: colors.border }]}>
               {/* Match Analysis Section */}
-              <ThemedView style={styles.analysisSection}>
-                <ThemedView style={styles.sectionHeader}>
-                  <Ionicons name="analytics-outline" size={24} color="#1e40af" />
-                  <ThemedText style={styles.sectionTitle}>Match Analysis</ThemedText>
+              <ThemedView style={[styles.analysisSection, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
+                  <Ionicons name="analytics-outline" size={24} color={colors.primary} />
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Match Analysis</ThemedText>
                 </ThemedView>
-                <ThemedView style={styles.analysisCard}>
-                  <RichText text={analysis.description} style={styles.analysisText} />
+                <ThemedView style={[styles.analysisCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                  <ThemedText style={[styles.analysisText, { color: colors.text }]}>
+                    {analysis.description}
+                  </ThemedText>
                 </ThemedView>
               </ThemedView>
 
               {/* Predictions Section */}
-              <ThemedView style={styles.predictionsSection}>
-                <ThemedView style={styles.sectionHeader}>
-                  <Ionicons name="podium-outline" size={24} color="#1e40af" />
-                  <ThemedText style={styles.sectionTitle}>Predictions</ThemedText>
+              <ThemedView style={[styles.predictionsSection, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
+                  <Ionicons name="podium-outline" size={24} color={colors.primary} />
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Predictions</ThemedText>
                 </ThemedView>
                 
                 {analysis.predicts.map((predict, index) => (
-                  <ThemedView key={index} style={styles.predictionCard}>
+                  <ThemedView key={index} style={[styles.predictionCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                     <ThemedView style={styles.predictionHeader}>
                       <ThemedView style={styles.predictionMain}>
-                        <ThemedText style={styles.predictionType}>
+                        <ThemedText style={[styles.predictionType, { color: colors.primary }]}>
                           {predict.type}
                         </ThemedText>
                         
@@ -260,17 +263,17 @@ export default function AnalyzeScreen() {
                           styles.riskBadge,
                           getRiskStyles(calculateRiskLevel(predict.probability))
                         ]}>
-                          <ThemedText style={styles.riskBadgeText}>
+                          <ThemedText style={[styles.riskBadgeText]}>
                             {calculateRiskLevel(predict.probability)}
                           </ThemedText>
                         </ThemedView>
                       </ThemedView>
 
-                      <ThemedText style={styles.predictionValue}>
+                      <ThemedText style={[styles.predictionValue, { color: colors.text }]}>
                         {predict.prediction}
                       </ThemedText>
 
-                      <ThemedText style={styles.probabilityText}>
+                      <ThemedText style={[styles.probabilityText, { color: colors.textSecondary }]}>
                         {Math.round(predict.probability * 100)}% Confidence
                       </ThemedText>
                     </ThemedView>
@@ -278,7 +281,7 @@ export default function AnalyzeScreen() {
                     <TouchableOpacity 
                       style={styles.evidenceToggle}
                       onPress={() => togglePrediction(index)}>
-                      <ThemedText style={styles.evidenceToggleText}>
+                      <ThemedText style={[styles.evidenceToggleText, { color: colors.primary }]}>
                         {expandedPredictions.includes(index) ? 'Hide Details' : 'Show Details'}
                       </ThemedText>
                       <Ionicons 
@@ -329,8 +332,9 @@ const styles = StyleSheet.create({
   },
   matchInfo: {
     width: '100%',
-    marginBottom: 24,
+    marginBottom: 4,
     alignItems: 'center',
+    borderRadius: 12,
   },
   competitionLogo: {
     width: 44,
@@ -432,12 +436,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   analysisText: {
     fontSize: 16,
@@ -451,6 +457,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   predictionHeader: {
     marginBottom: 12,

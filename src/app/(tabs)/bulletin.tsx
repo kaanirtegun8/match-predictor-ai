@@ -19,8 +19,7 @@ function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
 }
 
 export default function BulletinScreen() {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
+  const { colors } = useTheme();
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -66,7 +65,7 @@ export default function BulletinScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.border }]} edges={['top']}>
         <ThemedView style={styles.loadingContainer}>
           <ThemedText>Loading matches...</ThemedText>
         </ThemedView>
@@ -76,8 +75,8 @@ export default function BulletinScreen() {
 
   return (
     <ScrollView
-      style={[styles.content, { backgroundColor: colors.background }]}
-      contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
+      style={[styles.content, { backgroundColor: colors.border }]}
+      contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.border }]}
       refreshControl={
         <RefreshControl 
           refreshing={refreshing} 

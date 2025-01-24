@@ -12,8 +12,7 @@ interface LeagueSectionProps {
 }
 
 export function LeagueSection({ matches }: LeagueSectionProps) {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
+  const { colors } = useTheme();
 
   if (!matches || matches.length === 0) return null;
 
@@ -24,7 +23,7 @@ export function LeagueSection({ matches }: LeagueSectionProps) {
   };
 
   return (
-    <ThemedView style={[styles.container, { backgroundColor: colors.inputBackground }]}>
+    <ThemedView style={[styles.container, { backgroundColor: colors.border }]}>
       <TouchableOpacity onPress={handleHeaderPress}>
         <ThemedView style={[styles.header, { backgroundColor: colors.primary }]}>
           <Image

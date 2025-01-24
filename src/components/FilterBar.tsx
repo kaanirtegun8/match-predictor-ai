@@ -2,6 +2,7 @@ import React from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Competition {
   id: number;
@@ -16,6 +17,8 @@ interface FilterBarProps {
 }
 
 export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSelect }: FilterBarProps) {
+  const { colors } = useTheme();
+
   return (
     <ScrollView
       horizontal
@@ -25,6 +28,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
       <TouchableOpacity
         style={[
           styles.filterItem,
+          { backgroundColor: colors.background },
           !selectedCompetitionId && styles.selectedItem,
         ]}
         onPress={() => onCompetitionSelect(null)}
@@ -41,6 +45,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           key={competition.id}
           style={[
             styles.filterItem,
+            { backgroundColor: colors.background },
             selectedCompetitionId === competition.id.toString() && styles.selectedItem,
           ]}
           onPress={() => onCompetitionSelect(competition.id.toString())}
@@ -52,6 +57,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           />
           <ThemedText style={[
             styles.filterText,
+            { color: colors.text },
             selectedCompetitionId === competition.id.toString() && styles.selectedText,
           ]}>
             {competition.name}

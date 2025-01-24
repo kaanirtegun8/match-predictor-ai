@@ -11,13 +11,17 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useStats } from '@/hooks/useStats';
 import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useEffect } from 'react';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
+import { Colors } from '@/constants/Colors';
 
 export default function AccountScreen() {
   const { signOut, user, deleteAccount } = useAuth();
   const { isDark, toggleTheme } = useTheme();
-  const { isSubscribed } = useSubscription();
+  const { isSubscribed, checkStatus } = useSubscription();
   const { stats, loading } = useStats();
-
+  const { colors } = useTheme();
   // Format creation date
   const memberSince = user?.metadata.creationTime 
     ? new Date(user.metadata.creationTime).toLocaleDateString('en-GB', {
@@ -78,15 +82,15 @@ export default function AccountScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.border }]}>
       {/* User Info Section */}
-      <ThemedView style={styles.section}>
-        <Ionicons name="person-circle-outline" size={80} color="#1282A2" />
-        <ThemedText style={styles.email}>{user?.email}</ThemedText>
-        <ThemedText style={styles.memberSince}>Member since {memberSince}</ThemedText>
+      <ThemedView style={[styles.section, { backgroundColor: colors.background }]}>
+        <Ionicons name="person-circle-outline" size={80} color={colors.primary} />
+        <ThemedText style={[styles.email, { color: colors.text }]}>{user?.email}</ThemedText>
+        <ThemedText style={[styles.memberSince, { color: colors.textSecondary }]}>Member since {memberSince}</ThemedText>
         <ThemedView style={[
           styles.badge, 
-          { backgroundColor: isSubscribed ? '#FFD700' : '#6b7280' }
+          { backgroundColor: isSubscribed ? colors.primary : colors.textSecondary }
         ]}>
           <ThemedText style={styles.badgeText}>
             {isSubscribed ? 'Premium' : 'Free'}
@@ -95,32 +99,32 @@ export default function AccountScreen() {
       </ThemedView>
 
       {/* Statistics Section */}
-      <ThemedView style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Statistics</ThemedText>
-        <ThemedView style={styles.statsGrid}>
+      <ThemedView style={[styles.section, { backgroundColor: colors.background }]}>
+        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Statistics</ThemedText>
+        <ThemedView style={[styles.statsGrid, { backgroundColor: colors.background }]}>
           {loading ? (
-            <ActivityIndicator size="large" color="#FFD700" />
+            <ActivityIndicator size="large" color={colors.primary} />
           ) : (
             <>
               {/* Total Analyses */}
-              <ThemedView style={styles.statCard}>
-                <Ionicons name="analytics-outline" size={24} color="#FFD700" />
-                <ThemedText style={styles.statNumber}>{stats.totalMatches}</ThemedText>
-                <ThemedText style={styles.statLabel}>Total Analyses</ThemedText>
+              <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
+                <Ionicons name="analytics-outline" size={24} color={colors.primary} />
+                <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.totalMatches}</ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>Total Analyses</ThemedText>
               </ThemedView>
 
               {/* Monthly Analyses */}
-              <ThemedView style={styles.statCard}>
-                <Ionicons name="calendar-outline" size={24} color="#FFD700" />
-                <ThemedText style={styles.statNumber}>{stats.monthlyMatches}</ThemedText>
-                <ThemedText style={styles.statLabel}>This Month</ThemedText>
+              <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
+                <Ionicons name="calendar-outline" size={24} color={colors.primary} />
+                <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.monthlyMatches}</ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>This Month</ThemedText>
               </ThemedView>
 
               {/* Most Active League */}
-              <ThemedView style={styles.statCard}>
-                <Ionicons name="trophy-outline" size={24} color="#FFD700" />
-                <ThemedText style={styles.statNumber}>{stats.mostActiveLeague}</ThemedText>
-                <ThemedText style={styles.statLabel}>Most Active</ThemedText>
+              <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
+                <Ionicons name="trophy-outline" size={24} color={colors.primary} />
+                <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.mostActiveLeague}</ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>Most Active</ThemedText>
               </ThemedView>
             </>
           )}
@@ -129,17 +133,17 @@ export default function AccountScreen() {
 
       {/* Subscription Section */}
       <ThemedView style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Subscription</ThemedText>
+        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Subscription</ThemedText>
         <SubscriptionInfo />
       </ThemedView>
 
       {/* Preferences Section */}
-      <ThemedView style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Preferences</ThemedText>
+      <ThemedView style={[styles.section, {backgroundColor: colors.background}]}>
+        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>Preferences</ThemedText>
         
         {/* Theme Toggle */}
         <TouchableOpacity 
-          style={styles.themeToggle} 
+          style={[styles.themeToggle, {backgroundColor: colors.border}]} 
           onPress={toggleTheme}
           activeOpacity={0.7}>
           <ThemedView style={styles.themeInfo}>
@@ -148,34 +152,34 @@ export default function AccountScreen() {
               size={24} 
               color={isDark ? "#fbbf24" : "#f59e0b"} 
             />
-            <ThemedText style={styles.themeText}>
+            <ThemedText style={[styles.themeText, {color: colors.text}]}>
               {isDark ? 'Dark Mode' : 'Light Mode'}
             </ThemedText>
           </ThemedView>
           <Switch
             value={isDark}
             onValueChange={toggleTheme}
-            trackColor={{ false: '#d1d5db', true: '#3b82f6' }}
-            thumbColor={isDark ? '#1d4ed8' : '#9ca3af'}
+            trackColor={{ false: '#d1d5db', true: colors.background }}
+            thumbColor={colors.primary}
           />
         </TouchableOpacity>
       </ThemedView>
 
       {/* Account Management Section */}
-      <ThemedView style={styles.section}>
-        <ThemedText style={styles.sectionTitle}>Account Management</ThemedText>
+      <ThemedView style={[styles.section, {backgroundColor: colors.background}]}>
+        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>Account Management</ThemedText>
         
         {/* Sign Out Button */}
         <TouchableOpacity 
-          style={styles.button} 
+          style={[styles.button, {backgroundColor: colors.border}]} 
           onPress={signOut}>
-          <Ionicons name="log-out-outline" size={24} color="#666" />
-          <ThemedText style={styles.buttonText}>Sign Out</ThemedText>
+          <Ionicons name="log-out-outline" size={24} color={colors.text}/>
+          <ThemedText style={[styles.buttonText, {color: colors.text}]}>Sign Out</ThemedText>
         </TouchableOpacity>
 
         {/* Delete Account Button */}
         <TouchableOpacity 
-          style={[styles.button, styles.deleteButton]} 
+          style={[styles.button, styles.deleteButton, {backgroundColor: colors.error}]} 
           onPress={handleDeleteAccount}>
           <Ionicons name="trash-outline" size={24} color="#fff" />
           <ThemedText style={[styles.buttonText, styles.deleteButtonText]}>
@@ -193,7 +197,6 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   section: {
-    backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -305,8 +308,7 @@ const styles = StyleSheet.create({
     color: '#666',
   },
   deleteButton: {
-    backgroundColor: '#dc2626',
-    marginTop: 16,
+    marginTop: 8,
   },
   deleteButtonText: {
     color: '#fff',

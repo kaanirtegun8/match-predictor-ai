@@ -9,6 +9,7 @@ import { ThemedView } from '../../components/themed/ThemedView';
 import dateUtils from '../../utils/date';
 import { Match } from '@/models/Match';
 import { getMatchDetails } from '../../services/matchService';
+import { useTheme } from '@/contexts/ThemeContext';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -34,7 +35,7 @@ export default function MatchDetailScreen() {
   const [awayTeamMatches, setAwayTeamMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
+  const { colors } = useTheme();
   // Border animation
   const borderAnim = useRef(new Animated.Value(0)).current;
 
@@ -96,10 +97,10 @@ export default function MatchDetailScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={[styles.container, styles.centerContent]}>
-          <ActivityIndicator size="large" color="#1282A2" />
-          <ThemedText style={styles.loadingText}>Loading match details...</ThemedText>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.border }]}>
+        <ThemedView style={[styles.container, styles.centerContent, { backgroundColor: colors.border }]}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <ThemedText style={[styles.loadingText, { color: colors.text }]}>Loading match details...</ThemedText>
         </ThemedView>
       </SafeAreaView>
     );
@@ -107,11 +108,11 @@ export default function MatchDetailScreen() {
 
   if (!match) {
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={[styles.container, styles.centerContent]}>
-          <ThemedText style={styles.errorText}>Match not found</ThemedText>
+      <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.border }]}>
+        <ThemedView style={[styles.container, styles.centerContent, { backgroundColor: colors.border }]}>
+          <ThemedText style={[styles.errorText, { color: colors.text }]}>Match not found</ThemedText>
           <TouchableOpacity 
-            style={styles.retryButton}
+            style={[styles.retryButton, { backgroundColor: colors.primary }]}
             onPress={() => router.push(`/match/${id}`)}>
             <ThemedText style={styles.retryButtonText}>Retry</ThemedText>
           </TouchableOpacity>
@@ -134,23 +135,23 @@ export default function MatchDetailScreen() {
   const isFinished = match.status === 'FINISHED';
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.border }]}>
       <ScrollView 
-        style={styles.scrollView}
+        style={[styles.scrollView, { backgroundColor: colors.border }]}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
           />
         }>
-        <ThemedView style={styles.container}>
+        <ThemedView style={[styles.container, { backgroundColor: colors.border }]}>
           {/* Header */}
-          <ThemedView style={styles.header}>
+          <ThemedView style={[styles.header, { backgroundColor: colors.border }]}>
             <TouchableOpacity 
-              style={styles.backButton} 
+              style={[styles.backButton, { }]} 
               onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color="#000" />
-              <ThemedText style={styles.backText}>Back</ThemedText>
+              <Ionicons name="chevron-back" size={24} color={colors.primary} />
+              <ThemedText style={[styles.backText, { color: colors.primary }]}>Back</ThemedText>
             </TouchableOpacity>
           </ThemedView>
 
@@ -163,14 +164,14 @@ export default function MatchDetailScreen() {
               style={styles.competitionLogo}
               resizeMode="contain"
             />
-            <ThemedText style={styles.competitionName}>
+            <ThemedText style={[styles.competitionName, { color: colors.text }]}>
               {match.competition.name} {match.matchday ? `- Matchday ${match.matchday}` : ''}
             </ThemedText>
           </TouchableOpacity>
 
           {/* Match Status */}
-          <ThemedView style={styles.statusContainerSimple}>
-            <ThemedText style={styles.date}>{formattedDate}</ThemedText>
+          <ThemedView style={[styles.statusContainerSimple, { backgroundColor: colors.border }]}>
+            <ThemedText style={[styles.date, { color: colors.text }]}>{formattedDate}</ThemedText>
             {isLive && (
               <ThemedView style={styles.liveContainer}>
                 <ThemedText style={styles.liveIndicator}>LIVE</ThemedText>
@@ -182,14 +183,14 @@ export default function MatchDetailScreen() {
           </ThemedView>
 
           {/* Teams and Score */}
-          <ThemedView style={styles.matchContainer}>
-            <ThemedView style={styles.matchBadge}>
-              <ThemedText style={styles.matchBadgeText}>
+          <ThemedView style={[styles.matchContainer, { backgroundColor: colors.background }]}>
+            <ThemedView style={[styles.matchBadge, { backgroundColor: colors.primary }]}>
+              <ThemedText style={[styles.matchBadgeText, { color: colors.buttonText }]}>
                 {dateUtils.getMatchDateLabel(matchDate)}
               </ThemedText>
             </ThemedView>
-            <ThemedView style={styles.teamsRow}>
-              <ThemedView style={styles.teamContainer}>
+            <ThemedView style={[styles.teamsRow, { backgroundColor: colors.background }]}>
+              <ThemedView style={[styles.teamContainer, { backgroundColor: colors.background }]}>
                 <Image
                   source={{ uri: match.homeTeam.crest }}
                   style={styles.teamLogo}
@@ -209,20 +210,20 @@ export default function MatchDetailScreen() {
                     </ThemedView>
                   ))}
                 </ThemedView>
-                <ThemedText style={styles.teamName}>{match.homeTeam.name}</ThemedText>
+                <ThemedText style={[styles.teamName, { color: colors.text }]}>{match.homeTeam.name}</ThemedText>
               </ThemedView>
 
               {isFinished || isLive ? (
                 <ThemedView style={styles.scoreContainer}>
-                  <ThemedText style={styles.score}>
+                  <ThemedText style={[styles.score, { color: colors.text }]}>
                     {match.score?.fullTime.home}-{match.score?.fullTime.away}
                   </ThemedText>
                 </ThemedView>
               ) : (
-                <ThemedText style={styles.vsText}>VS</ThemedText>
+                <ThemedText style={[styles.vsText, { color: colors.primary }]}>VS</ThemedText>
               )}
 
-              <ThemedView style={styles.teamContainer}>
+              <ThemedView style={[styles.teamContainer, { backgroundColor: colors.background }]}>
                 <Image
                   source={{ uri: match.awayTeam.crest }}
                   style={styles.teamLogo}
@@ -242,9 +243,9 @@ export default function MatchDetailScreen() {
                     </ThemedView>
                   ))}
                 </ThemedView>
-                <ThemedText style={styles.teamName}>{match.awayTeam.name}</ThemedText>
+                <ThemedText style={[styles.teamName, { color: colors.text }]}>{match.awayTeam.name}</ThemedText>
               </ThemedView>
-            </ThemedView>
+            </ThemedView>   
           </ThemedView>
 
           {/* Analysis Request Section */}
@@ -290,10 +291,10 @@ export default function MatchDetailScreen() {
 
           {/* Recent Matches */}
           {h2h.length > 0 && (
-            <ThemedView style={styles.recentMatchesContainer}>
-              <ThemedView style={styles.sectionHeader}>
-                <Ionicons name="time-outline" size={18} color="#2E7D32" />
-                <ThemedText style={styles.sectionTitle}>Head to Head</ThemedText>
+            <ThemedView style={[styles.recentMatchesContainer, { backgroundColor: colors.background }]}>
+              <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
+                <Ionicons name="time-outline" size={18} color={colors.primary} />
+                <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Head to Head</ThemedText>
               </ThemedView>
               <ThemedView style={styles.recentMatches}>
                 {h2h.slice(0, 5).map((match) => {
@@ -305,34 +306,34 @@ export default function MatchDetailScreen() {
                   });
                   
                   return (
-                    <ThemedView key={match.id} style={styles.recentMatch}>
-                      <ThemedView style={styles.recentMatchTeam}>
+                    <ThemedView key={match.id} style={[styles.recentMatch, { backgroundColor: colors.background }]}>
+                      <ThemedView style={[styles.recentMatchTeam, { backgroundColor: colors.background }]}>
                         <Image
                           source={{ uri: match.homeTeam.crest }}
                           style={styles.recentMatchLogo}
                           resizeMode="contain"
                         />
-                        <ThemedText style={styles.recentMatchTeamName} numberOfLines={1}>
+                        <ThemedText style={[styles.recentMatchTeamName, { color: match.score.winner === 'HOME_TEAM' ? colors.primary : colors.text, fontWeight: match.score.winner === 'HOME_TEAM' ? 'bold' : 'normal' }]} numberOfLines={1}>
                           {match.homeTeam.shortName || match.homeTeam.name}
                         </ThemedText>
                       </ThemedView>
                       
-                      <ThemedText style={styles.recentMatchScore}>
+                      <ThemedText style={[styles.recentMatchScore, { color: colors.text }]}>
                         {match.score?.fullTime.home}-{match.score?.fullTime.away}
                       </ThemedText>
                       
-                      <ThemedView style={styles.recentMatchTeam}>
+                      <ThemedView style={[styles.recentMatchTeam, { backgroundColor: colors.background }]}>
                         <Image
                           source={{ uri: match.awayTeam.crest }}
                           style={styles.recentMatchLogo}
                           resizeMode="contain"
                         />
-                        <ThemedText style={styles.recentMatchTeamName} numberOfLines={1}>
+                        <ThemedText style={[styles.recentMatchTeamName, { color: match.score.winner === 'AWAY_TEAM' ? colors.primary : colors.text, fontWeight: match.score.winner === 'AWAY_TEAM' ? 'bold' : 'normal' }]} numberOfLines={1}>
                           {match.awayTeam.shortName || match.awayTeam.name}
                         </ThemedText>
                       </ThemedView>
                       
-                      <ThemedText style={styles.recentMatchDate}>
+                      <ThemedText style={[styles.recentMatchDate, { color: colors.text }]}>
                         {formattedDate}
                       </ThemedText>
                     </ThemedView>
@@ -368,8 +369,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   backButton: {
     flexDirection: 'row',
@@ -442,10 +449,16 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     marginHorizontal: 16,
     borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e0e0e0',
     position: 'relative',
     paddingTop: 32,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   teamsRow: {
     flexDirection: 'row',
@@ -453,6 +466,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderRadius: 12,
   },
   teamContainer: {
     flex: 1,
@@ -493,8 +507,14 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 12,
     padding: 16,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   recentMatches: {
     gap: 2,

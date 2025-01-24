@@ -7,10 +7,19 @@ import { ThemedView } from '@/components/themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import LottieView from 'lottie-react-native';
+import { useLoading } from '@/contexts/LoadingContext';
 
 export default function SuccessScreen() {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
+  const { colors } = useTheme();
+  const { showLoading, hideLoading } = useLoading();
+
+  const handleExplore = () => {
+    showLoading();
+    router.back();
+    router.back();
+    router.push('/(tabs)/bulletin');
+    hideLoading();
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
@@ -30,16 +39,9 @@ export default function SuccessScreen() {
 
         {/* Button */}
         <TouchableOpacity
-          style={[styles.button, { backgroundColor: colors.primary }]}
-          onPress={() => {
-            // First close all modals
-            router.back();
-            // Then navigate to bulletin
-            setTimeout(() => {
-              router.replace('/(tabs)/bulletin');
-            }, 100);
-          }}>
-          <ThemedText style={[styles.buttonText, { color: colors.buttonText }]}>
+          style={[styles.exploreButton, { backgroundColor: colors.primary }]}
+          onPress={handleExplore}>
+          <ThemedText style={[styles.exploreText, { color: colors.background }]}>
             Start Exploring
           </ThemedText>
         </TouchableOpacity>
@@ -78,14 +80,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 24,
   },
-  button: {
+  exploreButton: {
     paddingVertical: 16,
     paddingHorizontal: 32,
     borderRadius: 12,
     width: '100%',
     alignItems: 'center',
   },
-  buttonText: {
+  exploreText: {
     fontSize: 16,
     fontWeight: '600',
   },

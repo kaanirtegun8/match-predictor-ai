@@ -1,11 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors } from '@/constants/Colors';
+import { Colors, ColorTheme } from '@/constants/Colors';
+import { useSubscription } from '@/hooks/useSubscription';
 
 interface ThemeContextType {
   isDark: boolean;
   toggleTheme: () => void;
-  colors: typeof Colors.light | typeof Colors.dark;
+  colors: ColorTheme;
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -16,6 +17,7 @@ const ThemeContext = createContext<ThemeContextType>({
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(false);
+  const { isSubscribed } = useSubscription();
 
   useEffect(() => {
     loadTheme();
@@ -42,7 +44,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const colors = isDark ? Colors.dark : Colors.light;
+  const colors = useMemo(() => {
+    if (isDark) {
+      return isSubscribed ? Colors.premiumDark : Colors.dark;
+    }
+    return isSubscribed ? Colors.premiumLight : Colors.light;
+  }, [isDark, isSubscribed]);
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme, colors }}>
@@ -54,3 +61,4 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 export function useTheme() {
   return useContext(ThemeContext);
 } 
+
