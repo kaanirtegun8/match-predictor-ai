@@ -2,6 +2,8 @@ import { Tabs } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
+import { useSubscription } from '@/hooks/useSubscription';
+import { View, Text } from 'react-native';
 
 /**
  * Two main tabs:
@@ -10,6 +12,7 @@ import { Colors } from '@/constants/Colors';
  */
 export default function TabLayout() {
   const { isDark } = useTheme();
+  const { isSubscribed } = useSubscription();
   const colors = isDark ? Colors.dark : Colors.light;
 
   return (
@@ -45,9 +48,42 @@ export default function TabLayout() {
         options={{
           title: 'Account',
           headerTitle: 'My Profile',
-          tabBarIcon: ({ color }) => (
-            <FontAwesome name="user" size={24} color={color} />
+          tabBarIcon: ({ color, focused }) => (
+            <View style={{ width: 32, alignItems: 'center' }}>
+              <FontAwesome 
+                name="user" 
+                size={24} 
+                color={focused ? (colors.primary) : color} 
+              />
+              {isSubscribed && (
+                <View style={{ 
+                  position: 'absolute',
+                  top: -4,
+                  right: -20,
+                  backgroundColor: isDark ? colors.inputBackground : colors.background,
+                  borderRadius: 8,
+                  paddingHorizontal: 4,
+                  height: 16,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  gap: 2,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                }}>
+                  <FontAwesome name="star" size={8} color={colors.primary} />
+                  <Text style={{ 
+                    color: colors.primary, 
+                    fontSize: 8, 
+                    fontWeight: '600',
+                    marginTop: -1,
+                  }}>
+                    PRO
+                  </Text>
+                </View>
+              )}
+            </View>
           ),
+          tabBarActiveTintColor: isSubscribed ? colors.primary : colors.primary,
         }}
       />
     </Tabs>

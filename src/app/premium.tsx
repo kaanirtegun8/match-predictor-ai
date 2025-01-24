@@ -1,4 +1,4 @@
-import { View, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, useColorScheme } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,24 +7,45 @@ import { ThemedView } from '@/components/themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PurchasesPackage } from 'react-native-purchases';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function PremiumScreen() {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
-  const { packages, purchase, restore, isLoading } = useSubscription();
+  const { colors } = useTheme();
+  const { packages, purchase, restore, isLoading, checkStatus } = useSubscription();
   const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Auto-select weekly package
+  useEffect(() => {
+    if (packages && packages.length > 0) {
+      const weeklyPackage = packages.find(pkg => 
+        pkg.product.title.toLowerCase().includes('weekly') || 
+        pkg.product.description.toLowerCase().includes('weekly')
+      );
+      if (weeklyPackage) {
+        setSelectedPackage(weeklyPackage);
+      }
+    }
+  }, [packages]);
 
   const handleContinue = async () => {
     if (!selectedPackage) return;
     setLoading(true);
     try {
-      await purchase(selectedPackage);
-      router.push('/success');
+      const purchaseResult = await purchase(selectedPackage);
+      if (purchaseResult) {
+        await checkStatus();
+        router.push('/success');
+      }
     } catch (error) {
       console.error('Purchase error:', error);
+      Alert.alert(
+        'Error',
+        'An error occurred during purchase. Please try again.',
+        [{ text: 'OK' }]
+      );
     } finally {
       setLoading(false);
     }
@@ -38,7 +59,6 @@ export default function PremiumScreen() {
         router.back();
       }
     } catch (error: any) {
-      
       Alert.alert(
         'Error',
         'An error occurred while restoring purchases. Please try again later.',
@@ -51,148 +71,191 @@ export default function PremiumScreen() {
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
-      <ScrollView style={styles.container} bounces={false}>
-        {/* Close Button */}
-        <TouchableOpacity 
-          style={[styles.closeButton, { backgroundColor: colors.background }]} 
-          onPress={() => router.back()}>
-          <Ionicons name="close" size={28} color={colors.text} />
-        </TouchableOpacity>
+      <ThemedView style={styles.container}>
+        {/* Hero Section with Gradient Overlay */}
+        <View style={styles.heroContainer}>
+          <Image 
+            source={require('@/assets/images/download.jpeg')}
+            style={styles.heroImage}
+            resizeMode="cover"
+          />
+          <LinearGradient
+            colors={['rgba(0,0,0,0.3)', colors.background]}
+            style={styles.gradient}
+          />
+          <TouchableOpacity 
+            style={[styles.closeButton, { backgroundColor: colors.background }]} 
+            onPress={() => router.back()}>
+            <Ionicons name="close" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <View style={styles.heroContent}>
+            <ThemedText style={[styles.title, styles.heroText]}>Upgrade to Premium</ThemedText>
+            <ThemedText style={[styles.subtitle, styles.heroText]}>
+              Unlock the full potential of Match Predictor AI
+            </ThemedText>
+          </View>
+        </View>
 
-        {/* Hero Image */}
-        <Image 
-          source={require('@/assets/images/download.jpeg')}
-          style={styles.heroImage}
-          resizeMode="cover"
-        />
-
-        {/* Content */}
-        <ThemedView style={styles.content}>
-          <ThemedText style={styles.title}>Upgrade to Premium</ThemedText>
-          <ThemedText style={[styles.subtitle, { color: colors.textSecondary }]}>
-            Get access to all premium features and unlock the full potential of Match Predictor AI
-          </ThemedText>
-
-          {/* Features List */}
-          <View style={styles.featuresList}>
+        {/* Main Content */}
+        <ThemedView style={styles.mainContent}>
+          {/* Features Grid */}
+          <View style={styles.featuresGrid}>
             <Feature 
               icon="analytics" 
-              title="Advanced Match Analysis"
-              description="Get detailed AI-powered match predictions and analysis"
+              title="Advanced Analysis"
+              color={colors.primary}
             />
             <Feature 
               icon="stats-chart" 
               title="Historical Data"
-              description="Access comprehensive historical match data and statistics"
+              color={colors.success}
             />
             <Feature 
               icon="notifications" 
-              title="Smart Notifications (Coming Soon)"
-              description="Receive personalized alerts for high-probability matches"
+              title="Smart Alerts"
+              color={colors.warning}
             />
           </View>
 
           {/* Packages */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.offeringsContainer}>
+          <View style={styles.packagesContainer}>
+            <ThemedText style={styles.packagesTitle}>Choose Your Plan</ThemedText>
             {isLoading ? (
-              <View style={styles.loadingContainer}>
-                <View style={styles.skeletonWrapper}>
-                  <View style={[styles.skeleton, { backgroundColor: colors.border }]} />
-                  <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                  <View style={[styles.skeleton, { backgroundColor: colors.border }]} />
-                </View>
-                <ActivityIndicator 
-                  style={styles.loadingIndicator}
-                  color={colors.primary} 
-                />
-              </View>
+              <ActivityIndicator color={colors.primary} style={styles.loader} />
             ) : (
-              packages?.map((pkg, index) => (
-                <View key={pkg.identifier} style={styles.offeringWrapper}>
+              <ScrollView 
+                horizontal 
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.packagesGrid}>
+                {packages?.map((pkg) => (
                   <TouchableOpacity
+                    key={pkg.identifier}
                     style={[
-                      styles.offering,
+                      styles.packageCard,
                       { 
-                        backgroundColor: colors.inputBackground,
+                        backgroundColor: selectedPackage?.identifier === pkg.identifier ? colors.border : colors.background,
                         borderColor: selectedPackage?.identifier === pkg.identifier 
                           ? colors.primary 
                           : colors.border 
                       },
                     ]}
                     onPress={() => setSelectedPackage(pkg)}>
-                    <ThemedText style={styles.offeringTitle}>
+                    <ThemedText style={styles.packageTitle}>
                       {pkg.product.title}
                     </ThemedText>
-                    <ThemedText style={[styles.offeringPrice, { color: colors.primary }]}>
-                      {pkg.product.priceString}
-                    </ThemedText>
-                    <ThemedText style={[styles.offeringPeriod, { color: colors.textSecondary }]}>
+                    {pkg.product.introPrice ? (
+                      <>
+                        <ThemedText style={[styles.packagePrice, { textDecorationLine: 'line-through', color: colors.textSecondary, fontSize: 16 }]}>
+                          {pkg.product.priceString}
+                        </ThemedText>
+                        <ThemedText style={[styles.packagePrice, { color: colors.primary }]}>
+                          {pkg.product.introPrice.priceString}
+                        </ThemedText>
+                      </>
+                    ) : (
+                      <ThemedText style={[styles.packagePrice, { color: colors.primary }]}>
+                        {pkg.product.priceString}
+                      </ThemedText>
+                    )}
+                    <ThemedText style={[styles.packagePeriod, { color: colors.textSecondary }]}>
                       {pkg.product.description}
                     </ThemedText>
                   </TouchableOpacity>
-                  {index < packages.length - 1 && (
-                    <View style={[styles.divider, { backgroundColor: colors.border }]} />
-                  )}
-                </View>
-              ))
+                ))}
+              </ScrollView>
             )}
-          </ScrollView>
+          </View>
 
-          {/* Continue Button */}
-          <TouchableOpacity
-            style={[
-              styles.continueButton,
-              { 
-                backgroundColor: selectedPackage ? colors.primary : colors.inputBackground,
-                borderWidth: selectedPackage ? 0 : 1,
-                borderColor: colors.border,
-              },
-              loading && styles.disabledButton
-            ]}
-            onPress={handleContinue}
-            disabled={loading || !selectedPackage}>
-            <ThemedText style={[
-              styles.continueText, 
-              { color: selectedPackage ? colors.buttonText : colors.textSecondary }
-            ]}>
-              {loading ? 'Processing...' : 'Continue'}
-            </ThemedText>
-          </TouchableOpacity>
+          {/* Bottom Actions */}
+          <View style={styles.bottomActions}>
+            <TouchableOpacity
+              style={[
+                styles.continueButton,
+                { 
+                  backgroundColor: selectedPackage ? colors.primary : colors.inputBackground,
+                  borderWidth: selectedPackage ? 0 : 1,
+                  borderColor: colors.border,
+                },
+                loading && styles.disabledButton
+              ]}
+              onPress={handleContinue}
+              disabled={loading || !selectedPackage}>
+              <ThemedText style={[
+                styles.continueText, 
+                { color: selectedPackage ? colors.buttonText : colors.textSecondary }
+              ]}>
+                {loading ? 'Processing...' : (
+                  selectedPackage?.product.introPrice ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                      <Ionicons name="rocket" size={20} color={colors.buttonText} style={{ marginRight: 8 }} />
+                      <ThemedText style={[styles.continueText, { color: colors.buttonText }]}>
+                        Start My Free Trial
+                      </ThemedText>
+                    </View>
+                  ) : 'Continue'
+                )}
+              </ThemedText>
+            </TouchableOpacity>
 
-          {/* Restore Purchases */}
-          <TouchableOpacity 
-            style={styles.restoreButton} 
-            onPress={handleRestore}
-            disabled={loading}>
-            <ThemedText style={[styles.restoreText, { color: colors.textSecondary }]}>
-              Restore Purchases
-            </ThemedText>
-          </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.restoreButton} 
+              onPress={handleRestore}
+              disabled={loading}>
+              <ThemedText style={[styles.restoreText, { color: colors.textSecondary }]}>
+                Restore Purchases
+              </ThemedText>
+            </TouchableOpacity>
+          </View>
         </ThemedView>
-      </ScrollView>
+      </ThemedView>
     </SafeAreaView>
   );
 }
 
-function Feature({ icon, title, description }: { icon: string, title: string, description: string }) {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
+function Feature({ icon, title, color }: { icon: string, title: string, color: string }) { 
+  const { colors } = useTheme();
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const getDescription = () => {
+    switch (title) {
+      case 'Advanced Analysis':
+        return 'Get detailed AI-powered match predictions and analysis with historical data and trends';
+      case 'Historical Data':
+        return 'Access comprehensive historical match data, head-to-head statistics, and team performance metrics';
+      case 'Smart Alerts':
+        return 'Receive notifications for high-probability matches and important game events';
+      default:
+        return '';
+    }
+  };
 
   return (
-    <ThemedView style={styles.featureItem}>
-      <ThemedView style={[styles.featureIcon, { backgroundColor: colors.primary + '20' }]}>
-        <Ionicons name={icon as any} size={24} color={colors.primary} />
-      </ThemedView>
-      <View style={styles.featureText}>
+    <View style={[styles.featureWrapper, { backgroundColor: colors.background }]}>
+      <TouchableOpacity 
+        style={[styles.featureItem, { backgroundColor: colors.border }]}
+        onPress={() => setShowTooltip(true)}>
+        <ThemedView style={[styles.featureIcon, { backgroundColor: color + '20' }]}>
+          <Ionicons name={icon as any} size={20} color={color} />
+        </ThemedView>
         <ThemedText style={styles.featureTitle}>{title}</ThemedText>
-        <ThemedText style={[styles.featureDescription, { color: colors.textSecondary }]}>
-          {description}
-        </ThemedText>
-      </View>
-    </ThemedView>
+      </TouchableOpacity>
+
+      <Modal
+        transparent
+        visible={showTooltip}
+        animationType="fade"
+        onRequestClose={() => setShowTooltip(false)}>
+        <TouchableOpacity 
+          style={styles.tooltipOverlay}
+          activeOpacity={1}
+          onPress={() => setShowTooltip(false)}>
+          <View style={[styles.tooltipContainer, { backgroundColor: colors.background }]}>
+            <View style={{ borderBottomColor: colors.background }} />
+            <ThemedText style={styles.tooltipText}>{getDescription()}</ThemedText>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+    </View>
   );
 }
 
@@ -203,13 +266,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  heroContainer: {
+    height: 300,
+    position: 'relative',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
+  gradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 150,
+  },
+  heroContent: {
+    position: 'absolute',
+    bottom: 24,
+    left: 20,
+    right: 20,
+  },
   closeButton: {
     position: 'absolute',
     top: 16,
     right: 16,
     zIndex: 1,
-    padding: 10,
-    borderRadius: 24,
+    padding: 8,
+    borderRadius: 20,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -219,13 +304,9 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 5,
   },
-  heroImage: {
-    width: '100%',
-    height: 300,
-  },
-  content: {
+  mainContent: {
     flex: 1,
-    padding: 24,
+    padding: 20,
   },
   title: {
     fontSize: 28,
@@ -234,76 +315,79 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    marginBottom: 32,
+    fontWeight: '600'
   },
-  featuresList: {
-    gap: 24,
-    marginBottom: 32,
+  featuresGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  featureWrapper: {
+    width: '31%',
   },
   featureItem: {
-    flexDirection: 'row',
+    height: 100,
+    padding: 12,
+    borderRadius: 12,
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'center',
   },
   featureIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  featureText: {
-    flex: 1,
+    marginBottom: 12,
   },
   featureTitle: {
-    fontSize: 16,
+    fontSize: 12,
     fontWeight: '600',
-    marginBottom: 4,
+    textAlign: 'center',
+    paddingHorizontal: 4,
   },
-  featureDescription: {
-    fontSize: 14,
+  packagesContainer: {
+    marginBottom: 24,
   },
-  offeringsContainer: {
+  packagesTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 16,
+  },
+  packagesGrid: {
+    paddingHorizontal: 4,
+    gap: 12,
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginHorizontal: 'auto',
-    paddingVertical: 16,
   },
-  offeringWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  offering: {
+  packageCard: {
+    width: 160,
     padding: 16,
     borderRadius: 12,
     borderWidth: 2,
     alignItems: 'center',
-    width: 150,
   },
-  offeringTitle: {
+  packageTitle: {
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 8,
     textAlign: 'center',
   },
-  offeringPrice: {
+  packagePrice: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 4,
   },
-  offeringPeriod: {
+  packagePeriod: {
     fontSize: 14,
+    textAlign: 'center',
   },
-  divider: {
-    width: 1,
-    height: '80%',
-    marginHorizontal: 16,
+  bottomActions: {
+    marginTop: 'auto',
   },
   continueButton: {
     padding: 16,
     borderRadius: 12,
     alignItems: 'center',
-    marginTop: 24,
   },
   continueText: {
     fontSize: 16,
@@ -319,22 +403,50 @@ const styles = StyleSheet.create({
   restoreText: {
     fontSize: 14,
   },
-  loadingContainer: {
-    alignItems: 'center',
+  loader: {
+    marginVertical: 20,
+  },
+  heroText: {
+    color: '#fff',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
+  },
+  tooltipOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
-    minHeight: 150,
-  },
-  skeletonWrapper: {
-    flexDirection: 'row',
     alignItems: 'center',
   },
-  skeleton: {
-    width: 150,
-    height: 120,
+  tooltipContainer: {
+    margin: 20,
     borderRadius: 12,
-    opacity: 0.3,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    maxWidth: '80%',
   },
-  loadingIndicator: {
+  tooltipArrow: {
     position: 'absolute',
+    top: -10,
+    alignSelf: 'center',
+    width: 0,
+    height: 0,
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 10,
+    borderLeftColor: 'transparent',
+    borderRightColor: 'transparent',
+  },
+  tooltipText: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: 'center',
   },
 });

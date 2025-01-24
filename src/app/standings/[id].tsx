@@ -7,6 +7,7 @@ import { ThemedText, ThemedView } from '@/components';
 import { getLeagueStandings } from '@/services/footballApi';
 import { StandingsResponse } from '@/models';
 import { Standing } from '@/models';
+import { useTheme } from '@/contexts/ThemeContext';
 
 
 export default function StandingsScreen() {
@@ -14,6 +15,7 @@ export default function StandingsScreen() {
     const [standings, setStandings] = useState<Standing[]>([]);
     const [competition, setCompetition] = useState<StandingsResponse['competition'] | null>(null);
     const [loading, setLoading] = useState(true);
+    const { colors } = useTheme();
 
     useEffect(() => {
         loadStandings();
@@ -36,23 +38,23 @@ export default function StandingsScreen() {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <ThemedView style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#1282A2" />
+                    <ActivityIndicator size="large" color={colors.primary} />
                 </ThemedView>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.scrollView}>
-                <ThemedView style={styles.container}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+            <ScrollView style={[styles.scrollView, { backgroundColor: colors.background }]}>
+                <ThemedView style={[styles.container, { backgroundColor: colors.background }]}>
                     {/* Header */}
-                    <ThemedView style={styles.header}>
+                    <ThemedView style={[styles.header, { backgroundColor: colors.background }]}>
                         <TouchableOpacity
                             style={styles.backButton}
                             onPress={() => router.back()}>
-                            <Ionicons name="chevron-back" size={24} color="#1282A2" />
-                            <ThemedText style={styles.backText}>Back</ThemedText>
+                            <Ionicons name="chevron-back" size={24} color={colors.primary} />
+                            <ThemedText style={[styles.backText, { color: colors.primary }]}>Back</ThemedText>
                         </TouchableOpacity>
                     </ThemedView>
 
@@ -64,26 +66,26 @@ export default function StandingsScreen() {
                                 style={styles.competitionLogo}
                                 resizeMode="contain"
                             />
-                            <ThemedText style={styles.competitionName}>
+                            <ThemedText style={[styles.competitionName, { color: colors.text }]}>
                                 {competition.name}
                             </ThemedText>
                         </ThemedView>
                     )}
 
                     {/* Standings Table */}
-                    <ThemedView style={styles.tableContainer}>
+                    <ThemedView style={[styles.tableContainer, { backgroundColor: colors.inputBackground }]}>
                         {/* Table Header */}
-                        <ThemedView style={styles.tableHeader}>
-                            <ThemedText style={[styles.headerCell, styles.positionCell]}>#</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.teamCell]}>Team</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>MP</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>W</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>D</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>L</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>GF</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>GA</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>GD</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.pointsCell]}>Pts</ThemedText>
+                        <ThemedView style={[styles.tableHeader, { backgroundColor: colors.primary }]}>
+                            <ThemedText style={[styles.headerCell, styles.positionCell, { color: colors.buttonText }]}>#</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.teamCell, { color: colors.buttonText }]}>Team</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>MP</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>W</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>D</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>L</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>GF</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>GA</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>GD</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.pointsCell, { color: colors.buttonText }  ]}>Pts</ThemedText>
                         </ThemedView>
 
                         {/* Table Rows */}
@@ -92,8 +94,8 @@ export default function StandingsScreen() {
                             return (
                                 <ThemedView
                                     key={`${standing.team.id}-${standing.position}`}
-                                    style={[styles.tableRow, isHighlighted && styles.highlightedRow]}>
-                                    <ThemedText style={[styles.cell, styles.positionCell, isHighlighted && styles.whiteText]}>
+                                    style={[styles.tableRow, isHighlighted && styles.highlightedRow, { backgroundColor: colors.inputBackground, borderColor: colors.border}]}>
+                                    <ThemedText style={[styles.cell, styles.positionCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.position}
                                     </ThemedText>
                                     <ThemedView style={[styles.teamInfo, { backgroundColor: 'transparent' }]}>
@@ -102,32 +104,32 @@ export default function StandingsScreen() {
                                             style={styles.teamLogo}
                                             resizeMode="contain"
                                         />
-                                        <ThemedText style={[styles.teamName, isHighlighted && styles.whiteText]} numberOfLines={1}>
+                                        <ThemedText style={[styles.teamName, isHighlighted && styles.whiteText, { color: colors.text }]} numberOfLines={1}>
                                             {standing.team.shortName || standing.team.name}
                                         </ThemedText>
                                     </ThemedView>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.playedGames}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.won}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.draw}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.lost}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.goalsFor}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.goalsAgainst}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.goalDifference}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.pointsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.pointsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.points}
                                     </ThemedText>
                                 </ThemedView>
@@ -164,7 +166,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor: '#e0e0e0',
     },
     backButton: {
         flexDirection: 'row',
@@ -227,7 +228,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
     },
     cell: {
         fontSize: 13,

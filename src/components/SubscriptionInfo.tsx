@@ -4,6 +4,7 @@ import { ThemedText, ThemedView } from '@/components';
 import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '@/hooks/useSubscription';
 import { router } from 'expo-router';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const PREMIUM_FEATURES = [
   {
@@ -25,7 +26,7 @@ const PREMIUM_FEATURES = [
 
 export function SubscriptionInfo() {
   const { isSubscribed } = useSubscription();
-
+  const { colors } = useTheme();
   return (
     <ThemedView style={styles.container}>
       {/* Current Plan */}
@@ -45,7 +46,7 @@ export function SubscriptionInfo() {
         </ThemedView>
         
         {!isSubscribed && (
-          <ThemedText style={styles.limitText}>
+          <ThemedText style={[styles.limitText, { color: colors.textTertiary }]}>
             5 analyses remaining this month
           </ThemedText>
         )}
@@ -62,8 +63,8 @@ export function SubscriptionInfo() {
               <Ionicons name={feature.icon as any} size={20} color="#fff" />
             </ThemedView>
             <ThemedView style={styles.featureInfo}>
-              <ThemedText style={styles.featureTitle}>{feature.title}</ThemedText>
-              <ThemedText style={styles.featureDescription}>
+              <ThemedText style={[styles.featureTitle, {color: colors.text}]}>{feature.title}</ThemedText>
+              <ThemedText style={[styles.featureDescription, {color: colors.textTertiary}]}>
                 {feature.description}
               </ThemedText>
             </ThemedView>
@@ -77,7 +78,7 @@ export function SubscriptionInfo() {
           styles.actionButton,
           { backgroundColor: isSubscribed ? '#6b7280' : '#FFD700' }
         ]}
-        onPress={() => router.push('/premium')}>
+        onPress={() => router.push(isSubscribed ? '/subscription-details' : '/premium')}>
         <ThemedText style={[
           styles.actionButtonText,
           { color: isSubscribed ? '#fff' : '#1f2937' }
