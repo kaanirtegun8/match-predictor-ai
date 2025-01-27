@@ -9,7 +9,6 @@ import { Colors } from '@/constants/Colors';
 import { useSubscription } from '@/hooks/useSubscription';
 import { useState, useEffect } from 'react';
 import { PurchasesPackage } from 'react-native-purchases';
-import { LinearGradient } from 'expo-linear-gradient';
 
 export default function PremiumScreen() {
   const { colors } = useTheme();
@@ -72,17 +71,14 @@ export default function PremiumScreen() {
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
       <ThemedView style={styles.container}>
-        {/* Hero Section with Gradient Overlay */}
+        {/* Hero Section with Dark Overlay */}
         <View style={styles.heroContainer}>
           <Image 
             source={require('@/assets/images/download.jpeg')}
             style={styles.heroImage}
             resizeMode="cover"
           />
-          <LinearGradient
-            colors={['rgba(0,0,0,0.3)', colors.background]}
-            style={styles.gradient}
-          />
+          <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.4)' }]} />
           <TouchableOpacity 
             style={[styles.closeButton, { backgroundColor: colors.background }]} 
             onPress={() => router.back()}>
@@ -187,7 +183,7 @@ export default function PremiumScreen() {
                 {loading ? 'Processing...' : (
                   selectedPackage?.product.introPrice ? (
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Ionicons name="rocket" size={20} color={colors.buttonText} style={{ marginRight: 8 }} />
+                      <Ionicons name="rocket" size={20} color={colors.error} style={{ marginRight: 8 }} />
                       <ThemedText style={[styles.continueText, { color: colors.buttonText }]}>
                         Start My Free Trial
                       </ThemedText>
@@ -275,12 +271,12 @@ const styles = StyleSheet.create({
     height: '100%',
     position: 'absolute',
   },
-  gradient: {
+  overlay: {
     position: 'absolute',
     left: 0,
     right: 0,
+    top: 0,
     bottom: 0,
-    height: 150,
   },
   heroContent: {
     position: 'absolute',
