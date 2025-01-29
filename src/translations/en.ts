@@ -26,6 +26,11 @@ export default {
     haveAccount: 'Already have an account? Sign In',
     passwordsNoMatch: 'Passwords do not match',
     fillAllFields: 'Please fill in all fields',
+    signInWithGoogle: 'Sign in with Google',
+    signInWithFacebook: 'Sign in with Facebook',
+    continueWithGoogle: 'Continue with Google',
+    continueWithFacebook: 'Continue with Facebook',
+    signingIn: 'Signing in...',
   },
   matches: {
     upcoming: 'Upcoming Matches',

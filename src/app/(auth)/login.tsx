@@ -70,11 +70,11 @@ export default function LoginScreen() {
       <View style={styles.socialButtonsContainer}>
         <GoogleSignInButton />
         <View style={styles.socialButtonSpacer} />
-        <FacebookSignInButton
+        {/* <FacebookSignInButton
           onPress={() => {
             // TODO: Implement Facebook Sign-In
           }}
-        />
+        /> */}
       </View>
 
       <Link href={{ pathname: '/(auth)/register' }} style={styles.link}>

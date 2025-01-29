@@ -26,6 +26,11 @@ export default {
     haveAccount: 'Zaten hesabınız var mı? Giriş Yapın',
     passwordsNoMatch: 'Şifreler eşleşmiyor',
     fillAllFields: 'Lütfen tüm alanları doldurun',
+    signInWithGoogle: 'Google ile Giriş Yap',
+    signInWithFacebook: 'Facebook ile Giriş Yap',
+    continueWithGoogle: 'Google ile Devam Et',
+    continueWithFacebook: 'Facebook ile Devam Et',
+    signingIn: 'Giriş yapılıyor...',
   },
   matches: {
     upcoming: 'Gelecek Maçlar',
