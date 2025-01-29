@@ -100,7 +100,9 @@ export default function AccountScreen() {
 
       {/* Statistics Section */}
       <ThemedView style={[styles.section, { backgroundColor: colors.background }]}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Statistics</ThemedText>
+        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>
+          {t('navigation.titles.myProfile')}
+        </ThemedText>
         <ThemedView style={[styles.statsGrid, { backgroundColor: colors.background }]}>
           {loading ? (
             <ActivityIndicator size="large" color={colors.primary} />

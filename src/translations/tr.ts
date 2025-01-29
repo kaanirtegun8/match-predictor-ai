@@ -32,6 +32,21 @@ export default {
     continueWithFacebook: 'Facebook ile Devam Et',
     signingIn: 'Giriş yapılıyor...',
   },
+  navigation: {
+    tabs: {
+      matches: 'Maçlar',
+      account: 'Hesabım',
+      bulletin: 'Bülten',
+    },
+    titles: {
+      myProfile: 'Profilim',
+      matches: 'Maçlar',
+      bulletin: 'Günlük Bülten',
+      matchDetails: 'Maç Detayları',
+      standings: 'Puan Durumu',
+      analysis: 'Analiz',
+    },
+  },
   matches: {
     upcoming: 'Gelecek Maçlar',
     live: 'Canlı Maçlar',

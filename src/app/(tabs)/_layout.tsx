@@ -4,6 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { useSubscription } from '@/hooks/useSubscription';
 import { View, Text } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Two main tabs:
@@ -14,6 +15,7 @@ export default function TabLayout() {
   const { isDark } = useTheme();
   const { isSubscribed } = useSubscription();
   const colors = isDark ? Colors.dark : Colors.light;
+  const { t } = useTranslation();
 
   return (
     <Tabs screenOptions={{
@@ -36,8 +38,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="bulletin"
         options={{
-          title: 'Matches',
-          headerTitle: 'Matches',
+          title: t('navigation.tabs.bulletin'),
+          headerTitle: t('navigation.titles.bulletin'),
           tabBarIcon: ({ color }) => (
             <FontAwesome name="list" size={24} color={color} />
           ),
@@ -46,8 +48,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          title: 'Account',
-          headerTitle: 'My Profile',
+          title: t('navigation.tabs.account'),
+          headerTitle: t('navigation.titles.myProfile'),
           tabBarIcon: ({ color, focused }) => (
             <View style={{ width: 32, alignItems: 'center' }}>
               <FontAwesome 

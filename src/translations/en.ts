@@ -32,6 +32,21 @@ export default {
     continueWithFacebook: 'Continue with Facebook',
     signingIn: 'Signing in...',
   },
+  navigation: {
+    tabs: {
+      matches: 'Matches',
+      account: 'Account',
+      bulletin: 'Bulletin',
+    },
+    titles: {
+      myProfile: 'My Profile',
+      matches: 'Matches',
+      bulletin: 'Daily Bulletin',
+      matchDetails: 'Match Details',
+      standings: 'Standings',
+      analysis: 'Analysis',
+    },
+  },
   matches: {
     upcoming: 'Upcoming Matches',
     live: 'Live Matches',
