@@ -6,6 +6,7 @@ import { Match } from '../../models/Match';
 import { getDailyBulletin } from '../../services/bulletinService';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
+import { useTranslation } from 'react-i18next';
 
 function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
   return matches.reduce<Record<string, Match[]>>((acc, match) => {
@@ -20,6 +21,7 @@ function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
 
 export default function BulletinScreen() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +69,7 @@ export default function BulletinScreen() {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: colors.border }]} edges={['top']}>
         <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Loading matches...</ThemedText>
+          <ThemedText>{t('common.loading')}</ThemedText>
         </ThemedView>
       </SafeAreaView>
     );
@@ -98,7 +100,7 @@ export default function BulletinScreen() {
       {filteredMatches.length === 0 && (
         <ThemedView style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>
-            No matches found
+            {t('matches.filter.noResults')}
           </ThemedText>
         </ThemedView>
       )}

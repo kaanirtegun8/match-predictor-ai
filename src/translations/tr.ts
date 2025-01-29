@@ -53,6 +53,18 @@ export default {
     live: 'Canlı Maçlar',
     finished: 'Tamamlanan Maçlar',
     noMatches: 'Maç bulunamadı',
+    filter: {
+      title: 'Filtrele',
+      allLeagues: 'Tüm Ligler',
+      allTeams: 'Tüm Takımlar',
+      apply: 'Uygula',
+      reset: 'Sıfırla',
+      selectLeague: 'Lig Seç',
+      selectTeam: 'Takım Seç',
+      clearAll: 'Tümünü Temizle',
+      search: 'Ara',
+      noResults: 'Sonuç bulunamadı'
+    }
   },
   settings: {
     title: 'Ayarlar',

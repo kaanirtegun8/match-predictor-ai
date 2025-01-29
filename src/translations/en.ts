@@ -53,6 +53,18 @@ export default {
     live: 'Live Matches',
     finished: 'Finished Matches',
     noMatches: 'No matches found',
+    filter: {
+      title: 'Filter',
+      allLeagues: 'All Leagues',
+      allTeams: 'All Teams',
+      apply: 'Apply',
+      reset: 'Reset',
+      selectLeague: 'Select League',
+      selectTeam: 'Select Team',
+      clearAll: 'Clear All',
+      search: 'Search',
+      noResults: 'No results found'
+    }
   },
   settings: {
     title: 'Settings',

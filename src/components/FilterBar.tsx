@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface Competition {
   id: number;
@@ -18,6 +19,7 @@ interface FilterBarProps {
 
 export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSelect }: FilterBarProps) {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <ScrollView
@@ -37,7 +39,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           styles.filterText,
           !selectedCompetitionId && styles.selectedText,
         ]}>
-          All
+          {t('matches.filter.allLeagues')}
         </ThemedText>
       </TouchableOpacity>
       {competitions.map((competition) => (
