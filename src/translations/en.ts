@@ -64,10 +64,43 @@ export default {
       free: 'Free',
       premium: 'Premium'
     },
+    subscription: 'Subscription',
+  },
+  stats: {
+    totalAnalyses: 'Total Analyses',
+    thisMonth: 'This Month',
+    mostActive: 'Most Active',
+  },
+  accountManagement: {
+    title: 'Account Management',
+    deleteAccount: 'Delete Account',
+    deleteConfirmation: 'This action cannot be undone. Please enter your password to confirm.',
+    continue: 'Continue',
+    confirmPassword: 'Confirm Password',
+    enterPassword: 'Please enter your password to delete your account',
+    passwordRequired: 'Password is required',
+    invalidPassword: 'Invalid password or something went wrong. Please try again.',
   },
   premium: {
     title: 'Premium',
     subscribe: 'Subscribe',
     restore: 'Restore Purchases',
+    freePlan: 'Free Plan',
+    analysesRemaining: 'analyses remaining this month',
+    features: {
+      unlimitedAnalysis: {
+        title: 'Unlimited Analysis',
+        description: 'Analyze any match, anytime'
+      },
+      detailedStats: {
+        title: 'Detailed Statistics',
+        description: 'Access to advanced stats'
+      },
+      matchAlerts: {
+        title: 'Match Alerts',
+        description: 'Get notified for important matches'
+      }
+    },
+    upgradeToPremium: 'Upgrade to Premium'
   },
 }; 

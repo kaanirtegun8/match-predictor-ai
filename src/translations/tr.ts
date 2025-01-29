@@ -64,10 +64,43 @@ export default {
       free: 'Ücretsiz',
       premium: 'Premium'
     },
+    subscription: 'Abonelik',
+  },
+  stats: {
+    totalAnalyses: 'Toplam Analiz',
+    thisMonth: 'Bu Ay',
+    mostActive: 'En Aktif',
+  },
+  accountManagement: {
+    title: 'Hesap Yönetimi',
+    deleteAccount: 'Hesabı Sil',
+    deleteConfirmation: 'Bu işlem geri alınamaz. Lütfen onaylamak için şifrenizi girin.',
+    continue: 'Devam Et',
+    confirmPassword: 'Şifreyi Onayla',
+    enterPassword: 'Hesabınızı silmek için lütfen şifrenizi girin',
+    passwordRequired: 'Şifre gerekli',
+    invalidPassword: 'Geçersiz şifre veya bir şeyler yanlış gitti. Lütfen tekrar deneyin.',
   },
   premium: {
     title: 'Premium',
     subscribe: 'Abone Ol',
     restore: 'Satın Alımları Geri Yükle',
+    freePlan: 'Ücretsiz Plan',
+    analysesRemaining: 'analiz hakkı kaldı bu ay',
+    features: {
+      unlimitedAnalysis: {
+        title: 'Sınırsız Analiz',
+        description: 'İstediğiniz maçı, istediğiniz zaman analiz edin'
+      },
+      detailedStats: {
+        title: 'Detaylı İstatistikler',
+        description: 'Gelişmiş istatistiklere erişim'
+      },
+      matchAlerts: {
+        title: 'Maç Bildirimleri',
+        description: 'Önemli maçlar için bildirim alın'
+      }
+    },
+    upgradeToPremium: 'Premium\'a Yükselt'
   },
 }; 
