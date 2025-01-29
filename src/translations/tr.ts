@@ -99,8 +99,31 @@ export default {
       matchAlerts: {
         title: 'Maç Bildirimleri',
         description: 'Önemli maçlar için bildirim alın'
+      },
+      advancedAnalysis: {
+        title: 'Gelişmiş Analiz',
+        description: 'Tarihsel veriler ve tahminlerle detaylı AI destekli maç analizleri alın'
+      },
+      historicalData: {
+        title: 'Geçmiş Veriler',
+        description: 'Kapsamlı geçmiş maç verilerine ve takım performans metriklerine erişin'
+      },
+      smartAlerts: {
+        title: 'Akıllı Bildirimler',
+        description: 'Yüksek olasılıklı maçlar ve önemli oyun olayları için bildirimler alın'
       }
     },
-    upgradeToPremium: 'Premium\'a Yükselt'
+    upgradeToPremium: 'Premium\'a Yükselt',
+    unlockPotential: 'Match Predictor AI\'ın tüm potansiyelini açığa çıkarın',
+    choosePlan: 'Planınızı Seçin',
+    weekly: 'Haftalık',
+    monthly: 'Aylık',
+    startFreeTrial: 'Ücretsiz Denemeyi Başlat',
+    processing: 'İşleniyor...',
+    continue: 'Devam Et',
+    restorePurchases: 'Satın Alımları Geri Yükle',
+    purchaseError: 'Satın alma sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+    restoreError: 'Satın alımları geri yüklerken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
+    ok: 'Tamam'
   },
 }; 

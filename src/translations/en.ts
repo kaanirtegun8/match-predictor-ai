@@ -99,8 +99,31 @@ export default {
       matchAlerts: {
         title: 'Match Alerts',
         description: 'Get notified for important matches'
+      },
+      advancedAnalysis: {
+        title: 'Advanced Analysis',
+        description: 'Get detailed AI-powered analysis of matches with historical data and predictions'
+      },
+      historicalData: {
+        title: 'Historical Data',
+        description: 'Access comprehensive historical match data and team performance metrics'
+      },
+      smartAlerts: {
+        title: 'Smart Alerts',
+        description: 'Receive notifications for high-probability matches and important game events'
       }
     },
-    upgradeToPremium: 'Upgrade to Premium'
+    upgradeToPremium: 'Upgrade to Premium',
+    unlockPotential: 'Unlock the full potential of Match Predictor AI',
+    choosePlan: 'Choose Your Plan',
+    weekly: 'Weekly',
+    monthly: 'Monthly',
+    startFreeTrial: 'Start My Free Trial',
+    processing: 'Processing...',
+    continue: 'Continue',
+    restorePurchases: 'Restore Purchases',
+    purchaseError: 'An error occurred during purchase. Please try again.',
+    restoreError: 'An error occurred while restoring purchases. Please try again later.',
+    ok: 'OK'
   },
 }; 
