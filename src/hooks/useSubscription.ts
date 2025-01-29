@@ -21,29 +21,21 @@ export const useSubscription = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        console.log("[Subscription] Initializing...");
-        console.log("[Subscription] User state:", user?.email || "No user");
         setIsLoading(true);
         
         await initializeRevenueCat();
-        console.log("[Subscription] RevenueCat initialized");
         
         await loadPackages();
-        console.log("[Subscription] Packages loaded");
         
         if (user) {
-          console.log("[Subscription] Checking status for user:", user.email);
           await checkStatus();
         } else {
-          console.log("[Subscription] No user, resetting subscription state");
           setIsSubscribed(false);
           setCustomerInfo(null);
         }
       } catch (error) {
-        console.error('[Subscription] Failed to initialize:', error);
       } finally {
         setIsLoading(false);
-        console.log("[Subscription] Initialization complete");
       }
     };
 
@@ -63,9 +55,7 @@ export const useSubscription = () => {
   // Check subscription status
   const checkStatus = async () => {
     try {
-      console.log("[Subscription] Checking subscription status...");
       const { isActive, customerInfo: info } = await checkSubscriptionStatus();
-      console.log("[Subscription] Status check result:", { isActive, hasCustomerInfo: !!info });
       setIsSubscribed(isActive);
       setCustomerInfo(info);
       return { isActive, customerInfo: info };

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHeader } from '@/components/auth';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState('');
@@ -12,15 +13,16 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signUp } = useAuth();
+  const { t } = useTranslation();
 
   const handleRegister = async () => {
     if (!fullName || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('common.error'), t('auth.fillAllFields'));
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(t('common.error'), t('auth.passwordsNoMatch'));
       return;
     }
 
@@ -28,10 +30,10 @@ export default function RegisterScreen() {
       setLoading(true);
       const result = await signUp(email, password, fullName);
       if (!result.success) {
-        Alert.alert('Error', result.error || 'Failed to sign up');
+        Alert.alert(t('common.error'), result.error || t('auth.signUpFailed'));
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert(t('common.error'), error.message);
     } finally {
       setLoading(false);
     }
@@ -40,32 +42,32 @@ export default function RegisterScreen() {
   return (
     <View style={styles.container}>
       <AuthHeader 
-        title="Create Account"
-        subtitle="Join us to get AI-powered match predictions"
+        title={t('auth.createAccount')}
+        subtitle={t('auth.createAccountSubtitle')}
       />
 
       <View style={styles.inputContainer}>
         <AuthInput
-          placeholder="Full Name"
+          placeholder={t('auth.fullName')}
           autoCapitalize="words"
           value={fullName}
           onChangeText={setFullName}
         />
         <AuthInput
-          placeholder="Email"
+          placeholder={t('auth.email')}
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
         />
         <AuthInput
-          placeholder="Password"
+          placeholder={t('auth.password')}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
         />
         <AuthInput
-          placeholder="Confirm Password"
+          placeholder={t('auth.confirmPassword')}
           secureTextEntry
           value={confirmPassword}
           onChangeText={setConfirmPassword}
@@ -73,14 +75,14 @@ export default function RegisterScreen() {
       </View>
 
       <AuthButton
-        title="Sign Up"
+        title={t('auth.signUp')}
         onPress={handleRegister}
         loading={loading}
       />
 
       <View style={styles.dividerContainer}>
         <View style={styles.divider} />
-        <Text style={styles.dividerText}>or</Text>
+        <Text style={styles.dividerText}>{t('common.or')}</Text>
         <View style={styles.divider} />
       </View>
 
@@ -95,7 +97,7 @@ export default function RegisterScreen() {
       </View>
 
       <Link href={{ pathname: '/(auth)/login' }} style={styles.link}>
-        <Text style={styles.linkText}>Already have an account? Sign In</Text>
+        <Text style={styles.linkText}>{t('auth.haveAccount')}</Text>
       </Link>
     </View>
   );
@@ -109,7 +111,7 @@ const styles = StyleSheet.create({
       ios: 50,
       android: 40,
     }),
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.light.background,
   },
   inputContainer: {
     gap: 10,
@@ -123,10 +125,10 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.divider,
+    backgroundColor: Colors.light.border,
   },
   dividerText: {
-    color: Colors.textTertiary,
+    color: Colors.light.text,
     paddingHorizontal: 12,
     fontSize: 13,
   },
@@ -141,7 +143,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: Colors.link,
+    color: Colors.light.link,
     fontSize: 14,
   },
 }); 

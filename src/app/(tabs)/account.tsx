@@ -1,3 +1,4 @@
+import React from 'react';
 import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,10 +12,8 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useStats } from '@/hooks/useStats';
 import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useEffect } from 'react';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
-import { Colors } from '@/constants/Colors';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountScreen() {
   const { signOut, user, deleteAccount } = useAuth();
@@ -22,6 +21,7 @@ export default function AccountScreen() {
   const { isSubscribed, checkStatus } = useSubscription();
   const { stats, loading } = useStats();
   const { colors } = useTheme();
+  const { t } = useTranslation();
   // Format creation date
   const memberSince = user?.metadata.creationTime 
     ? new Date(user.metadata.creationTime).toLocaleDateString('en-GB', {
@@ -139,8 +139,11 @@ export default function AccountScreen() {
 
       {/* Preferences Section */}
       <ThemedView style={[styles.section, {backgroundColor: colors.background}]}>
-        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>Preferences</ThemedText>
+        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>{t('settings.title')}</ThemedText>
         
+        {/* Language Selector */}
+        <LanguageSelector />
+
         {/* Theme Toggle */}
         <TouchableOpacity 
           style={[styles.themeToggle, {backgroundColor: colors.border}]} 
@@ -153,7 +156,7 @@ export default function AccountScreen() {
               color={isDark ? "#fbbf24" : "#f59e0b"} 
             />
             <ThemedText style={[styles.themeText, {color: colors.text}]}>
-              {isDark ? 'Dark Mode' : 'Light Mode'}
+              {t('settings.theme')}
             </ThemedText>
           </ThemedView>
           <Switch
