@@ -2,6 +2,7 @@ import { TouchableOpacity, Text, StyleSheet, View, Animated, Pressable, Activity
 import { SvgXml } from 'react-native-svg';
 import { useRef, useCallback, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 const googleLogo = `
 <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
@@ -16,6 +17,7 @@ export function GoogleSignInButton() {
   const scale = useRef(new Animated.Value(1)).current;
   const [isLoading, setIsLoading] = useState(false);
   const { signInWithGoogle } = useAuth();
+  const { t } = useTranslation();
 
   const animateScale = useCallback((value: number) => {
     Animated.spring(scale, {
@@ -61,7 +63,7 @@ export function GoogleSignInButton() {
         </View>
         <View style={styles.separator} />
         <Text style={styles.text}>
-          {isLoading ? 'Signing in...' : 'Sign in with Google'}
+          {isLoading ? t('auth.signingIn') : t('auth.signInWithGoogle')}
         </Text>
       </Animated.View>
     </Pressable>

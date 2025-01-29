@@ -5,28 +5,31 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSubscription } from '@/hooks/useSubscription';
 import { router } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const PREMIUM_FEATURES = [
   {
     icon: 'analytics-outline',
-    title: 'Unlimited Analysis',
-    description: 'Analyze any match, anytime'
+    titleKey: 'premium.features.unlimitedAnalysis.title',
+    descriptionKey: 'premium.features.unlimitedAnalysis.description'
   },
   {
     icon: 'bar-chart-outline',
-    title: 'Detailed Statistics',
-    description: 'Access to advanced stats'
+    titleKey: 'premium.features.detailedStats.title',
+    descriptionKey: 'premium.features.detailedStats.description'
   },
   {
     icon: 'notifications-outline',
-    title: 'Match Alerts',
-    description: 'Get notified for important matches'
+    titleKey: 'premium.features.matchAlerts.title',
+    descriptionKey: 'premium.features.matchAlerts.description'
   }
 ];
 
 export function SubscriptionInfo() {
   const { isSubscribed } = useSubscription();
   const { colors } = useTheme();
+  const { t } = useTranslation();
+
   return (
     <ThemedView style={styles.container}>
       {/* Current Plan */}
@@ -41,13 +44,13 @@ export function SubscriptionInfo() {
             color="#fff" 
           />
           <ThemedText style={styles.planText}>
-            {isSubscribed ? 'Premium Plan' : 'Free Plan'}
+            {isSubscribed ? t('settings.accountType.premium') : t('premium.freePlan')}
           </ThemedText>
         </ThemedView>
         
         {!isSubscribed && (
           <ThemedText style={[styles.limitText, { color: colors.textTertiary }]}>
-            5 analyses remaining this month
+            5 {t('premium.analysesRemaining')}
           </ThemedText>
         )}
       </ThemedView>
@@ -63,9 +66,11 @@ export function SubscriptionInfo() {
               <Ionicons name={feature.icon as any} size={20} color="#fff" />
             </ThemedView>
             <ThemedView style={styles.featureInfo}>
-              <ThemedText style={[styles.featureTitle, {color: colors.text}]}>{feature.title}</ThemedText>
+              <ThemedText style={[styles.featureTitle, {color: colors.text}]}>
+                {t(feature.titleKey)}
+              </ThemedText>
               <ThemedText style={[styles.featureDescription, {color: colors.textTertiary}]}>
-                {feature.description}
+                {t(feature.descriptionKey)}
               </ThemedText>
             </ThemedView>
           </ThemedView>
@@ -83,7 +88,7 @@ export function SubscriptionInfo() {
           styles.actionButtonText,
           { color: isSubscribed ? '#fff' : '#1f2937' }
         ]}>
-          {isSubscribed ? 'Manage Subscription' : 'Upgrade to Premium'}
+          {isSubscribed ? t('premium.subscribe') : t('premium.upgradeToPremium')}
         </ThemedText>
         <Ionicons 
           name="arrow-forward" 

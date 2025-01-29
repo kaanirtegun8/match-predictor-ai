@@ -1,3 +1,4 @@
+import React from 'react';
 import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
@@ -11,10 +12,8 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { useStats } from '@/hooks/useStats';
 import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { useEffect } from 'react';
-import { useRouter, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
-import { Colors } from '@/constants/Colors';
+import { LanguageSelector } from '@/components/LanguageSelector';
+import { useTranslation } from 'react-i18next';
 
 export default function AccountScreen() {
   const { signOut, user, deleteAccount } = useAuth();
@@ -22,43 +21,48 @@ export default function AccountScreen() {
   const { isSubscribed, checkStatus } = useSubscription();
   const { stats, loading } = useStats();
   const { colors } = useTheme();
-  // Format creation date
+  const { t, i18n } = useTranslation();
+
+  // Format creation date based on current language
   const memberSince = user?.metadata.creationTime 
-    ? new Date(user.metadata.creationTime).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    : 'N/A';
+    ? new Date(user.metadata.creationTime).toLocaleDateString(
+        i18n.language === 'tr' ? 'tr-TR' : 'en-GB', 
+        {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }
+      )
+    : t('common.notAvailable');
 
   const handleDeleteAccount = () => {
     Alert.alert(
-      "Delete Account",
-      "This action cannot be undone. Please enter your password to confirm.",
+      t('accountManagement.deleteAccount'),
+      t('accountManagement.deleteConfirmation'),
       [
         {
-          text: "Cancel",
+          text: t('common.cancel'),
           style: "cancel"
         },
         {
-          text: "Continue",
+          text: t('accountManagement.continue'),
           style: "destructive",
           onPress: () => {
             // Show password prompt
             Alert.prompt(
-              "Confirm Password",
-              "Please enter your password to delete your account",
+              t('accountManagement.confirmPassword'),
+              t('accountManagement.enterPassword'),
               [
                 {
-                  text: "Cancel",
+                  text: t('common.cancel'),
                   style: "cancel"
                 },
                 {
-                  text: "Delete Account",
+                  text: t('accountManagement.deleteAccount'),
                   style: "destructive",
                   onPress: async (password) => {
                     if (!password) {
-                      Alert.alert("Error", "Password is required");
+                      Alert.alert(t('common.error'), t('accountManagement.passwordRequired'));
                       return;
                     }
                     try {
@@ -68,7 +72,7 @@ export default function AccountScreen() {
                         await deleteAccount();
                       }
                     } catch (error) {
-                      Alert.alert("Error", "Invalid password or something went wrong. Please try again.");
+                      Alert.alert(t('common.error'), t('accountManagement.invalidPassword'));
                     }
                   }
                 }
@@ -87,20 +91,24 @@ export default function AccountScreen() {
       <ThemedView style={[styles.section, { backgroundColor: colors.background }]}>
         <Ionicons name="person-circle-outline" size={80} color={colors.primary} />
         <ThemedText style={[styles.email, { color: colors.text }]}>{user?.email}</ThemedText>
-        <ThemedText style={[styles.memberSince, { color: colors.textSecondary }]}>Member since {memberSince}</ThemedText>
+        <ThemedText style={[styles.memberSince, { color: colors.textSecondary }]}>
+          {t('settings.memberSince')} {memberSince}
+        </ThemedText>
         <ThemedView style={[
           styles.badge, 
           { backgroundColor: isSubscribed ? colors.primary : colors.textSecondary }
         ]}>
           <ThemedText style={styles.badgeText}>
-            {isSubscribed ? 'Premium' : 'Free'}
+            {isSubscribed ? t('settings.accountType.premium') : t('settings.accountType.free')}
           </ThemedText>
         </ThemedView>
       </ThemedView>
 
       {/* Statistics Section */}
       <ThemedView style={[styles.section, { backgroundColor: colors.background }]}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Statistics</ThemedText>
+        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>
+          {t('navigation.titles.myProfile')}
+        </ThemedText>
         <ThemedView style={[styles.statsGrid, { backgroundColor: colors.background }]}>
           {loading ? (
             <ActivityIndicator size="large" color={colors.primary} />
@@ -110,21 +118,21 @@ export default function AccountScreen() {
               <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
                 <Ionicons name="analytics-outline" size={24} color={colors.primary} />
                 <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.totalMatches}</ThemedText>
-                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>Total Analyses</ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>{t('stats.totalAnalyses')}</ThemedText>
               </ThemedView>
 
               {/* Monthly Analyses */}
               <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
                 <Ionicons name="calendar-outline" size={24} color={colors.primary} />
                 <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.monthlyMatches}</ThemedText>
-                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>This Month</ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>{t('stats.thisMonth')}</ThemedText>
               </ThemedView>
 
               {/* Most Active League */}
               <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
                 <Ionicons name="trophy-outline" size={24} color={colors.primary} />
                 <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.mostActiveLeague}</ThemedText>
-                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>Most Active</ThemedText>
+                <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>{t('stats.mostActive')}</ThemedText>
               </ThemedView>
             </>
           )}
@@ -133,14 +141,17 @@ export default function AccountScreen() {
 
       {/* Subscription Section */}
       <ThemedView style={styles.section}>
-        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Subscription</ThemedText>
+        <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('settings.subscription')}</ThemedText>
         <SubscriptionInfo />
       </ThemedView>
 
       {/* Preferences Section */}
       <ThemedView style={[styles.section, {backgroundColor: colors.background}]}>
-        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>Preferences</ThemedText>
+        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>{t('settings.title')}</ThemedText>
         
+        {/* Language Selector */}
+        <LanguageSelector />
+
         {/* Theme Toggle */}
         <TouchableOpacity 
           style={[styles.themeToggle, {backgroundColor: colors.border}]} 
@@ -153,7 +164,7 @@ export default function AccountScreen() {
               color={isDark ? "#fbbf24" : "#f59e0b"} 
             />
             <ThemedText style={[styles.themeText, {color: colors.text}]}>
-              {isDark ? 'Dark Mode' : 'Light Mode'}
+              {t('settings.theme')}
             </ThemedText>
           </ThemedView>
           <Switch
@@ -167,24 +178,24 @@ export default function AccountScreen() {
 
       {/* Account Management Section */}
       <ThemedView style={[styles.section, {backgroundColor: colors.background}]}>
-        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>Account Management</ThemedText>
+        <ThemedText style={[styles.sectionTitle, {color: colors.primary}]}>{t('accountManagement.title')}</ThemedText>
         
-        {/* Sign Out Button */}
-        <TouchableOpacity 
-          style={[styles.button, {backgroundColor: colors.border}]} 
-          onPress={signOut}>
-          <Ionicons name="log-out-outline" size={24} color={colors.text}/>
-          <ThemedText style={[styles.buttonText, {color: colors.text}]}>Sign Out</ThemedText>
-        </TouchableOpacity>
-
         {/* Delete Account Button */}
         <TouchableOpacity 
           style={[styles.button, styles.deleteButton, {backgroundColor: colors.error}]} 
           onPress={handleDeleteAccount}>
           <Ionicons name="trash-outline" size={24} color="#fff" />
           <ThemedText style={[styles.buttonText, styles.deleteButtonText]}>
-            Delete Account
+            {t('accountManagement.deleteAccount')}
           </ThemedText>
+        </TouchableOpacity>
+
+        {/* Sign Out Button */}
+        <TouchableOpacity 
+          style={[styles.button, {backgroundColor: colors.border}]} 
+          onPress={signOut}>
+          <Ionicons name="log-out-outline" size={24} color={colors.text}/>
+          <ThemedText style={[styles.buttonText, {color: colors.text}]}>{t('auth.signOut')}</ThemedText>
         </TouchableOpacity>
       </ThemedView>
     </ScrollView>

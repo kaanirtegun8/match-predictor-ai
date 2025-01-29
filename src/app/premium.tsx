@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, useColorScheme } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,14 +8,15 @@ import { ThemedView } from '@/components/themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { useSubscription } from '@/hooks/useSubscription';
-import { useState, useEffect } from 'react';
 import { PurchasesPackage } from 'react-native-purchases';
+import { useTranslation } from 'react-i18next';
 
 export default function PremiumScreen() {
   const { colors } = useTheme();
   const { packages, purchase, restore, isLoading, checkStatus } = useSubscription();
   const [selectedPackage, setSelectedPackage] = useState<PurchasesPackage | null>(null);
   const [loading, setLoading] = useState(false);
+  const { t } = useTranslation();
 
   // Auto-select weekly package
   useEffect(() => {
@@ -41,9 +43,9 @@ export default function PremiumScreen() {
     } catch (error) {
       console.error('Purchase error:', error);
       Alert.alert(
-        'Error',
-        'An error occurred during purchase. Please try again.',
-        [{ text: 'OK' }]
+        t('common.error'),
+        t('premium.purchaseError'),
+        [{ text: t('premium.ok') }]
       );
     } finally {
       setLoading(false);
@@ -59,9 +61,9 @@ export default function PremiumScreen() {
       }
     } catch (error: any) {
       Alert.alert(
-        'Error',
-        'An error occurred while restoring purchases. Please try again later.',
-        [{ text: 'OK' }]
+        t('common.error'),
+        t('premium.restoreError'),
+        [{ text: t('premium.ok') }]
       );
     } finally {
       setLoading(false);
@@ -85,9 +87,9 @@ export default function PremiumScreen() {
             <Ionicons name="close" size={24} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.heroContent}>
-            <ThemedText style={[styles.title, styles.heroText]}>Upgrade to Premium</ThemedText>
+            <ThemedText style={[styles.title, styles.heroText]}>{t('premium.upgradeToPremium')}</ThemedText>
             <ThemedText style={[styles.subtitle, styles.heroText]}>
-              Unlock the full potential of Match Predictor AI
+              {t('premium.unlockPotential')}
             </ThemedText>
           </View>
         </View>
@@ -98,24 +100,24 @@ export default function PremiumScreen() {
           <View style={styles.featuresGrid}>
             <Feature 
               icon="analytics" 
-              title="Advanced Analysis"
+              titleKey="premium.features.advancedAnalysis.title"
               color={colors.primary}
             />
             <Feature 
               icon="stats-chart" 
-              title="Historical Data"
+              titleKey="premium.features.historicalData.title"
               color={colors.success}
             />
             <Feature 
               icon="notifications" 
-              title="Smart Alerts"
+              titleKey="premium.features.smartAlerts.title"
               color={colors.warning}
             />
           </View>
 
           {/* Packages */}
           <View style={styles.packagesContainer}>
-            <ThemedText style={styles.packagesTitle}>Choose Your Plan</ThemedText>
+            <ThemedText style={styles.packagesTitle}>{t('premium.choosePlan')}</ThemedText>
             {isLoading ? (
               <ActivityIndicator color={colors.primary} style={styles.loader} />
             ) : (
@@ -137,7 +139,7 @@ export default function PremiumScreen() {
                     ]}
                     onPress={() => setSelectedPackage(pkg)}>
                     <ThemedText style={styles.packageTitle}>
-                      {pkg.product.title}
+                      {pkg.product.title.toLowerCase().includes('weekly') ? t('premium.weekly') : t('premium.monthly')}
                     </ThemedText>
                     {pkg.product.introPrice ? (
                       <>
@@ -180,15 +182,15 @@ export default function PremiumScreen() {
                 styles.continueText, 
                 { color: selectedPackage ? colors.buttonText : colors.textSecondary }
               ]}>
-                {loading ? 'Processing...' : (
+                {loading ? t('premium.processing') : (
                   selectedPackage?.product.introPrice ? (
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                       <Ionicons name="rocket" size={20} color={colors.error} style={{ marginRight: 8 }} />
                       <ThemedText style={[styles.continueText, { color: colors.buttonText }]}>
-                        Start My Free Trial
+                        {t('premium.startFreeTrial')}
                       </ThemedText>
                     </View>
-                  ) : 'Continue'
+                  ) : t('premium.continue')
                 )}
               </ThemedText>
             </TouchableOpacity>
@@ -198,7 +200,7 @@ export default function PremiumScreen() {
               onPress={handleRestore}
               disabled={loading}>
               <ThemedText style={[styles.restoreText, { color: colors.textSecondary }]}>
-                Restore Purchases
+                {t('premium.restorePurchases')}
               </ThemedText>
             </TouchableOpacity>
           </View>
@@ -208,18 +210,19 @@ export default function PremiumScreen() {
   );
 }
 
-function Feature({ icon, title, color }: { icon: string, title: string, color: string }) { 
+function Feature({ icon, titleKey, color }: { icon: string, titleKey: string, color: string }) { 
   const { colors } = useTheme();
   const [showTooltip, setShowTooltip] = useState(false);
+  const { t } = useTranslation();
 
   const getDescription = () => {
-    switch (title) {
-      case 'Advanced Analysis':
-        return 'Get detailed AI-powered match predictions and analysis with historical data and trends';
-      case 'Historical Data':
-        return 'Access comprehensive historical match data, head-to-head statistics, and team performance metrics';
-      case 'Smart Alerts':
-        return 'Receive notifications for high-probability matches and important game events';
+    switch (titleKey) {
+      case 'premium.features.advancedAnalysis.title':
+        return t('premium.features.advancedAnalysis.description');
+      case 'premium.features.historicalData.title':
+        return t('premium.features.historicalData.description');
+      case 'premium.features.smartAlerts.title':
+        return t('premium.features.smartAlerts.description');
       default:
         return '';
     }
@@ -233,7 +236,7 @@ function Feature({ icon, title, color }: { icon: string, title: string, color: s
         <ThemedView style={[styles.featureIcon, { backgroundColor: color + '20' }]}>
           <Ionicons name={icon as any} size={20} color={color} />
         </ThemedView>
-        <ThemedText style={styles.featureTitle}>{title}</ThemedText>
+        <ThemedText style={styles.featureTitle}>{t(titleKey)}</ThemedText>
       </TouchableOpacity>
 
       <Modal

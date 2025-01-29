@@ -35,7 +35,10 @@
               "host": "oauth2redirect"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -52,7 +55,8 @@
           }
         }
       ],
-      "expo-dev-client"
+      "expo-dev-client",
+      "expo-localization"
     ],
     "scheme": "com.matchpredictorai.matchpredictorai",
     "experiments": {
