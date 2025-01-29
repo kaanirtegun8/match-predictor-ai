@@ -21,15 +21,19 @@ export default function AccountScreen() {
   const { isSubscribed, checkStatus } = useSubscription();
   const { stats, loading } = useStats();
   const { colors } = useTheme();
-  const { t } = useTranslation();
-  // Format creation date
+  const { t, i18n } = useTranslation();
+
+  // Format creation date based on current language
   const memberSince = user?.metadata.creationTime 
-    ? new Date(user.metadata.creationTime).toLocaleDateString('en-GB', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })
-    : 'N/A';
+    ? new Date(user.metadata.creationTime).toLocaleDateString(
+        i18n.language === 'tr' ? 'tr-TR' : 'en-GB', 
+        {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        }
+      )
+    : t('common.notAvailable');
 
   const handleDeleteAccount = () => {
     Alert.alert(
@@ -87,13 +91,15 @@ export default function AccountScreen() {
       <ThemedView style={[styles.section, { backgroundColor: colors.background }]}>
         <Ionicons name="person-circle-outline" size={80} color={colors.primary} />
         <ThemedText style={[styles.email, { color: colors.text }]}>{user?.email}</ThemedText>
-        <ThemedText style={[styles.memberSince, { color: colors.textSecondary }]}>Member since {memberSince}</ThemedText>
+        <ThemedText style={[styles.memberSince, { color: colors.textSecondary }]}>
+          {t('settings.memberSince')} {memberSince}
+        </ThemedText>
         <ThemedView style={[
           styles.badge, 
           { backgroundColor: isSubscribed ? colors.primary : colors.textSecondary }
         ]}>
           <ThemedText style={styles.badgeText}>
-            {isSubscribed ? 'Premium' : 'Free'}
+            {isSubscribed ? t('settings.accountType.premium') : t('settings.accountType.free')}
           </ThemedText>
         </ThemedView>
       </ThemedView>

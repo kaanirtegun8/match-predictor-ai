@@ -9,6 +9,7 @@ export default {
     edit: 'Edit',
     back: 'Back',
     or: 'or',
+    notAvailable: 'N/A',
   },
   auth: {
     signIn: 'Sign In',
@@ -58,6 +59,11 @@ export default {
     language: 'Language',
     theme: 'Theme',
     notifications: 'Notifications',
+    memberSince: 'Member since',
+    accountType: {
+      free: 'Free',
+      premium: 'Premium'
+    },
   },
   premium: {
     title: 'Premium',

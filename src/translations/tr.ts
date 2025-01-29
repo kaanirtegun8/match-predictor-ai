@@ -9,6 +9,7 @@ export default {
     edit: 'Düzenle',
     back: 'Geri',
     or: 'veya',
+    notAvailable: 'Mevcut Değil',
   },
   auth: {
     signIn: 'Giriş Yap',
@@ -58,6 +59,11 @@ export default {
     language: 'Dil',
     theme: 'Tema',
     notifications: 'Bildirimler',
+    memberSince: 'Üyelik tarihi',
+    accountType: {
+      free: 'Ücretsiz',
+      premium: 'Premium'
+    },
   },
   premium: {
     title: 'Premium',
