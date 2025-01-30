@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { LoadingProvider } from '@/contexts/LoadingContext';
 import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 import { LanguageProvider } from '@/contexts/LanguageContext';
+import { TutorialProvider } from '@/components/tutorial/TutorialProvider';
 
 // Define valid root routes that don't need redirection
 const VALID_ROOT_ROUTES = ['match', 'standings', 'predictions', 'analyze', 'premium', 'success', 'subscription-details'];
@@ -40,43 +41,45 @@ export default function RootLayout() {
   if (loading) return null;
 
   return (
-      <LanguageProvider>
+    <LanguageProvider>
       <ThemeProvider>
         <LoadingProvider>
           <SubscriptionProvider>
-            <Stack>
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen 
-                name="(tabs)" 
-                options={{ 
+            <TutorialProvider>
+              <Stack>
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen 
+                  name="(tabs)" 
+                  options={{ 
+                    headerShown: false,
+                    animation: 'none',
+                    presentation: 'containedModal'
+                  }} 
+                />
+                <Stack.Screen name="predictions" options={{ presentation: 'modal' }} />
+                <Stack.Screen name="premium" options={{ 
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
                   headerShown: false,
-                  animation: 'none',
-                  presentation: 'containedModal'
-                }} 
-              />
-              <Stack.Screen name="predictions" options={{ presentation: 'modal' }} />
-              <Stack.Screen name="premium" options={{ 
-                presentation: 'modal',
-                animation: 'slide_from_bottom',
-                headerShown: false,
-              }} />
-              <Stack.Screen name="subscription-details" options={{ 
-                presentation: 'modal',
-                animation: 'slide_from_bottom',
-                headerShown: false,
-              }} />
-              <Stack.Screen name="success" options={{ 
-                presentation: 'modal',
-                animation: 'fade',
-                headerShown: false,
-              }} />
-              <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
-            </Stack>
+                }} />
+                <Stack.Screen name="subscription-details" options={{ 
+                  presentation: 'modal',
+                  animation: 'slide_from_bottom',
+                  headerShown: false,
+                }} />
+                <Stack.Screen name="success" options={{ 
+                  presentation: 'modal',
+                  animation: 'fade',
+                  headerShown: false,
+                }} />
+                <Stack.Screen name="match/[id]" options={{ headerShown: false }} />
+                <Stack.Screen name="standings/[id]" options={{ headerShown: false }} />
+                <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
+              </Stack>
+            </TutorialProvider>
           </SubscriptionProvider>
         </LoadingProvider>
       </ThemeProvider>
-      </LanguageProvider>
+    </LanguageProvider>
   );
 }

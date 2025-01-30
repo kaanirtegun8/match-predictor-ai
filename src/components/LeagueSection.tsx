@@ -6,14 +6,15 @@ import { MatchCard } from './MatchCard';
 import { Match } from '@/models';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
+import { RefObject } from 'react';
 
 interface LeagueSectionProps {
   matches: Match[];
+  firstMatchRef?: RefObject<any>;
 }
 
-export function LeagueSection({ matches }: LeagueSectionProps) {
+export function LeagueSection({ matches, firstMatchRef }: LeagueSectionProps) {
   const { colors } = useTheme();
-
   if (!matches || matches.length === 0) return null;
 
   const competition = matches[0].competition;
@@ -37,8 +38,12 @@ export function LeagueSection({ matches }: LeagueSectionProps) {
         </ThemedView>
       </TouchableOpacity>
       <ThemedView style={styles.matchList}>
-        {matches.map((match) => (
-          <MatchCard key={match.id} match={match} />
+        {matches.map((match, index) => (
+            <MatchCard 
+              key={match.id}
+              match={match} 
+              ref={index === 0 ? firstMatchRef : undefined}
+            />
         ))}
       </ThemedView>
     </ThemedView>
