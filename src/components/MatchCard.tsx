@@ -5,16 +5,20 @@ import { ThemedView } from './themed/ThemedView';
 import { Match } from '@/models';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface MatchCardProps {
   match: Match;
 }
 
-const formatMatchDate = (utcDate: string | undefined): string => {
-  if (!utcDate) return 'Date not available';
+const formatMatchDate = (utcDate: string | undefined, language: string, t: any): string => {
+  if (!utcDate) return t('common.notAvailable');
   
   const date = new Date(utcDate);
-  return date.toLocaleDateString('en-US', {
+  const locale = language === 'tr' ? 'tr-TR' : 'en-GB';
+  
+  return date.toLocaleDateString(locale, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -34,67 +38,62 @@ const getScore = (match: Match): string => {
 };
 
 export function MatchCard({ match }: MatchCardProps) {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
-  
-  const formattedDate = formatMatchDate(match.utcDate);
-  const score = getScore(match);
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+  const { language } = useLanguage();
+
+  const handlePress = () => {
+    router.push(`/match/${match.id}`);
+  };
+
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED';
+  const isFinished = match.status === 'FINISHED';
 
   return (
-    <TouchableOpacity
-      style={[styles.container, { borderBottomColor: colors.border }]}
-      onPress={() => router.push(`/match/${match.id}`)}>
-      <ThemedView style={styles.content}>
-        {/* Date and Status */}
-        <ThemedView style={styles.dateContainer}>
-          <ThemedText style={[styles.date, { color: colors.textSecondary }]}>
-            {formattedDate}
-          </ThemedText>
-          {isLive && (
-            <ThemedView style={styles.liveContainer}>
-              <ThemedText style={[styles.liveIndicator, { color: colors.error }]}>
-                LIVE
+    <TouchableOpacity onPress={handlePress}>
+      <ThemedView style={[styles.container, { borderBottomColor: colors.border }]}>
+        <ThemedView style={styles.content}>
+          <ThemedView style={styles.dateContainer}>
+            <ThemedText style={[styles.date, { color: colors.textSecondary }]}>
+              {formatMatchDate(match.utcDate, language, t)}
+            </ThemedText>
+            {isLive && (
+              <ThemedView style={styles.liveContainer}>
+                <ThemedText style={[styles.liveIndicator, { color: colors.error }]}>
+                  • LIVE
+                </ThemedText>
+              </ThemedView>
+            )}
+          </ThemedView>
+
+          <ThemedView style={styles.matchInfo}>
+            <ThemedView style={styles.teamContainer}>
+              <Image
+                source={{ uri: match.homeTeam.crest }}
+                style={styles.teamLogo}
+                resizeMode="contain"
+              />
+              <ThemedText style={[styles.teamName, { color: colors.text }]} numberOfLines={1}>
+                {match.homeTeam.shortName || match.homeTeam.name}
               </ThemedText>
             </ThemedView>
-          )}
-        </ThemedView>
 
-        {/* Teams and Score */}
-        <ThemedView style={styles.matchInfo}>
-          {/* Home Team */}
-          <ThemedView style={styles.teamContainer}>
-            <Image
-              source={{ uri: match.homeTeam.crest }}
-              style={styles.teamLogo}
-              resizeMode="contain"
-            />
-            <ThemedText style={[styles.teamName, { color: colors.text }]} numberOfLines={1}>
-              {match.homeTeam.shortName || match.homeTeam.name}
-            </ThemedText>
-          </ThemedView>
+            <ThemedView style={styles.scoreContainer}>
+              <ThemedText style={[styles.score, { color: isFinished ? colors.textSecondary : colors.primary }]}>
+                {getScore(match)}
+              </ThemedText>
+            </ThemedView>
 
-          {/* Score */}
-          <ThemedView style={styles.scoreContainer}>
-            <ThemedText style={[
-              styles.score,
-              { color: colors.text },
-              isLive && { color: colors.error }
-            ]}>
-              {score}
-            </ThemedText>
-          </ThemedView>
-
-          {/* Away Team */}
-          <ThemedView style={[styles.teamContainer, styles.awayTeam]}>
-            <ThemedText style={[styles.teamName, styles.awayTeamName, { color: colors.text }]} numberOfLines={1}>
-              {match.awayTeam.shortName || match.awayTeam.name}
-            </ThemedText>
-            <Image
-              source={{ uri: match.awayTeam.crest }}
-              style={styles.teamLogo}
-              resizeMode="contain"
-            />
+            <ThemedView style={[styles.teamContainer, styles.awayTeam]}>
+              <ThemedText style={[styles.teamName, styles.awayTeamName, { color: colors.text }]} numberOfLines={1}>
+                {match.awayTeam.shortName || match.awayTeam.name}
+              </ThemedText>
+              <Image
+                source={{ uri: match.awayTeam.crest }}
+                style={styles.teamLogo}
+                resizeMode="contain"
+              />
+            </ThemedView>
           </ThemedView>
         </ThemedView>
       </ThemedView>

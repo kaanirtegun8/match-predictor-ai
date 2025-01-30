@@ -8,7 +8,7 @@ import { getLeagueStandings } from '@/services/footballApi';
 import { StandingsResponse } from '@/models';
 import { Standing } from '@/models';
 import { useTheme } from '@/contexts/ThemeContext';
-
+import { useTranslation } from 'react-i18next';
 
 export default function StandingsScreen() {
     const { id, homeTeamId, awayTeamId } = useLocalSearchParams();
@@ -16,6 +16,7 @@ export default function StandingsScreen() {
     const [competition, setCompetition] = useState<StandingsResponse['competition'] | null>(null);
     const [loading, setLoading] = useState(true);
     const { colors } = useTheme();
+    const { t } = useTranslation();
 
     useEffect(() => {
         loadStandings();
@@ -39,6 +40,9 @@ export default function StandingsScreen() {
             <SafeAreaView style={styles.safeArea}>
                 <ThemedView style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color={colors.primary} />
+                    <ThemedText style={[styles.loadingText, { color: colors.text }]}>
+                        {t('common.loading')}
+                    </ThemedText>
                 </ThemedView>
             </SafeAreaView>
         );
@@ -54,7 +58,9 @@ export default function StandingsScreen() {
                             style={styles.backButton}
                             onPress={() => router.back()}>
                             <Ionicons name="chevron-back" size={24} color={colors.primary} />
-                            <ThemedText style={[styles.backText, { color: colors.primary }]}>Back</ThemedText>
+                            <ThemedText style={[styles.backText, { color: colors.primary }]}>
+                                {t('common.back')}
+                            </ThemedText>
                         </TouchableOpacity>
                     </ThemedView>
 
@@ -76,16 +82,36 @@ export default function StandingsScreen() {
                     <ThemedView style={[styles.tableContainer, { backgroundColor: colors.inputBackground }]}>
                         {/* Table Header */}
                         <ThemedView style={[styles.tableHeader, { backgroundColor: colors.primary }]}>
-                            <ThemedText style={[styles.headerCell, styles.positionCell, { color: colors.buttonText }]}>#</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.teamCell, { color: colors.buttonText }]}>Team</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>MP</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>W</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>D</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>L</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>GF</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>GA</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>GD</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.pointsCell, { color: colors.buttonText }  ]}>Pts</ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.positionCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.position')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.teamCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.team')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.played')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.won')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.draw')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.lost')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.goalsFor')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.goalsAgainst')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.goalDifference')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.pointsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.points')}
+                            </ThemedText>
                         </ThemedView>
 
                         {/* Table Rows */}
@@ -149,7 +175,6 @@ export default function StandingsScreen() {
         </SafeAreaView>
     );
 }
-
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -289,5 +314,10 @@ const styles = StyleSheet.create({
     whiteText: {
         color: '#1282A2',
         fontWeight: '500',
+    },
+    loadingText: {
+        fontSize: 16,
+        marginTop: 16,
+        color: '#475569',
     },
 });

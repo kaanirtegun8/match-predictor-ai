@@ -10,6 +10,7 @@ export default {
     back: 'Back',
     or: 'or',
     notAvailable: 'N/A',
+    retry: 'Retry',
   },
   auth: {
     signIn: 'Sign In',
@@ -53,6 +54,23 @@ export default {
     live: 'Live Matches',
     finished: 'Finished Matches',
     noMatches: 'No matches found',
+    matchday: 'Matchday',
+    form: {
+      win: 'W',
+      loss: 'L',
+      draw: 'D'
+    },
+    analysis: {
+      title: 'Match Analysis',
+      subtitle: 'AI-Powered insights and predictions',
+      button: 'Analyze'
+    },
+    headToHead: 'Head to Head',
+    status: {
+      live: 'LIVE',
+      loadingDetails: 'Loading match details...',
+      matchNotFound: 'Match not found'
+    },
     filter: {
       title: 'Filter',
       allLeagues: 'All Leagues',
@@ -137,5 +155,24 @@ export default {
     purchaseError: 'An error occurred during purchase. Please try again.',
     restoreError: 'An error occurred while restoring purchases. Please try again later.',
     ok: 'OK'
+  },
+  standings: {
+    headers: {
+      position: '#',
+      team: 'Team',
+      played: 'P',
+      won: 'W',
+      draw: 'D',
+      lost: 'L',
+      goalsFor: 'GF',
+      goalsAgainst: 'GA',
+      goalDifference: 'GD',
+      points: 'Pts'
+    },
+    labels: {
+      matchesPlayed: 'Matches Played',
+      form: 'Form',
+      nextMatch: 'Next Match'
+    }
   },
 }; 

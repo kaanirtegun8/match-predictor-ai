@@ -10,6 +10,7 @@ export default {
     back: 'Geri',
     or: 'veya',
     notAvailable: 'Mevcut Değil',
+    retry: 'Tekrar Dene',
   },
   auth: {
     signIn: 'Giriş Yap',
@@ -53,6 +54,23 @@ export default {
     live: 'Canlı Maçlar',
     finished: 'Tamamlanan Maçlar',
     noMatches: 'Maç bulunamadı',
+    matchday: 'Hafta',
+    form: {
+      win: 'K',
+      loss: 'M',
+      draw: 'B'
+    },
+    analysis: {
+      title: 'Maç Analizi',
+      subtitle: 'AI destekli öngörüler ve tahminler',
+      button: 'Analiz Et'
+    },
+    headToHead: 'Karşılaştırma',
+    status: {
+      live: 'CANLI',
+      loadingDetails: 'Maç detayları yükleniyor...',
+      matchNotFound: 'Maç bulunamadı'
+    },
     filter: {
       title: 'Filtrele',
       allLeagues: 'Tüm Ligler',
@@ -137,5 +155,24 @@ export default {
     purchaseError: 'Satın alma sırasında bir hata oluştu. Lütfen tekrar deneyin.',
     restoreError: 'Satın alımları geri yüklerken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
     ok: 'Tamam'
+  },
+  standings: {
+    headers: {
+      position: '#',
+      team: 'Takım',
+      played: 'O',
+      won: 'G',
+      draw: 'B',
+      lost: 'M',
+      goalsFor: 'AG',
+      goalsAgainst: 'YG',
+      goalDifference: 'AV',
+      points: 'P'
+    },
+    labels: {
+      matchesPlayed: 'Oynanan Maç',
+      form: 'Form',
+      nextMatch: 'Sonraki Maç'
+    }
   },
 }; 
