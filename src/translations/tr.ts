@@ -10,6 +10,7 @@ export default {
     back: 'Geri',
     or: 'veya',
     notAvailable: 'Mevcut Değil',
+    retry: 'Tekrar Dene',
   },
   auth: {
     signIn: 'Giriş Yap',
@@ -53,6 +54,23 @@ export default {
     live: 'Canlı Maçlar',
     finished: 'Tamamlanan Maçlar',
     noMatches: 'Maç bulunamadı',
+    matchday: 'Hafta',
+    form: {
+      win: 'K',
+      loss: 'M',
+      draw: 'B'
+    },
+    analysis: {
+      title: 'Maç Analizi',
+      subtitle: 'AI destekli öngörüler ve tahminler',
+      button: 'Analiz Et'
+    },
+    headToHead: 'Karşılaştırma',
+    status: {
+      live: 'CANLI',
+      loadingDetails: 'Maç detayları yükleniyor...',
+      matchNotFound: 'Maç bulunamadı'
+    },
     filter: {
       title: 'Filtrele',
       allLeagues: 'Tüm Ligler',

@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState, useRef } from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
@@ -10,6 +11,7 @@ import dateUtils from '../../utils/date';
 import { Match } from '@/models/Match';
 import { getMatchDetails } from '../../services/matchService';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -27,7 +29,19 @@ function getTeamForm(matches: Match[], teamId: number): string[] {
     .reverse();
 }
 
+function getFormLabel(form: string, t: any): string {
+  switch (form) {
+    case 'W': return t('matches.form.win');
+    case 'L': return t('matches.form.loss');
+    case 'D': return t('matches.form.draw');
+    default: return form;
+  }
+}
+
 export default function MatchDetailScreen() {
+  const { colors } = useTheme();
+  const { language } = useLanguage();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
   const [h2h, setH2h] = useState<Match[]>([]);
@@ -35,7 +49,7 @@ export default function MatchDetailScreen() {
   const [awayTeamMatches, setAwayTeamMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const { colors } = useTheme();
+  const { colors: themeColors } = useTheme();
   // Border animation
   const borderAnim = useRef(new Animated.Value(0)).current;
 
@@ -122,7 +136,8 @@ export default function MatchDetailScreen() {
   }
 
   const matchDate = new Date(match.utcDate);
-  const formattedDate = matchDate.toLocaleDateString('en-GB', {
+  const locale = language === 'tr' ? 'tr-TR' : 'en-GB';
+  const formattedDate = matchDate.toLocaleDateString(locale, {
     weekday: 'long',
     year: 'numeric',
     month: 'long',
@@ -165,7 +180,7 @@ export default function MatchDetailScreen() {
               resizeMode="contain"
             />
             <ThemedText style={[styles.competitionName, { color: colors.text }]}>
-              {match.competition.name} {match.matchday ? `- Matchday ${match.matchday}` : ''}
+              {match.competition.name} {match.matchday ? `- ${t('matches.matchday')} ${match.matchday}` : ''}
             </ThemedText>
           </TouchableOpacity>
 
@@ -186,7 +201,7 @@ export default function MatchDetailScreen() {
           <ThemedView style={[styles.matchContainer, { backgroundColor: colors.background }]}>
             <ThemedView style={[styles.matchBadge, { backgroundColor: colors.primary }]}>
               <ThemedText style={[styles.matchBadgeText, { color: colors.buttonText }]}>
-                {dateUtils.getMatchDateLabel(matchDate)}
+                {dateUtils.getMatchDateLabel(matchDate, language)}
               </ThemedText>
             </ThemedView>
             <ThemedView style={[styles.teamsRow, { backgroundColor: colors.background }]}>
@@ -206,7 +221,7 @@ export default function MatchDetailScreen() {
                         result === 'L' && styles.lossIndicator,
                         result === 'D' && styles.drawIndicator,
                       ]}>
-                      <ThemedText style={styles.formText}>{result}</ThemedText>
+                      <ThemedText style={styles.formText}>{getFormLabel(result, t)}</ThemedText>
                     </ThemedView>
                   ))}
                 </ThemedView>
@@ -239,7 +254,7 @@ export default function MatchDetailScreen() {
                         result === 'L' && styles.lossIndicator,
                         result === 'D' && styles.drawIndicator,
                       ]}>
-                      <ThemedText style={styles.formText}>{result}</ThemedText>
+                      <ThemedText style={styles.formText}>{getFormLabel(result, t)}</ThemedText>
                     </ThemedView>
                   ))}
                 </ThemedView>
@@ -256,17 +271,8 @@ export default function MatchDetailScreen() {
                 borderColor: borderAnim.interpolate({
                   inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
                   outputRange: [
-                    '#FFD700', // Altın sarısı
-                    '#FF6B6B', // Mercan kırmızısı
-                    '#4CAF50', // Yeşil
-                    '#2196F3', // Mavi
-                    '#9C27B0', // Mor
-                    '#FF9800', // Turuncu
-                    '#00BCD4', // Cyan
-                    '#F44336', // Kırmızı
-                    '#8BC34A', // Açık yeşil
-                    '#E91E63', // Pembe
-                    '#FFD700'  // Tekrar sarı (smooth geçiş için)
+                    '#FFD700', '#FF6B6B', '#4CAF50', '#2196F3', '#9C27B0',
+                    '#FF9800', '#00BCD4', '#F44336', '#8BC34A', '#E91E63', '#FFD700'
                   ]
                 })
               }
@@ -275,14 +281,14 @@ export default function MatchDetailScreen() {
                 <ThemedView style={styles.analysisLeft}>
                   <Ionicons name="trending-up" size={24} color="#FFD700" />
                   <ThemedView style={styles.textContainer}>
-                    <ThemedText style={styles.analysisTitle}>Match Analysis</ThemedText>
-                    <ThemedText style={styles.analysisSubtitle}>AI-Powered insights and predictions</ThemedText>
+                    <ThemedText style={styles.analysisTitle}>{t('matches.analysis.title')}</ThemedText>
+                    <ThemedText style={styles.analysisSubtitle}>{t('matches.analysis.subtitle')}</ThemedText>
                   </ThemedView>
                 </ThemedView>
                 <TouchableOpacity 
                   style={[styles.analysisButton, { backgroundColor: '#FFD700' }]}
                   onPress={() => router.push(`/analyze/${match.id}`)}>
-                  <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>Analyze</ThemedText>
+                  <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>{t('matches.analysis.button')}</ThemedText>
                   <Ionicons name="arrow-forward" size={18} color="#000" />
                 </TouchableOpacity>
               </ThemedView>
@@ -294,12 +300,12 @@ export default function MatchDetailScreen() {
             <ThemedView style={[styles.recentMatchesContainer, { backgroundColor: colors.background }]}>
               <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
                 <Ionicons name="time-outline" size={18} color={colors.primary} />
-                <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Head to Head</ThemedText>
+                <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.headToHead')}</ThemedText>
               </ThemedView>
               <ThemedView style={styles.recentMatches}>
                 {h2h.slice(0, 5).map((match) => {
                   const matchDate = new Date(match.utcDate ?? match.kickoff);
-                  const formattedDate = matchDate.toLocaleDateString('en-GB', {
+                  const formattedDate = matchDate.toLocaleDateString(locale, {
                     day: 'numeric',
                     month: 'short',
                     year: 'numeric',
