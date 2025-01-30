@@ -114,7 +114,9 @@ export default function MatchDetailScreen() {
       <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.border }]}>
         <ThemedView style={[styles.container, styles.centerContent, { backgroundColor: colors.border }]}>
           <ActivityIndicator size="large" color={colors.primary} />
-          <ThemedText style={[styles.loadingText, { color: colors.text }]}>Loading match details...</ThemedText>
+          <ThemedText style={[styles.loadingText, { color: colors.text }]}>
+            {t('matches.status.loadingDetails')}
+          </ThemedText>
         </ThemedView>
       </SafeAreaView>
     );
@@ -124,11 +126,13 @@ export default function MatchDetailScreen() {
     return (
       <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.border }]}>
         <ThemedView style={[styles.container, styles.centerContent, { backgroundColor: colors.border }]}>
-          <ThemedText style={[styles.errorText, { color: colors.text }]}>Match not found</ThemedText>
+          <ThemedText style={[styles.errorText, { color: colors.text }]}>
+            {t('matches.status.matchNotFound')}
+          </ThemedText>
           <TouchableOpacity 
             style={[styles.retryButton, { backgroundColor: colors.primary }]}
             onPress={() => router.push(`/match/${id}`)}>
-            <ThemedText style={styles.retryButtonText}>Retry</ThemedText>
+            <ThemedText style={styles.retryButtonText}>{t('common.retry')}</ThemedText>
           </TouchableOpacity>
         </ThemedView>
       </SafeAreaView>
@@ -166,7 +170,9 @@ export default function MatchDetailScreen() {
               style={[styles.backButton, { }]} 
               onPress={() => router.back()}>
               <Ionicons name="chevron-back" size={24} color={colors.primary} />
-              <ThemedText style={[styles.backText, { color: colors.primary }]}>Back</ThemedText>
+              <ThemedText style={[styles.backText, { color: colors.primary }]}>
+                {t('common.back')}
+              </ThemedText>
             </TouchableOpacity>
           </ThemedView>
 
@@ -189,7 +195,9 @@ export default function MatchDetailScreen() {
             <ThemedText style={[styles.date, { color: colors.text }]}>{formattedDate}</ThemedText>
             {isLive && (
               <ThemedView style={styles.liveContainer}>
-                <ThemedText style={styles.liveIndicator}>LIVE</ThemedText>
+                <ThemedText style={styles.liveIndicator}>
+                  {t('matches.status.live')}
+                </ThemedText>
               </ThemedView>
             )}
             {match.venue && (

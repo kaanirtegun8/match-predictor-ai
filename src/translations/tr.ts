@@ -156,4 +156,23 @@ export default {
     restoreError: 'Satın alımları geri yüklerken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
     ok: 'Tamam'
   },
+  standings: {
+    headers: {
+      position: '#',
+      team: 'Takım',
+      played: 'O',
+      won: 'G',
+      draw: 'B',
+      lost: 'M',
+      goalsFor: 'AG',
+      goalsAgainst: 'YG',
+      goalDifference: 'AV',
+      points: 'P'
+    },
+    labels: {
+      matchesPlayed: 'Oynanan Maç',
+      form: 'Form',
+      nextMatch: 'Sonraki Maç'
+    }
+  },
 }; 
