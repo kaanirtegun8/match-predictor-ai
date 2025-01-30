@@ -1,10 +1,11 @@
-import { StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, TouchableOpacity, Image, View } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
 import { Match } from '@/models';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
+import { forwardRef } from 'react';
 
 interface MatchCardProps {
   match: Match;
@@ -33,7 +34,7 @@ const getScore = (match: Match): string => {
   return 'vs';
 };
 
-export function MatchCard({ match }: MatchCardProps) {
+export const MatchCard = forwardRef<View, MatchCardProps>(({ match }, ref) => {
   const { isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
   
@@ -42,10 +43,11 @@ export function MatchCard({ match }: MatchCardProps) {
   const isLive = match.status === 'IN_PLAY' || match.status === 'PAUSED';
 
   return (
-    <TouchableOpacity
-      style={[styles.container, { borderBottomColor: colors.border }]}
-      onPress={() => router.push(`/match/${match.id}`)}>
-      <ThemedView style={styles.content}>
+    <View ref={ref}>
+      <TouchableOpacity
+        style={[styles.container, { borderBottomColor: colors.border }]}
+        onPress={() => router.push(`/match/${match.id}`)}>
+        <ThemedView style={styles.content}>
         {/* Date and Status */}
         <ThemedView style={styles.dateContainer}>
           <ThemedText style={[styles.date, { color: colors.textSecondary }]}>
@@ -99,8 +101,9 @@ export function MatchCard({ match }: MatchCardProps) {
         </ThemedView>
       </ThemedView>
     </TouchableOpacity>
+    </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {

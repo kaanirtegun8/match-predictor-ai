@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useEffect, useState, useRef } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing } from 'react-native';
+import React, { useEffect, useState, useRef, createRef } from 'react';
+import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '../../components/themed/ThemedText';
@@ -10,6 +10,8 @@ import dateUtils from '../../utils/date';
 import { Match } from '@/models/Match';
 import { getMatchDetails } from '../../services/matchService';
 import { useTheme } from '@/contexts/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTutorial } from '@/components/tutorial/TutorialProvider';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -36,8 +38,41 @@ export default function MatchDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const { colors } = useTheme();
+  const TUTORIAL_KEY = 'has_seen_match_tutorial';
+  const { startTutorial } = useTutorial();
+  const analysisButtonRef = useRef(null);
   // Border animation
   const borderAnim = useRef(new Animated.Value(0)).current;
+
+
+  useEffect(() => {
+    const startIfReady = async () => {
+        const hasSeenTutorial = await AsyncStorage.getItem(TUTORIAL_KEY);
+        if (hasSeenTutorial) return; 
+    
+        if (loading) return;
+        if (!match) return;
+    
+        if (!analysisButtonRef.current) return;
+    
+        startTutorial([
+          {
+            targetRef: analysisButtonRef,
+            title: "Maç Detayı",
+            message: "Burada maç bilgilerini görebilir, detaylı istatistikleri görebilirsiniz. Ayrıca Analiz butonuna tıklayarak maçın detaylı analizini görebilirsiniz.",
+            position: "top",
+            hasNextButton: false,
+            hasFinishButton: true,
+            onFinish: async () => {
+              await AsyncStorage.setItem(TUTORIAL_KEY, 'true');
+            }
+          }
+        ]);
+      };
+    
+      startIfReady();
+  }, [loading, match, analysisButtonRef.current]);
+
 
   useEffect(() => {
     const animate = () => {
@@ -249,45 +284,47 @@ export default function MatchDetailScreen() {
           </ThemedView>
 
           {/* Analysis Request Section */}
-          <ThemedView style={styles.analysisOuterContainer}>
-            <Animated.View style={[
-              styles.animatedBorder,
-              {
-                borderColor: borderAnim.interpolate({
-                  inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
-                  outputRange: [
-                    '#FFD700', // Altın sarısı
-                    '#FF6B6B', // Mercan kırmızısı
-                    '#4CAF50', // Yeşil
-                    '#2196F3', // Mavi
-                    '#9C27B0', // Mor
-                    '#FF9800', // Turuncu
-                    '#00BCD4', // Cyan
-                    '#F44336', // Kırmızı
-                    '#8BC34A', // Açık yeşil
-                    '#E91E63', // Pembe
-                    '#FFD700'  // Tekrar sarı (smooth geçiş için)
-                  ]
-                })
-              }
-            ]}>
-              <ThemedView style={styles.analysisContent}>
-                <ThemedView style={styles.analysisLeft}>
-                  <Ionicons name="trending-up" size={24} color="#FFD700" />
-                  <ThemedView style={styles.textContainer}>
-                    <ThemedText style={styles.analysisTitle}>Match Analysis</ThemedText>
-                    <ThemedText style={styles.analysisSubtitle}>AI-Powered insights and predictions</ThemedText>
-                  </ThemedView>
+          <View ref={analysisButtonRef}>
+            <ThemedView style={styles.analysisOuterContainer}>
+                <Animated.View style={[
+                styles.animatedBorder,
+                {
+                    borderColor: borderAnim.interpolate({
+                    inputRange: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1],
+                    outputRange: [
+                        '#FFD700', // Altın sarısı
+                        '#FF6B6B', // Mercan kırmızısı
+                        '#4CAF50', // Yeşil
+                        '#2196F3', // Mavi
+                        '#9C27B0', // Mor
+                        '#FF9800', // Turuncu
+                        '#00BCD4', // Cyan
+                        '#F44336', // Kırmızı
+                        '#8BC34A', // Açık yeşil
+                        '#E91E63', // Pembe
+                        '#FFD700'  // Tekrar sarı (smooth geçiş için)
+                    ]
+                    })
+                }
+                ]}>
+                <ThemedView style={styles.analysisContent}>
+                    <ThemedView style={styles.analysisLeft}>
+                    <Ionicons name="trending-up" size={24} color="#FFD700" />
+                    <ThemedView style={styles.textContainer}>
+                        <ThemedText style={styles.analysisTitle}>Match Analysis</ThemedText>
+                        <ThemedText style={styles.analysisSubtitle}>AI-Powered insights and predictions</ThemedText>
+                    </ThemedView>
+                    </ThemedView>
+                    <TouchableOpacity 
+                    style={[styles.analysisButton, { backgroundColor: '#FFD700' }]}
+                    onPress={() => router.push(`/analyze/${match.id}`)}>
+                    <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>Analyze</ThemedText>
+                    <Ionicons name="arrow-forward" size={18} color="#000" />
+                    </TouchableOpacity>
                 </ThemedView>
-                <TouchableOpacity 
-                  style={[styles.analysisButton, { backgroundColor: '#FFD700' }]}
-                  onPress={() => router.push(`/analyze/${match.id}`)}>
-                  <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>Analyze</ThemedText>
-                  <Ionicons name="arrow-forward" size={18} color="#000" />
-                </TouchableOpacity>
-              </ThemedView>
-            </Animated.View>
-          </ThemedView>
+                </Animated.View>
+            </ThemedView>
+          </View>
 
           {/* Recent Matches */}
           {h2h.length > 0 && (
