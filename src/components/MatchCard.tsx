@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, TouchableOpacity, Image, View } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
@@ -7,6 +7,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { forwardRef } from 'react';
 
 interface MatchCardProps {
   match: Match;
@@ -37,7 +38,7 @@ const getScore = (match: Match): string => {
   return 'vs';
 };
 
-export function MatchCard({ match }: MatchCardProps) {
+export const MatchCard = forwardRef<View, MatchCardProps>(({ match }, ref) => {
   const { colors } = useTheme();
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -50,7 +51,7 @@ export function MatchCard({ match }: MatchCardProps) {
   const isFinished = match.status === 'FINISHED';
 
   return (
-    <TouchableOpacity onPress={handlePress}>
+    <TouchableOpacity ref={ref} onPress={handlePress}>
       <ThemedView style={[styles.container, { borderBottomColor: colors.border }]}>
         <ThemedView style={styles.content}>
           <ThemedView style={styles.dateContainer}>
@@ -99,7 +100,7 @@ export function MatchCard({ match }: MatchCardProps) {
       </ThemedView>
     </TouchableOpacity>
   );
-}
+});
 
 const styles = StyleSheet.create({
   container: {
