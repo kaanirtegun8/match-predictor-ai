@@ -334,14 +334,14 @@ export default function MatchDetailScreen() {
                 <ThemedView style={styles.analysisLeft}>
                   <Ionicons name="trending-up" size={24} color="#FFD700" />
                   <ThemedView style={styles.textContainer}>
-                    <ThemedText style={styles.analysisTitle}>Match Analysis</ThemedText>
-                    <ThemedText style={styles.analysisSubtitle}>AI-Powered insights and predictions</ThemedText>
+                    <ThemedText style={styles.analysisTitle}>{t('matches.analysis.title')}</ThemedText>
+                    <ThemedText style={styles.analysisSubtitle}>{t('matches.analysis.subtitle')}</ThemedText>
                   </ThemedView>
                 </ThemedView>
                 <TouchableOpacity 
                   style={[styles.analysisButton, { backgroundColor: '#FFD700' }]}
                   onPress={() => router.push(`/analyze/${match.id}`)}>
-                  <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>Analyze</ThemedText>
+                  <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>{t('matches.analysis.button')}</ThemedText>
                   <Ionicons name="arrow-forward" size={18} color="#000" />
                 </TouchableOpacity>
                 </ThemedView>

@@ -56,14 +56,40 @@ export default {
     noMatches: 'Maç bulunamadı',
     matchday: 'Hafta',
     form: {
-      win: 'K',
+      win: 'G',
       loss: 'M',
       draw: 'B'
     },
     analysis: {
       title: 'Maç Analizi',
       subtitle: 'AI destekli öngörüler ve tahminler',
-      button: 'Analiz Et'
+      button: 'Analiz Et',
+      showDetails: 'Detayları Göster',
+      hideDetails: 'Detayları Gizle',
+      noEvidence: 'Bu tahmin için detaylı açıklama bulunmuyor.',
+      loadingSteps: {
+        stats: 'Maç istatistikleri alınıyor...',
+        performance: 'Takım performansları analiz ediliyor...',
+        predictions: 'Yapay zeka tahminleri oluşturuluyor...',
+        finalizing: 'Maç öngörüleri tamamlanıyor...'
+      }
+    },
+    predictions: {
+      title: 'Tahminler',
+      confidence: '{{percent}}% Güven Oranı',
+      types: {
+        matchResult: 'Maç Sonucu',
+        totalGoals: 'Toplam Gol',
+        bothTeamsToScore: 'Karşılıklı Gol',
+        homeTeamGoals: 'Ev Sahibi Gol',
+        awayTeamGoals: 'Deplasman Gol',
+        firstGoal: 'İlk Gol'
+      },
+      risk: {
+        RISKY: 'Riskli',
+        MODERATE: 'Makul',
+        SAFE: 'Güvenli'
+      }
     },
     headToHead: 'Karşılaştırma',
     status: {

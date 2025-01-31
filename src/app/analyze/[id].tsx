@@ -4,15 +4,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { AnalyzeResponseModel, RiskLevel } from '../../models/AnalyzeResponseModel';
+import { AnalyzeResponseModel, RiskLevel, Prediction } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
 import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
 import { useTheme } from '@/contexts/ThemeContext';
+import { BilingualAnalysis } from '@/models/BilingualAnalysis';
+
+const kebabToCamelCase = (str: string): string => {
+  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+};
 
 const getRiskStyles = (risk: RiskLevel) => {
   switch (risk) {
@@ -34,9 +40,10 @@ const calculateRiskLevel = (probability: number): RiskLevel => {
 };
 
 export default function AnalyzeScreen() {
+  const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
-  const [analysis, setAnalysis] = useState<AnalyzeResponseModel | null>(null);
+  const [analysis, setAnalysis] = useState<BilingualAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingStep, setLoadingStep] = useState<number>(1);
   const [loadingMessage, setLoadingMessage] = useState<string>('Retrieving match statistics...');
@@ -49,6 +56,9 @@ export default function AnalyzeScreen() {
         : [...prev, index]
     );
   };
+
+  // Get current language
+  const currentLanguage = i18n.language;
 
   useEffect(() => {
     const loadMatch = async () => {
@@ -119,10 +129,10 @@ export default function AnalyzeScreen() {
   const LoadingSteps = () => (
     <ThemedView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
       {[
-        'Retrieving match statistics...',
-        'Analyzing team performances...',
-        'Generating AI predictions...',
-        'Finalizing match insights...'
+        t('matches.analysis.loadingSteps.stats'),
+        t('matches.analysis.loadingSteps.performance'),
+        t('matches.analysis.loadingSteps.predictions'),
+        t('matches.analysis.loadingSteps.finalizing')
       ].map((step, index) => (
         <ThemedView key={index} style={[styles.loadingStep, { backgroundColor: colors.border }]}>
           <ThemedView style={[styles.stepIndicator, { backgroundColor: colors.border }]}>
@@ -174,7 +184,7 @@ export default function AnalyzeScreen() {
               style={styles.backButton}
               onPress={() => router.back()}>
               <Ionicons name="chevron-back" size={24} color={colors.primary} />
-              <ThemedText style={[styles.backText, { color: colors.primary }]}>Back</ThemedText>
+              <ThemedText style={[styles.backText, { color: colors.primary }]}>{t('common.back')}</ThemedText>
             </TouchableOpacity>
           </ThemedView>
 
@@ -204,17 +214,17 @@ export default function AnalyzeScreen() {
               <ThemedView style={[styles.metadataContainer, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
                   <ThemedText style={[styles.badgeText, { color: colors.text }]}>
-                    Matchday {match.matchday}
+                    {t('matches.matchday')} {match.matchday}
                   </ThemedText>
                 </ThemedView>
                 
                 {match.utcDate && (
                   <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
                     <ThemedText style={[styles.badgeText, { color: colors.text }]}>
-                      {new Date(match.utcDate).toLocaleDateString('en-US', {
-                        month: 'short',
+                      {new Date(match.utcDate).toLocaleDateString(t('common.locale', { defaultValue: 'tr-TR' }), {
                         day: 'numeric',
-                      })} • {new Date(match.utcDate).toLocaleTimeString('en-US', {
+                        month: 'long',
+                      })} • {new Date(match.utcDate).toLocaleTimeString(t('common.locale', { defaultValue: 'tr-TR' }), {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
@@ -234,11 +244,11 @@ export default function AnalyzeScreen() {
               <ThemedView style={[styles.analysisSection, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
                   <Ionicons name="analytics-outline" size={24} color={colors.primary} />
-                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Match Analysis</ThemedText>
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.analysis.title')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={[styles.analysisCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <ThemedText style={[styles.analysisText, { color: colors.text }]}>
-                    {analysis.description}
+                    {currentLanguage === 'tr' ? analysis.tr.description : analysis.en.description}
                   </ThemedText>
                 </ThemedView>
               </ThemedView>
@@ -247,15 +257,15 @@ export default function AnalyzeScreen() {
               <ThemedView style={[styles.predictionsSection, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
                   <Ionicons name="podium-outline" size={24} color={colors.primary} />
-                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Predictions</ThemedText>
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.predictions.title')}</ThemedText>
                 </ThemedView>
                 
-                {analysis.predicts.map((predict, index) => (
+                {(currentLanguage === 'tr' ? analysis.tr.predicts : analysis.en.predicts).map((predict: Prediction, index: number) => (
                   <ThemedView key={index} style={[styles.predictionCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                     <ThemedView style={styles.predictionHeader}>
                       <ThemedView style={styles.predictionMain}>
                         <ThemedText style={[styles.predictionType, { color: colors.primary }]}>
-                          {predict.type}
+                          {t(`matches.predictions.types.${kebabToCamelCase(predict.id)}`)}
                         </ThemedText>
                         
                         <ThemedView style={[
@@ -263,7 +273,7 @@ export default function AnalyzeScreen() {
                           getRiskStyles(calculateRiskLevel(predict.probability))
                         ]}>
                           <ThemedText style={[styles.riskBadgeText]}>
-                            {calculateRiskLevel(predict.probability)}
+                            {t(`matches.predictions.risk.${calculateRiskLevel(predict.probability)}`)}
                           </ThemedText>
                         </ThemedView>
                       </ThemedView>
@@ -273,7 +283,7 @@ export default function AnalyzeScreen() {
                       </ThemedText>
 
                       <ThemedText style={[styles.probabilityText, { color: colors.textSecondary }]}>
-                        {Math.round(predict.probability * 100)}% Confidence
+                        {t('matches.predictions.confidence', { percent: Math.round(predict.probability * 100) })}
                       </ThemedText>
                     </ThemedView>
 
@@ -281,7 +291,7 @@ export default function AnalyzeScreen() {
                       style={styles.evidenceToggle}
                       onPress={() => togglePrediction(index)}>
                       <ThemedText style={[styles.evidenceToggleText, { color: colors.primary }]}>
-                        {expandedPredictions.includes(index) ? 'Hide Details' : 'Show Details'}
+                        {expandedPredictions.includes(index) ? t('matches.analysis.hideDetails') : t('matches.analysis.showDetails')}
                       </ThemedText>
                       <Ionicons 
                         name={expandedPredictions.includes(index) ? "chevron-up" : "chevron-down"} 
@@ -292,7 +302,13 @@ export default function AnalyzeScreen() {
 
                     {expandedPredictions.includes(index) && (
                       <ThemedView style={styles.evidenceContainer}>
-                        <RichText text={predict.evidence} style={styles.evidenceText} />
+                        {predict.evidence ? (
+                          <RichText text={predict.evidence} style={styles.evidenceText} />
+                        ) : (
+                          <ThemedText style={[styles.evidenceText, { color: colors.textSecondary }]}>
+                            {t('matches.analysis.noEvidence')}
+                          </ThemedText>
+                        )}
                       </ThemedView>
                     )}
                   </ThemedView>

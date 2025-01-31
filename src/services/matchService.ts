@@ -4,6 +4,7 @@ import { Match } from '../models/Match';
 import { API_TOKEN, BASE_URL } from './footballApi';
 import { AnalyzeResponseModel } from '../models/AnalyzeResponseModel';
 import { auth } from '@/config/firebase';
+import { BilingualAnalysis } from '../models/BilingualAnalysis';
 
 export async function getMatchDetails(matchId: string): Promise<{
   details: Match;
@@ -111,101 +112,36 @@ async function fetchLeagueStandingsFromAPI(leagueId: number): Promise<any> {
   return data.standings[0].table; // Getting the total standings table
 }
 
-export const saveMatchAnalysis = async (matchId: string, analysis: AnalyzeResponseModel) => {
-  const today = new Date().toISOString().split('T')[0];
-  let matchDetails;
-
-  // 1. Get match details first
+export const saveMatchAnalysis = async (matchId: string, analysis: BilingualAnalysis): Promise<boolean> => {
   try {
-    const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
-    const matchSnap = await getDoc(matchRef);
-    const matchData = matchSnap.data();
-    matchDetails = matchData?.details;
-    if (!matchDetails) {
-      console.error('❌ Match details not found');
-      return false;
-    }
-  } catch (error) {
-    console.error('❌ Error getting match details:', error);
-    return false;
-  }
-  
-  // 2. Save match analysis to dailyBulletins
-  try {
+    const today = new Date().toISOString().split('T')[0];
     const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
     await setDoc(matchRef, { analysis }, { merge: true });
-    console.log('✅ Match analysis saved to dailyBulletins:', matchId);
+    console.log('✅ Analysis saved successfully');
+    return true;
   } catch (error) {
-    console.error('❌ Error saving to dailyBulletins:', error);
+    console.error('❌ Error saving analysis:', error);
     return false;
   }
-
-  // 3. Save to user's analyses collection
-  try {
-    const user = auth.currentUser;
-    if (!user) {
-      console.error('❌ No user logged in');
-      return false;
-    }
-
-    const analysisRef = doc(collection(db, 'users', user.uid, 'analyses'));
-    await setDoc(analysisRef, {
-      matchId,
-      leagueId: matchDetails.competition.id,
-      leagueName: matchDetails.competition.name,
-      homeTeamId: matchDetails.homeTeam.id,
-      homeTeamName: matchDetails.homeTeam.name,
-      awayTeamId: matchDetails.awayTeam.id,
-      awayTeamName: matchDetails.awayTeam.name,
-      analyzedAt: serverTimestamp(),
-    });
-    
-    console.log('✅ Analysis saved to user collection:', {
-      league: matchDetails.competition.name,
-      match: `${matchDetails.homeTeam.name} vs ${matchDetails.awayTeam.name}`
-    });
-  } catch (error) {
-    console.error('❌ Error saving to user collection:', error);
-    return false;
-  }
-
-  return true;
 };
 
-export const getMatchAnalysis = async (matchId: string): Promise<AnalyzeResponseModel | null> => {
-    try {
-        const today = new Date().toISOString().split('T')[0];
-        const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
-        const matchSnap = await getDoc(matchRef);
-        
-        if (matchSnap.exists()) {
-            const data = matchSnap.data();
-            if (data.analysis) {
-                console.log('✅ Using cached analysis');
-                
-                // Check and save to user collection
-                const user = auth.currentUser;
-                if (user) {
-                    const userAnalysesRef = collection(db, 'users', user.uid, 'analyses');
-                    const q = query(userAnalysesRef, where('matchId', '==', matchId));
-                    const querySnapshot = await getDocs(q);
-                    
-                    if (querySnapshot.empty) {
-                        await saveMatchAnalysis(matchId, data.analysis);
-                        console.log('✅ Cached analysis saved to user collection');
-                    } else {
-                        console.log('ℹ️ Analysis already exists in user collection');
-                    }
-                }
-                
-                return data.analysis as AnalyzeResponseModel;
-            }
-        }
-        
-        console.log('⚠️ No cached analysis found');
-        return null;
-    } catch (error) {
-        console.error('❌ Error getting match analysis:', error);
-        return null;
+export const getMatchAnalysis = async (matchId: string): Promise<BilingualAnalysis | null> => {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
+    const matchSnap = await getDoc(matchRef);
+    
+    if (matchSnap.exists()) {
+      const data = matchSnap.data();
+      if (data.analysis) {
+        console.log('✅ Analysis found in cache');
+        return data.analysis as BilingualAnalysis;
+      }
     }
+    console.log('⚠️ No cached analysis found');
+    return null;
+  } catch (error) {
+    console.error('❌ Error getting analysis:', error);
+    return null;
+  }
 }; 
