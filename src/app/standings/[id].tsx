@@ -7,13 +7,16 @@ import { ThemedText, ThemedView } from '@/components';
 import { getLeagueStandings } from '@/services/footballApi';
 import { StandingsResponse } from '@/models';
 import { Standing } from '@/models';
-
+import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export default function StandingsScreen() {
     const { id, homeTeamId, awayTeamId } = useLocalSearchParams();
     const [standings, setStandings] = useState<Standing[]>([]);
     const [competition, setCompetition] = useState<StandingsResponse['competition'] | null>(null);
     const [loading, setLoading] = useState(true);
+    const { colors } = useTheme();
+    const { t } = useTranslation();
 
     useEffect(() => {
         loadStandings();
@@ -36,64 +39,97 @@ export default function StandingsScreen() {
         return (
             <SafeAreaView style={styles.safeArea}>
                 <ThemedView style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#1282A2" />
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <ThemedText style={[styles.loadingText, { color: colors.text }]}>
+                        {t('common.loading')}
+                    </ThemedText>
                 </ThemedView>
             </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.scrollView}>
-                <ThemedView style={styles.container}>
+        <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.border }]}>
+            <ScrollView style={[styles.scrollView, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.container, { backgroundColor: colors.border }]}>
                     {/* Header */}
-                    <ThemedView style={styles.header}>
+                    <ThemedView style={[styles.header, { backgroundColor: colors.border }]}>
                         <TouchableOpacity
                             style={styles.backButton}
                             onPress={() => router.back()}>
-                            <Ionicons name="chevron-back" size={24} color="#000" />
-                            <ThemedText style={styles.backText}>Back</ThemedText>
+                            <Ionicons name="chevron-back" size={24} color={colors.primary} />
+                            <ThemedText style={[styles.backText, { color: colors.primary }]}>
+                                {t('common.back')}
+                            </ThemedText>
                         </TouchableOpacity>
                     </ThemedView>
 
                     {/* Competition Info */}
                     {competition && (
-                        <ThemedView style={styles.competitionInfo}>
+                        <ThemedView style={[styles.competitionInfo, { backgroundColor: colors.border }]}>
                             <Image
                                 source={{ uri: competition.emblem }}
                                 style={styles.competitionLogo}
                                 resizeMode="contain"
                             />
-                            <ThemedText style={styles.competitionName}>
+                            <ThemedText style={[styles.competitionName, { color: colors.text }]}>
                                 {competition.name}
                             </ThemedText>
                         </ThemedView>
                     )}
 
                     {/* Standings Table */}
-                    <ThemedView style={styles.tableContainer}>
+                    <ThemedView style={[styles.tableContainer, { backgroundColor: colors.inputBackground }]}>
                         {/* Table Header */}
-                        <ThemedView style={styles.tableHeader}>
-                            <ThemedText style={[styles.headerCell, styles.positionCell]}>#</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.teamCell]}>Team</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>MP</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>W</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>D</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>L</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>GF</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>GA</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.statsCell]}>GD</ThemedText>
-                            <ThemedText style={[styles.headerCell, styles.pointsCell]}>Pts</ThemedText>
+                        <ThemedView style={[styles.tableHeader, { backgroundColor: colors.primary }]}>
+                            <ThemedText style={[styles.headerCell, styles.positionCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.position')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.teamCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.team')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.played')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.won')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.draw')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.lost')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.goalsFor')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.goalsAgainst')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.statsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.goalDifference')}
+                            </ThemedText>
+                            <ThemedText style={[styles.headerCell, styles.pointsCell, { color: colors.buttonText }]}>
+                                {t('standings.headers.points')}
+                            </ThemedText>
                         </ThemedView>
 
                         {/* Table Rows */}
-                        {standings.map((standing) => {
+                        {standings.map((standing, index) => {
                             const isHighlighted = standing.team.id === Number(homeTeamId) || standing.team.id === Number(awayTeamId);
+                            const isEvenRow = index % 2 === 0;
                             return (
                                 <ThemedView
                                     key={`${standing.team.id}-${standing.position}`}
-                                    style={[styles.tableRow, isHighlighted && styles.highlightedRow]}>
-                                    <ThemedText style={[styles.cell, styles.positionCell, isHighlighted && styles.whiteText]}>
+                                    style={[
+                                        styles.tableRow,
+                                        isHighlighted && { backgroundColor: colors.highlight },
+                                        !isHighlighted && { 
+                                            backgroundColor: isEvenRow ? colors.inputBackground : colors.background,
+                                            borderColor: colors.border
+                                        }
+                                    ]}>
+                                    <ThemedText style={[styles.cell, styles.positionCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.position}
                                     </ThemedText>
                                     <ThemedView style={[styles.teamInfo, { backgroundColor: 'transparent' }]}>
@@ -102,32 +138,32 @@ export default function StandingsScreen() {
                                             style={styles.teamLogo}
                                             resizeMode="contain"
                                         />
-                                        <ThemedText style={[styles.teamName, isHighlighted && styles.whiteText]} numberOfLines={1}>
+                                        <ThemedText style={[styles.teamName, isHighlighted && styles.whiteText, { color: colors.text }]} numberOfLines={1}>
                                             {standing.team.shortName || standing.team.name}
                                         </ThemedText>
                                     </ThemedView>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.playedGames}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.won}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.draw}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.lost}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.goalsFor}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.goalsAgainst}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.statsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.goalDifference}
                                     </ThemedText>
-                                    <ThemedText style={[styles.cell, styles.pointsCell, isHighlighted && styles.whiteText]}>
+                                    <ThemedText style={[styles.cell, styles.pointsCell, isHighlighted && styles.whiteText, { color: colors.text }]}>
                                         {standing.points}
                                     </ThemedText>
                                 </ThemedView>
@@ -140,11 +176,10 @@ export default function StandingsScreen() {
     );
 }
 
-
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: 'white',
     },
     scrollView: {
         flex: 1,
@@ -166,26 +201,20 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOffset: {
             width: 0,
-            height: 1,
+            height: 2,
         },
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
-        elevation: 2,
-        marginBottom: 8,
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
     },
     backButton: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f1f5f9',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 8,
     },
     backText: {
-        fontSize: 15,
+        fontSize: 16,
         marginLeft: 4,
-        color: '#334155',
-        fontWeight: '500',
+        color: '#1282A2',
     },
     competitionInfo: {
         padding: 20,
@@ -220,7 +249,7 @@ const styles = StyleSheet.create({
     },
     tableHeader: {
         flexDirection: 'row',
-        backgroundColor: '#65a30d',
+        backgroundColor: '#1282A2',
         paddingVertical: 14,
         paddingHorizontal: 12,
     },
@@ -238,8 +267,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         backgroundColor: '#fff',
         alignItems: 'center',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
     },
     cell: {
         fontSize: 13,
@@ -253,46 +280,44 @@ const styles = StyleSheet.create({
     },
     teamCell: {
         flex: 1,
-        marginRight: 8,
+        textAlign: 'left',
+        paddingLeft: 8,
+    },
+    statsCell: {
+        width: 28,
+        textAlign: 'center',
+    },
+    pointsCell: {
+        width: 32,
+        textAlign: 'center',
+        fontWeight: 'bold',
     },
     teamInfo: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        marginRight: 8,
-        maxWidth: '45%',
+        gap: 8,
     },
     teamLogo: {
-        width: 24,
-        height: 24,
-        minWidth: 24,
+        width: 20,
+        height: 20,
     },
     teamName: {
-        fontSize: 13,
-        color: '#0f172a',
         flex: 1,
-        fontWeight: '500',
-    },
-    statsCell: {
-        width: 32,
+        fontSize: 13,
         color: '#475569',
-    },
-    pointsCell: {
-        width: 36,
-        fontWeight: '600',
-        color: '#0f172a',
-        fontSize: 14,
     },
     teamInfoBackground: {
         backgroundColor: '#fff',
         borderRadius: 4,
     },
-    highlightedRow: {
-        backgroundColor: '#f0fdf4',
-    },
     whiteText: {
-        color: '#166534',
+        color: '#1282A2',
         fontWeight: '500',
+    },
+    loadingText: {
+        fontSize: 16,
+        marginTop: 16,
+        color: '#475569',
     },
 });

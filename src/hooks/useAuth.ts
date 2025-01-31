@@ -7,18 +7,22 @@ import {
   User,
   GoogleAuthProvider,
   signInWithCredential,
-  updateProfile
+  updateProfile,
+  deleteUser
 } from 'firebase/auth';
-import { auth } from '../config/firebase';
+import { auth, db } from '../config/firebase';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 import { Platform } from 'react-native';
+import { doc, setDoc, deleteDoc, collection, getDocs, writeBatch } from 'firebase/firestore';
+import { router } from 'expo-router';
 
 WebBrowser.maybeCompleteAuthSession();
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID_ANDROID,
@@ -110,13 +114,49 @@ export function useAuth() {
 
   const signOut = () => firebaseSignOut(auth);
 
+  const deleteAccount = async () => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error('No user logged in');
+      }
+
+      // 1. Delete all user analyses first
+      const analysesRef = collection(db, 'users', user.uid, 'analyses');
+      const analysesSnapshot = await getDocs(analysesRef);
+      
+      const batch = writeBatch(db);
+      analysesSnapshot.forEach((doc) => {
+        batch.delete(doc.ref);
+      });
+      await batch.commit();
+      console.log('✅ User analyses deleted');
+
+      // 2. Delete user document
+      const userRef = doc(db, 'users', user.uid);
+      await deleteDoc(userRef);
+      console.log('✅ User document deleted');
+
+      // 3. Delete Firebase Auth account
+      await deleteUser(user);
+      console.log('✅ User account deleted');
+      
+      router.replace('/login');
+    } catch (error) {
+      console.error('❌ Error deleting account:', error);
+      throw error;
+    }
+  };
+
   return {
     user,
     loading,
+    error,
     signIn,
     signUp,
     signOut,
     signInWithGoogle,
     isAuthenticated: !!user,
+    deleteAccount
   };
 } 

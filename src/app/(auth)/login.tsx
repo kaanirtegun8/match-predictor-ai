@@ -4,16 +4,18 @@ import { useState } from 'react';
 import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHeader } from '@/components/auth';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { signIn } = useAuth();
+  const { t } = useTranslation();
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('common.error'), t('auth.fillAllFields'));
       return;
     }
 
@@ -21,10 +23,10 @@ export default function LoginScreen() {
       setLoading(true);
       const result = await signIn(email, password);
       if (!result.success) {
-        Alert.alert('Error', result.error || 'Failed to sign in');
+        Alert.alert(t('common.error'), result.error || t('auth.signInFailed'));
       }
     } catch (error: any) {
-      Alert.alert('Error', error.message);
+      Alert.alert(t('common.error'), error.message);
     } finally {
       setLoading(false);
     }
@@ -33,20 +35,20 @@ export default function LoginScreen() {
   return (
     <View style={styles.container}>
       <AuthHeader 
-        title="Welcome Back"
-        subtitle="Sign in to access your personalized match predictions"
+        title={t('auth.welcomeBack')}
+        subtitle={t('auth.welcomeSubtitle')}
       />
 
       <View style={styles.inputContainer}>
         <AuthInput
-          placeholder="Email"
+          placeholder={t('auth.email')}
           keyboardType="email-address"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
         />
         <AuthInput
-          placeholder="Password"
+          placeholder={t('auth.password')}
           secureTextEntry
           value={password}
           onChangeText={setPassword}
@@ -54,29 +56,29 @@ export default function LoginScreen() {
       </View>
 
       <AuthButton
-        title="Sign In"
+        title={t('auth.signIn')}
         onPress={handleLogin}
         loading={loading}
       />
 
       <View style={styles.dividerContainer}>
         <View style={styles.divider} />
-        <Text style={styles.dividerText}>or</Text>
+        <Text style={styles.dividerText}>{t('common.or')}</Text>
         <View style={styles.divider} />
       </View>
 
       <View style={styles.socialButtonsContainer}>
         <GoogleSignInButton />
         <View style={styles.socialButtonSpacer} />
-        <FacebookSignInButton
+        {/* <FacebookSignInButton
           onPress={() => {
             // TODO: Implement Facebook Sign-In
           }}
-        />
+        /> */}
       </View>
 
       <Link href={{ pathname: '/(auth)/register' }} style={styles.link}>
-        <Text style={styles.linkText}>Don't have an account? Sign Up</Text>
+        <Text style={styles.linkText}>{t('auth.noAccount')}</Text>
       </Link>
     </View>
   );
@@ -90,7 +92,7 @@ const styles = StyleSheet.create({
       ios: 50,
       android: 40,
     }),
-    backgroundColor: Colors.background,
+    backgroundColor: Colors.light.background,
   },
   inputContainer: {
     gap: 10,
@@ -104,10 +106,10 @@ const styles = StyleSheet.create({
   divider: {
     flex: 1,
     height: 1,
-    backgroundColor: Colors.divider,
+    backgroundColor: Colors.light.border,
   },
   dividerText: {
-    color: Colors.textTertiary,
+    color: Colors.light.text,
     paddingHorizontal: 12,
     fontSize: 13,
   },
@@ -122,7 +124,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   linkText: {
-    color: Colors.link,
+    color: Colors.light.link,
     fontSize: 14,
   },
 }); 

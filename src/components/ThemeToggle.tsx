@@ -1,46 +1,35 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, TouchableOpacity, Switch } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { Colors } from '../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
 
 export const ThemeToggle: React.FC = () => {
-  const { theme, setTheme, isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
+  const { isDark, toggleTheme, colors } = useTheme();
 
-  const options: { label: string; value: 'system' | 'light' | 'dark' }[] = [
+  const options = [
     { label: 'System', value: 'system' },
     { label: 'Light', value: 'light' },
     { label: 'Dark', value: 'dark' },
   ];
 
   return (
-    <View style={[styles.container, { borderColor: colors.border }]}>
+    <View style={styles.container}>
       <Text style={[styles.title, { color: colors.text }]}>Theme</Text>
       <View style={styles.optionsContainer}>
-        {options.map((option) => (
-          <Pressable
-            key={option.value}
-            style={[
-              styles.option,
-              { 
-                backgroundColor: theme === option.value ? colors.primary : 'transparent',
-                borderColor: colors.border,
-              },
-            ]}
-            onPress={() => setTheme(option.value)}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                { 
-                  color: theme === option.value ? colors.buttonText : colors.text,
-                },
-              ]}
-            >
-              {option.label}
-            </Text>
-          </Pressable>
-        ))}
+        <TouchableOpacity
+          style={[
+            styles.option,
+            {
+              backgroundColor: isDark ? colors.inputBackground : colors.background,
+              borderColor: colors.border,
+            },
+          ]}
+          onPress={toggleTheme}>
+          <Text style={[styles.optionText, { color: colors.text }]}>
+            {isDark ? 'Dark Mode' : 'Light Mode'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -51,25 +40,32 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: 1,
   },
-  title: {
+  themeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  text: {
     fontSize: 16,
     fontWeight: '600',
-    marginBottom: 12,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
   },
   optionsContainer: {
     flexDirection: 'row',
     gap: 8,
   },
   option: {
-    flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    padding: 12,
+    borderWidth: 2,
+    borderColor: '#d1d5db',
     borderRadius: 8,
-    borderWidth: 1,
-    alignItems: 'center',
   },
   optionText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 

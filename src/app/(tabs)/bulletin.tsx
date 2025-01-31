@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FilterBar, LeagueSection, ThemedText, ThemedView } from '../../components';
@@ -6,6 +6,12 @@ import { Match } from '../../models/Match';
 import { getDailyBulletin } from '../../services/bulletinService';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
+import { useTranslation } from 'react-i18next';
+import { useTutorial } from '@/components/tutorial/TutorialProvider';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
+
+const TUTORIAL_KEY = 'has_seen_bulletin_tutorial';
 
 function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
   return matches.reduce<Record<string, Match[]>>((acc, match) => {
@@ -19,12 +25,14 @@ function groupMatchesByLeague(matches: Match[]): Record<string, Match[]> {
 }
 
 export default function BulletinScreen() {
-  const { isDark } = useTheme();
-  const colors = isDark ? Colors.dark : Colors.light;
+  const { colors } = useTheme();
+  const { t } = useTranslation();
   const [matches, setMatches] = useState<Match[]>([]);
   const [selectedCompetition, setSelectedCompetition] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const firstMatchRef = useRef(null);
+  const { startTutorial, skipTutorial } = useTutorial();
 
   const loadMatches = useCallback(async () => {
     try {
@@ -48,6 +56,38 @@ export default function BulletinScreen() {
     loadMatches();
   }, [loadMatches]);
 
+  useEffect(() => {
+    const startIfReady = async () => {
+        const hasSeenTutorial = await AsyncStorage.getItem(TUTORIAL_KEY);
+        if (hasSeenTutorial) return; 
+    
+        if (loading) return;
+        if (!matches || matches.length === 0) return;
+    
+        if (!firstMatchRef.current) return;
+    
+        startTutorial([
+          {
+            targetRef: firstMatchRef,
+            title: t('tutorial.bulletin.title'),
+            message: t('tutorial.bulletin.message'),
+            position: "bottom",
+            onNext: async () => {
+                skipTutorial();
+                router.push(`/match/${matches[0].id}`);
+                await AsyncStorage.setItem(TUTORIAL_KEY, 'true');
+            },
+            hasNextButton: true,
+            hasFinishButton: false,
+            customNextText: t('tutorial.buttons.next')
+          }
+        ]);
+      };
+    
+      startIfReady();
+  }, [loading, matches, firstMatchRef.current]);
+
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await loadMatches();
@@ -66,9 +106,9 @@ export default function BulletinScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.border }]} edges={['top']}>
         <ThemedView style={styles.loadingContainer}>
-          <ThemedText>Loading matches...</ThemedText>
+          <ThemedText>{t('common.loading')}</ThemedText>
         </ThemedView>
       </SafeAreaView>
     );
@@ -76,8 +116,8 @@ export default function BulletinScreen() {
 
   return (
     <ScrollView
-      style={[styles.content, { backgroundColor: colors.background }]}
-      contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.background }]}
+      style={[styles.content, { backgroundColor: colors.border }]}
+      contentContainerStyle={[styles.scrollContent, { backgroundColor: colors.border }]}
       refreshControl={
         <RefreshControl 
           refreshing={refreshing} 
@@ -90,16 +130,17 @@ export default function BulletinScreen() {
         selectedCompetitionId={selectedCompetition}
         onCompetitionSelect={setSelectedCompetition}
       />
-      {Object.entries(groupedMatches).map(([leagueId, leagueMatches]) => (
+      {Object.entries(groupedMatches).map(([leagueId, leagueMatches], index) => (
         <LeagueSection
           key={leagueId}
           matches={leagueMatches}
+          firstMatchRef={index === 0 ? firstMatchRef : undefined}
         />
       ))}
       {filteredMatches.length === 0 && (
         <ThemedView style={styles.emptyContainer}>
           <ThemedText style={styles.emptyText}>
-            No matches found
+            {t('matches.filter.noResults')}
           </ThemedText>
         </ThemedView>
       )}

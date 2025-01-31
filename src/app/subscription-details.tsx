@@ -1,4 +1,4 @@
-import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert, Animated } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,17 +7,79 @@ import { ThemedView } from '@/components/themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import { useSubscription } from '@/hooks/useSubscription';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useEffect, useRef } from 'react';
+
+function SkeletonLoader() {
+  const { isDark } = useTheme();
+  const colors = isDark ? Colors.dark : Colors.light;
+  const translateX = useRef(new Animated.Value(-100)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(translateX, {
+          toValue: 100,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(translateX, {
+          toValue: -100,
+          duration: 0,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  const Skeleton = ({ width, height, style }: { width: number | string, height: number, style?: any }) => (
+    <View style={[{ width, height, overflow: 'hidden', borderRadius: 8 }, style]}>
+      <View style={[styles.skeletonBase, { backgroundColor: colors.border }]}>
+        <Animated.View style={[styles.shimmer, { transform: [{ translateX }] }]}>
+          <LinearGradient
+            style={{ width: '100%', height: '100%' }}
+            colors={['transparent', 'rgba(255, 255, 255, 0.3)', 'transparent']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+          />
+        </Animated.View>
+      </View>
+    </View>
+  );
+
+  return (
+    <View style={styles.content}>
+      <View style={styles.statusContainer}>
+        <Skeleton width={150} height={32} style={{ borderRadius: 16 }} />
+      </View>
+
+      <View style={styles.detailsContainer}>
+        <View style={styles.detailItem}>
+          <Skeleton width={100} height={16} style={{ marginBottom: 8 }} />
+          <Skeleton width={150} height={24} />
+        </View>
+        <View style={styles.detailItem}>
+          <Skeleton width={120} height={16} style={{ marginBottom: 8 }} />
+          <Skeleton width={150} height={24} />
+        </View>
+        <View style={styles.detailItem}>
+          <Skeleton width={110} height={16} style={{ marginBottom: 8 }} />
+          <Skeleton width={150} height={24} />
+        </View>
+      </View>
+    </View>
+  );
+}
 
 export default function SubscriptionDetailsScreen() {
   const { isDark } = useTheme();
   const colors = isDark ? Colors.dark : Colors.light;
   const { customerInfo, cancelSubscription } = useSubscription();
-  console.log(customerInfo)
 
   const handleCancelSubscription = () => {
     Alert.alert(
       'Cancel Auto-Renewal',
-      'Your subscription will continue until the end of the current period. Would you like to turn off auto-renewal? You will navigate to the subscriptions management page to cancel.',
+      'Your subscription will continue until the end of the current period. Would you like to turn off auto-renewal?',
       [
         {
           text: 'No, Keep It',
@@ -48,42 +110,46 @@ export default function SubscriptionDetailsScreen() {
         </View>
 
         {/* Content */}
-        <ThemedView style={[styles.content, { borderColor: colors.border }]}>
-          <View style={styles.statusContainer}>
-            <ThemedView style={[styles.badge, { backgroundColor: colors.primary + '20' }]}>
-              <ThemedText style={[styles.badgeText, { color: colors.primary }]}>
-                Active Subscription
+        {!customerInfo ? (
+          <SkeletonLoader />
+        ) : (
+          <ThemedView style={[styles.content, { borderColor: colors.border }]}>
+            <View style={styles.statusContainer}>
+              <ThemedView style={[styles.badge, { backgroundColor: colors.primary + '20' }]}>
+                <ThemedText style={[styles.badgeText, { color: colors.primary }]}>
+                  Active Subscription
+                </ThemedText>
+              </ThemedView>
+            </View>
+
+            <View style={styles.detailsContainer}>
+              <DetailItem 
+                label="Start Date" 
+                value={new Date(customerInfo?.originalPurchaseDate || '').toLocaleDateString()}
+                icon="calendar-outline"
+              />
+              <DetailItem 
+                label="Next Billing Date" 
+                value={new Date(customerInfo?.latestExpirationDate || '').toLocaleDateString()}
+                icon="calendar"
+              />
+              <DetailItem 
+                label="Subscription Plan" 
+                value={'Premium'}
+                icon="star"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.cancelButton, { borderColor: colors.error }]}
+              onPress={handleCancelSubscription}>
+              <Ionicons name="close-circle-outline" size={20} color={colors.error} />
+              <ThemedText style={[styles.cancelButtonText, { color: colors.error }]}>
+                Cancel Auto-Renewal
               </ThemedText>
-            </ThemedView>
-          </View>
-
-          <View style={styles.detailsContainer}>
-            <DetailItem 
-              label="Start Date" 
-              value={new Date(customerInfo?.originalPurchaseDate || '').toLocaleDateString()}
-              icon="calendar-outline"
-            />
-            <DetailItem 
-              label="Next Billing Date" 
-              value={new Date(customerInfo?.latestExpirationDate || '').toLocaleDateString()}
-              icon="calendar"
-            />
-            <DetailItem 
-              label="Subscription Plan" 
-              value={'Premium'}
-              icon="star"
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.cancelButton, { borderColor: colors.error }]}
-            onPress={handleCancelSubscription}>
-            <Ionicons name="close-circle-outline" size={20} color={colors.error} />
-            <ThemedText style={[styles.cancelButtonText, { color: colors.error }]}>
-              Cancel Auto-Renewal
-            </ThemedText>
-          </TouchableOpacity>
-        </ThemedView>
+            </TouchableOpacity>
+          </ThemedView>
+        )}
       </ThemedView>
     </SafeAreaView>
   );
@@ -192,5 +258,15 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  skeletonBase: {
+    height: '100%',
+    width: '100%',
+    position: 'relative',
+  },
+  shimmer: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
   },
 }); 

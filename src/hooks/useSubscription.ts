@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import { CustomerInfo, PurchasesPackage } from 'react-native-purchases';
+import { useAuth } from './useAuth';
 import {
   initializeRevenueCat,
   getAvailablePackages,
@@ -14,24 +15,32 @@ export const useSubscription = () => {
   const [packages, setPackages] = useState<PurchasesPackage[]>([]);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
+  const { user } = useAuth();
 
-  // Initialize RevenueCat
+  // Initialize RevenueCat and check subscription status when user changes
   useEffect(() => {
     const init = async () => {
       try {
-        console.log("init");
+        setIsLoading(true);
+        
         await initializeRevenueCat();
+        
         await loadPackages();
-        await checkStatus();
+        
+        if (user) {
+          await checkStatus();
+        } else {
+          setIsSubscribed(false);
+          setCustomerInfo(null);
+        }
       } catch (error) {
-        console.error('Failed to initialize subscription:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
     init();
-  }, []);
+  }, [user]);
 
   // Load available packages
   const loadPackages = async () => {
@@ -46,12 +55,13 @@ export const useSubscription = () => {
   // Check subscription status
   const checkStatus = async () => {
     try {
-      console.log("checkStatus");
       const { isActive, customerInfo: info } = await checkSubscriptionStatus();
       setIsSubscribed(isActive);
       setCustomerInfo(info);
+      return { isActive, customerInfo: info };
     } catch (error) {
-      console.error('Failed to check status:', error);
+      console.error('[Subscription] Failed to check status:', error);
+      throw error;
     }
   };
 

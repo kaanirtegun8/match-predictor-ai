@@ -2,6 +2,8 @@ import React from 'react';
 import { ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
+import { useTheme } from '@/contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 interface Competition {
   id: number;
@@ -16,6 +18,9 @@ interface FilterBarProps {
 }
 
 export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSelect }: FilterBarProps) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+
   return (
     <ScrollView
       horizontal
@@ -25,6 +30,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
       <TouchableOpacity
         style={[
           styles.filterItem,
+          { backgroundColor: colors.background },
           !selectedCompetitionId && styles.selectedItem,
         ]}
         onPress={() => onCompetitionSelect(null)}
@@ -33,7 +39,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           styles.filterText,
           !selectedCompetitionId && styles.selectedText,
         ]}>
-          All
+          {t('matches.filter.allLeagues')}
         </ThemedText>
       </TouchableOpacity>
       {competitions.map((competition) => (
@@ -41,6 +47,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           key={competition.id}
           style={[
             styles.filterItem,
+            { backgroundColor: colors.background },
             selectedCompetitionId === competition.id.toString() && styles.selectedItem,
           ]}
           onPress={() => onCompetitionSelect(competition.id.toString())}
@@ -52,6 +59,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           />
           <ThemedText style={[
             styles.filterText,
+            { color: colors.text },
             selectedCompetitionId === competition.id.toString() && styles.selectedText,
           ]}>
             {competition.name}
@@ -75,9 +83,20 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: '#fff',
     gap: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   selectedItem: {
     backgroundColor: '#65a30d',
+    borderColor: '#65a30d',
   },
   filterText: {
     fontSize: 13,

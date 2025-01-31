@@ -1,4 +1,4 @@
-import Purchases, { PurchasesPackage, CustomerInfo } from 'react-native-purchases';
+import Purchases, { PurchasesPackage, CustomerInfo, INTRO_ELIGIBILITY_STATUS } from 'react-native-purchases';
 import { Platform } from 'react-native';
 
 // RevenueCat API keys
@@ -35,7 +35,7 @@ export const initializeRevenueCat = async () => {
 export const getAvailablePackages = async (): Promise<PurchasesPackage[]> => {
   try {
     const offerings = await Purchases.getOfferings();
-    
+
     if (!offerings.current) {
       console.log('No current offering found');
       return [];

@@ -4,15 +4,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useTranslation } from 'react-i18next';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { AnalyzeResponseModel, RiskLevel } from '../../models/AnalyzeResponseModel';
+import { AnalyzeResponseModel, RiskLevel, Prediction } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
-import { getMatchDetails } from '@/services/matchService';
+import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
+import { useTheme } from '@/contexts/ThemeContext';
+import { BilingualAnalysis } from '@/models/BilingualAnalysis';
+
+const kebabToCamelCase = (str: string): string => {
+  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+};
 
 const getRiskStyles = (risk: RiskLevel) => {
   switch (risk) {
@@ -34,14 +40,15 @@ const calculateRiskLevel = (probability: number): RiskLevel => {
 };
 
 export default function AnalyzeScreen() {
+  const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
-  const [analysis, setAnalysis] = useState<AnalyzeResponseModel | null>(null);
+  const [analysis, setAnalysis] = useState<BilingualAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingStep, setLoadingStep] = useState<number>(1);
   const [loadingMessage, setLoadingMessage] = useState<string>('Retrieving match statistics...');
   const [expandedPredictions, setExpandedPredictions] = useState<number[]>([]);
-
+  const { colors } = useTheme();
   const togglePrediction = (index: number) => {
     setExpandedPredictions(prev => 
       prev.includes(index) 
@@ -49,6 +56,9 @@ export default function AnalyzeScreen() {
         : [...prev, index]
     );
   };
+
+  // Get current language
+  const currentLanguage = i18n.language;
 
   useEffect(() => {
     const loadMatch = async () => {
@@ -59,21 +69,52 @@ export default function AnalyzeScreen() {
         
         if (matchData) {
           setMatch(matchData.details);
-          setLoadingStep(2);
-          setLoadingMessage('Analyzing team performances...');
           
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          
-          setLoadingStep(3);
-          setLoadingMessage('Generating AI predictions...');
-          const result = await analyzeMatch(matchData.details);
-          
-          
-          setLoadingStep(4);
-          setLoadingMessage('Finalizing match insights...');
-          await new Promise(resolve => setTimeout(resolve, 800));
-          
-          setAnalysis(result);
+          // Check if analysis exists in Firestore
+          const existingAnalysis = await getMatchAnalysis(id as string);
+          if (existingAnalysis) {
+            console.log('✅ Match analysis found in Firestore, using cached data');
+            setLoadingStep(2);
+            setLoadingMessage('Loading cached analysis...');
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            setLoadingStep(3);
+            setLoadingMessage('Processing insights...');
+            await new Promise(resolve => setTimeout(resolve, 600));
+            
+            setLoadingStep(4);
+            setLoadingMessage('Finalizing match insights...');
+            await new Promise(resolve => setTimeout(resolve, 400));
+            
+            setAnalysis(existingAnalysis);
+          } else {
+            console.log('⚠️ No analysis found in Firestore, generating new analysis...');
+            setLoadingStep(2);
+            setLoadingMessage('Analyzing team performances...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            setLoadingStep(3);
+            setLoadingMessage('Generating AI predictions...');
+            const result = await analyzeMatch({
+                details: matchData.details,
+                h2h: matchData.h2h,
+                homeRecentMatches: matchData.homeRecentMatches,
+                awayRecentMatches: matchData.awayRecentMatches,
+                standings: matchData.standings
+            });
+            
+            // Save analysis to database
+            const saved = await saveMatchAnalysis(id as string, result);
+            if (!saved) {
+              console.error('❌ Failed to save match analysis');
+            }
+            
+            setLoadingStep(4);
+            setLoadingMessage('Finalizing match insights...');
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            setAnalysis(result);
+          }
         }
       } catch (error) {
         console.error('Failed to load match:', error);
@@ -86,15 +127,15 @@ export default function AnalyzeScreen() {
   }, [id]);
 
   const LoadingSteps = () => (
-    <ThemedView style={styles.loadingContainer}>
+    <ThemedView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
       {[
-        'Retrieving match statistics...',
-        'Analyzing team performances...',
-        'Generating AI predictions...',
-        'Finalizing match insights...'
+        t('matches.analysis.loadingSteps.stats'),
+        t('matches.analysis.loadingSteps.performance'),
+        t('matches.analysis.loadingSteps.predictions'),
+        t('matches.analysis.loadingSteps.finalizing')
       ].map((step, index) => (
-        <ThemedView key={index} style={styles.loadingStep}>
-          <ThemedView style={styles.stepIndicator}>
+        <ThemedView key={index} style={[styles.loadingStep, { backgroundColor: colors.border }]}>
+          <ThemedView style={[styles.stepIndicator, { backgroundColor: colors.border }]}>
             {index + 1 === loadingStep && (
               <ActivityIndicator size="small" color="#007AFF" />
             )}
@@ -119,8 +160,8 @@ export default function AnalyzeScreen() {
 
   if (loading && !match) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#0000ff" />
+      <SafeAreaView style={[styles.container, { display: 'flex', justifyContent: 'center', alignItems: 'center', backgroundColor: colors.border }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
       </SafeAreaView>
     );
   }
@@ -134,56 +175,56 @@ export default function AnalyzeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <ThemedView style={styles.content}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.border }]}>
+      <ScrollView style={[styles.scrollView, { backgroundColor: colors.border }]}>
+        <ThemedView style={[styles.content, { backgroundColor: colors.border }]}>
           {/* Header */}
-          <ThemedView style={styles.header}>
+          <ThemedView style={[styles.header, { backgroundColor: colors.border }]}>
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color="#000" />
-              <ThemedText style={styles.backText}>Back</ThemedText>
+              <Ionicons name="chevron-back" size={24} color={colors.primary} />
+              <ThemedText style={[styles.backText, { color: colors.primary }]}>{t('common.back')}</ThemedText>
             </TouchableOpacity>
           </ThemedView>
 
           {/* Match Info */}
-          <ThemedView style={styles.matchInfo}>
+          <ThemedView style={[styles.matchInfo, { backgroundColor: colors.border, paddingVertical: 10 }]}>
             <Image
               source={{ uri: match.competition.emblem }}
               style={styles.competitionLogo}
               resizeMode="contain"
             />
             
-            <ThemedView style={styles.teamsContainer}>
-              <ThemedText style={styles.teamName}>
+            <ThemedView style={[styles.teamsContainer, { backgroundColor: colors.border }]}>
+              <ThemedText style={[styles.teamName, { color: colors.text }]}>
                 {match.homeTeam.name}
               </ThemedText>
-              <ThemedText style={styles.vsText}>vs</ThemedText>
-              <ThemedText style={styles.teamName}>
+              <ThemedText style={[styles.vsText, { color: colors.text }]}>vs</ThemedText>
+              <ThemedText style={[styles.teamName, { color: colors.text }]}>
                 {match.awayTeam.name}
               </ThemedText>
             </ThemedView>
 
-            <ThemedView style={styles.matchDetails}>
-              <ThemedText style={styles.competitionName}>
+            <ThemedView style={[styles.matchDetails, { backgroundColor: colors.border }]}>
+              <ThemedText style={[styles.competitionName, { color: colors.text }]}>
                 {match.competition.name}
               </ThemedText>
               
-              <ThemedView style={styles.metadataContainer}>
-                <ThemedView style={styles.badge}>
-                  <ThemedText style={styles.badgeText}>
-                    Matchday {match.matchday}
+              <ThemedView style={[styles.metadataContainer, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
+                  <ThemedText style={[styles.badgeText, { color: colors.text }]}>
+                    {t('matches.matchday')} {match.matchday}
                   </ThemedText>
                 </ThemedView>
                 
                 {match.utcDate && (
-                  <ThemedView style={styles.badge}>
-                    <ThemedText style={styles.badgeText}>
-                      {new Date(match.utcDate).toLocaleDateString('en-US', {
-                        month: 'short',
+                  <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
+                    <ThemedText style={[styles.badgeText, { color: colors.text }]}>
+                      {new Date(match.utcDate).toLocaleDateString(t('common.locale', { defaultValue: 'tr-TR' }), {
                         day: 'numeric',
-                      })} • {new Date(match.utcDate).toLocaleTimeString('en-US', {
+                        month: 'long',
+                      })} • {new Date(match.utcDate).toLocaleTimeString(t('common.locale', { defaultValue: 'tr-TR' }), {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
@@ -198,57 +239,59 @@ export default function AnalyzeScreen() {
           {!analysis ? (
             <LoadingSteps />
           ) : (
-            <ThemedView style={styles.analysisContent}>
+            <ThemedView style={[styles.analysisContent, { backgroundColor: colors.border }]}>
               {/* Match Analysis Section */}
-              <ThemedView style={styles.analysisSection}>
-                <ThemedView style={styles.sectionHeader}>
-                  <Ionicons name="analytics-outline" size={24} color="#1e40af" />
-                  <ThemedText style={styles.sectionTitle}>Match Analysis</ThemedText>
+              <ThemedView style={[styles.analysisSection, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
+                  <Ionicons name="analytics-outline" size={24} color={colors.primary} />
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.analysis.title')}</ThemedText>
                 </ThemedView>
-                <ThemedView style={styles.analysisCard}>
-                  <RichText text={analysis.description} style={styles.analysisText} />
+                <ThemedView style={[styles.analysisCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+                  <ThemedText style={[styles.analysisText, { color: colors.text }]}>
+                    {analysis && analysis[currentLanguage === 'tr' ? 'tr' : 'en']?.description || t('matches.analysis.noEvidence')}
+                  </ThemedText>
                 </ThemedView>
               </ThemedView>
 
               {/* Predictions Section */}
-              <ThemedView style={styles.predictionsSection}>
-                <ThemedView style={styles.sectionHeader}>
-                  <Ionicons name="podium-outline" size={24} color="#1e40af" />
-                  <ThemedText style={styles.sectionTitle}>Predictions</ThemedText>
+              <ThemedView style={[styles.predictionsSection, { backgroundColor: colors.border }]}>
+                <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
+                  <Ionicons name="podium-outline" size={24} color={colors.primary} />
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.predictions.title')}</ThemedText>
                 </ThemedView>
                 
-                {analysis.predicts.map((predict, index) => (
-                  <ThemedView key={index} style={styles.predictionCard}>
+                {(currentLanguage === 'tr' ? analysis.tr.predicts : analysis.en.predicts).map((predict: Prediction, index: number) => (
+                  <ThemedView key={index} style={[styles.predictionCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                     <ThemedView style={styles.predictionHeader}>
                       <ThemedView style={styles.predictionMain}>
-                        <ThemedText style={styles.predictionType}>
-                          {predict.type}
+                        <ThemedText style={[styles.predictionType, { color: colors.primary }]}>
+                          {t(`matches.predictions.types.${kebabToCamelCase(predict.id)}`)}
                         </ThemedText>
                         
                         <ThemedView style={[
                           styles.riskBadge,
                           getRiskStyles(calculateRiskLevel(predict.probability))
                         ]}>
-                          <ThemedText style={styles.riskBadgeText}>
-                            {calculateRiskLevel(predict.probability)}
+                          <ThemedText style={[styles.riskBadgeText]}>
+                            {t(`matches.predictions.risk.${calculateRiskLevel(predict.probability)}`)}
                           </ThemedText>
                         </ThemedView>
                       </ThemedView>
 
-                      <ThemedText style={styles.predictionValue}>
+                      <ThemedText style={[styles.predictionValue, { color: colors.text }]}>
                         {predict.prediction}
                       </ThemedText>
 
-                      <ThemedText style={styles.probabilityText}>
-                        {Math.round(predict.probability * 100)}% Confidence
+                      <ThemedText style={[styles.probabilityText, { color: colors.textSecondary }]}>
+                        {t('matches.predictions.confidence', { percent: Math.round(predict.probability * 100) })}
                       </ThemedText>
                     </ThemedView>
 
                     <TouchableOpacity 
                       style={styles.evidenceToggle}
                       onPress={() => togglePrediction(index)}>
-                      <ThemedText style={styles.evidenceToggleText}>
-                        {expandedPredictions.includes(index) ? 'Hide Details' : 'Show Details'}
+                      <ThemedText style={[styles.evidenceToggleText, { color: colors.primary }]}>
+                        {expandedPredictions.includes(index) ? t('matches.analysis.hideDetails') : t('matches.analysis.showDetails')}
                       </ThemedText>
                       <Ionicons 
                         name={expandedPredictions.includes(index) ? "chevron-up" : "chevron-down"} 
@@ -259,7 +302,13 @@ export default function AnalyzeScreen() {
 
                     {expandedPredictions.includes(index) && (
                       <ThemedView style={styles.evidenceContainer}>
-                        <RichText text={predict.evidence} style={styles.evidenceText} />
+                        {predict.evidence ? (
+                          <RichText text={predict.evidence} style={styles.evidenceText} />
+                        ) : (
+                          <ThemedText style={[styles.evidenceText, { color: colors.textSecondary }]}>
+                            {t('matches.analysis.noEvidence')}
+                          </ThemedText>
+                        )}
                       </ThemedView>
                     )}
                   </ThemedView>
@@ -294,11 +343,13 @@ const styles = StyleSheet.create({
   backText: {
     fontSize: 16,
     marginLeft: 4,
+    color: '#1282A2',
   },
   matchInfo: {
     width: '100%',
-    marginBottom: 24,
+    marginBottom: 4,
     alignItems: 'center',
+    borderRadius: 12,
   },
   competitionLogo: {
     width: 44,
@@ -400,12 +451,14 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: '#e2e8f0',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   analysisText: {
     fontSize: 16,
@@ -419,6 +472,14 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   predictionHeader: {
     marginBottom: 12,
