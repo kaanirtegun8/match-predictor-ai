@@ -8,12 +8,13 @@ import { useTranslation } from 'react-i18next';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
-import { AnalyzeResponseModel, RiskLevel } from '../../models/AnalyzeResponseModel';
+import { AnalyzeResponseModel, RiskLevel, Prediction } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
 import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
 import { useTheme } from '@/contexts/ThemeContext';
+import { BilingualAnalysis } from '@/models/BilingualAnalysis';
 
 const kebabToCamelCase = (str: string): string => {
   return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
@@ -39,10 +40,10 @@ const calculateRiskLevel = (probability: number): RiskLevel => {
 };
 
 export default function AnalyzeScreen() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
-  const [analysis, setAnalysis] = useState<AnalyzeResponseModel | null>(null);
+  const [analysis, setAnalysis] = useState<BilingualAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadingStep, setLoadingStep] = useState<number>(1);
   const [loadingMessage, setLoadingMessage] = useState<string>('Retrieving match statistics...');
@@ -55,6 +56,9 @@ export default function AnalyzeScreen() {
         : [...prev, index]
     );
   };
+
+  // Get current language
+  const currentLanguage = i18n.language;
 
   useEffect(() => {
     const loadMatch = async () => {
@@ -244,7 +248,7 @@ export default function AnalyzeScreen() {
                 </ThemedView>
                 <ThemedView style={[styles.analysisCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <ThemedText style={[styles.analysisText, { color: colors.text }]}>
-                    {analysis.description}
+                    {currentLanguage === 'tr' ? analysis.tr.description : analysis.en.description}
                   </ThemedText>
                 </ThemedView>
               </ThemedView>
@@ -256,7 +260,7 @@ export default function AnalyzeScreen() {
                   <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.predictions.title')}</ThemedText>
                 </ThemedView>
                 
-                {analysis.predicts.map((predict, index) => (
+                {(currentLanguage === 'tr' ? analysis.tr.predicts : analysis.en.predicts).map((predict: Prediction, index: number) => (
                   <ThemedView key={index} style={[styles.predictionCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                     <ThemedView style={styles.predictionHeader}>
                       <ThemedView style={styles.predictionMain}>
@@ -298,7 +302,13 @@ export default function AnalyzeScreen() {
 
                     {expandedPredictions.includes(index) && (
                       <ThemedView style={styles.evidenceContainer}>
-                        <RichText text={predict.evidence} style={styles.evidenceText} />
+                        {predict.evidence ? (
+                          <RichText text={predict.evidence} style={styles.evidenceText} />
+                        ) : (
+                          <ThemedText style={[styles.evidenceText, { color: colors.textSecondary }]}>
+                            {t('matches.analysis.noEvidence')}
+                          </ThemedText>
+                        )}
                       </ThemedView>
                     )}
                   </ThemedView>

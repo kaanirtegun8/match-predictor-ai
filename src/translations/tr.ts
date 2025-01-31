@@ -66,6 +66,7 @@ export default {
       button: 'Analiz Et',
       showDetails: 'Detayları Göster',
       hideDetails: 'Detayları Gizle',
+      noEvidence: 'Bu tahmin için detaylı açıklama bulunmuyor.',
       loadingSteps: {
         stats: 'Maç istatistikleri alınıyor...',
         performance: 'Takım performansları analiz ediliyor...',
