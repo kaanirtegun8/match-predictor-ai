@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState, useRef, createRef } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing, View } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing, View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -14,6 +14,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTutorial } from '@/contexts/TutorialContext';
+import { useAuth } from '@/hooks/useAuth';
+import { checkAnalysisLimit, getAnalysisCount } from '@/services/userService';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -56,6 +58,8 @@ export default function MatchDetailScreen() {
   const TUTORIAL_KEY = 'has_seen_match_tutorial';
   const analysisButtonRef = useRef(null);
   const { startTutorial } = useTutorial();
+  const { user } = useAuth();
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
 
   useEffect(() => {
@@ -339,10 +343,65 @@ export default function MatchDetailScreen() {
                   </ThemedView>
                 </ThemedView>
                 <TouchableOpacity 
-                  style={[styles.analysisButton, { backgroundColor: '#FFD700' }]}
-                  onPress={() => router.push(`/analyze/${match.id}`)}>
-                  <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>{t('matches.analysis.button')}</ThemedText>
-                  <Ionicons name="arrow-forward" size={18} color="#000" />
+                  style={[
+                    styles.analysisButton, 
+                    { backgroundColor: '#FFD700' },
+                    isAnalyzing && { opacity: 0.7 }
+                  ]}
+                  disabled={isAnalyzing}
+                  onPress={async () => {
+                    if (!user) {
+                      Alert.alert(
+                        t('common.error'),
+                        t('auth.loginRequired'),
+                        [
+                          {
+                            text: t('common.cancel'),
+                            style: 'cancel'
+                          },
+                          {
+                            text: t('auth.login'),
+                            onPress: () => router.push('/(auth)/login')
+                          }
+                        ]
+                      );
+                      return;
+                    }
+                    
+                    try {
+                      setIsAnalyzing(true);
+                      
+                      // First get and log the analysis count
+                      await getAnalysisCount(user.uid);
+                      
+                      // Then check if user can analyze
+                      const canAnalyze = await checkAnalysisLimit(user.uid);
+                      
+                      if (canAnalyze) {
+                        router.push(`/analyze/${match.id}`);
+                      } else {
+                        router.push('/premium');
+                      }
+                    } catch (error) {
+                      console.error('Error checking analysis limit:', error);
+                      Alert.alert(
+                        t('common.error'),
+                        t('matches.analysis.error')
+                      );
+                    } finally {
+                      setIsAnalyzing(false);
+                    }
+                  }}>
+                  {isAnalyzing ? (
+                    <ActivityIndicator size="small" color="#000" />
+                  ) : (
+                    <>
+                      <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>
+                        {t('matches.analysis.button')}
+                      </ThemedText>
+                      <Ionicons name="arrow-forward" size={18} color="#000" />
+                    </>
+                  )}
                 </TouchableOpacity>
                 </ThemedView>
               </Animated.View>

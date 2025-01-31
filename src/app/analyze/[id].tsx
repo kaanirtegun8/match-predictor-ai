@@ -248,7 +248,7 @@ export default function AnalyzeScreen() {
                 </ThemedView>
                 <ThemedView style={[styles.analysisCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <ThemedText style={[styles.analysisText, { color: colors.text }]}>
-                    {currentLanguage === 'tr' ? analysis.tr.description : analysis.en.description}
+                    {analysis && analysis[currentLanguage === 'tr' ? 'tr' : 'en']?.description || t('matches.analysis.noEvidence')}
                   </ThemedText>
                 </ThemedView>
               </ThemedView>

@@ -33,6 +33,8 @@ export default {
     continueWithGoogle: 'Continue with Google',
     continueWithFacebook: 'Continue with Facebook',
     signingIn: 'Signing in...',
+    loginRequired: 'Please sign in to analyze matches',
+    login: 'Login',
   },
   navigation: {
     tabs: {
@@ -63,7 +65,9 @@ export default {
     analysis: {
       title: 'Match Analysis',
       subtitle: 'AI-Powered insights and predictions',
-      button: 'Analyze'
+      button: 'Analyze',
+      error: 'Something went wrong while checking analysis limit. Please try again.',
+      noEvidence: 'No detailed analysis available for this prediction.'
     },
     headToHead: 'Head to Head',
     status: {

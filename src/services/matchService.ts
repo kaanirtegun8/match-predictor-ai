@@ -114,9 +114,25 @@ async function fetchLeagueStandingsFromAPI(leagueId: number): Promise<any> {
 
 export const saveMatchAnalysis = async (matchId: string, analysis: BilingualAnalysis): Promise<boolean> => {
   try {
+    const user = auth.currentUser;
+    if (!user) {
+      console.error('❌ No user logged in');
+      return false;
+    }
+
+    // Save in dailyBulletins for caching
     const today = new Date().toISOString().split('T')[0];
     const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
     await setDoc(matchRef, { analysis }, { merge: true });
+
+    // Save in user's analyses collection
+    const userAnalysisRef = doc(db, 'users', user.uid, 'analyses', matchId);
+    await setDoc(userAnalysisRef, {
+      analysis,
+      createdAt: serverTimestamp(),
+      matchId
+    });
+
     console.log('✅ Analysis saved successfully');
     return true;
   } catch (error) {
@@ -127,6 +143,18 @@ export const saveMatchAnalysis = async (matchId: string, analysis: BilingualAnal
 
 export const getMatchAnalysis = async (matchId: string): Promise<BilingualAnalysis | null> => {
   try {
+    // First check user's analyses if logged in
+    const user = auth.currentUser;
+    if (user) {
+      const userAnalysisRef = doc(db, 'users', user.uid, 'analyses', matchId);
+      const userAnalysisSnap = await getDoc(userAnalysisRef);
+      if (userAnalysisSnap.exists()) {
+        console.log('✅ Analysis found in user collection');
+        return userAnalysisSnap.data().analysis as BilingualAnalysis;
+      }
+    }
+
+    // If not found in user's analyses, check dailyBulletins cache
     const today = new Date().toISOString().split('T')[0];
     const matchRef = doc(db, 'dailyBulletins', today, 'matchDetails', matchId);
     const matchSnap = await getDoc(matchRef);
