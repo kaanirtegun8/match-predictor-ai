@@ -75,7 +75,20 @@ export default {
     },
     predictions: {
       title: 'Tahminler',
-      confidence: '%{percent}% Güven'
+      confidence: '{{percent}}% Güven Oranı',
+      types: {
+        matchResult: 'Maç Sonucu',
+        totalGoals: 'Toplam Gol',
+        bothTeamsToScore: 'Karşılıklı Gol',
+        homeTeamGoals: 'Ev Sahibi Gol',
+        awayTeamGoals: 'Deplasman Gol',
+        firstGoal: 'İlk Gol'
+      },
+      risk: {
+        RISKY: 'Riskli',
+        MODERATE: 'Makul',
+        SAFE: 'Güvenli'
+      }
     },
     headToHead: 'Karşılaştırma',
     status: {

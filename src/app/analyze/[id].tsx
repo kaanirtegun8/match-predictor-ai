@@ -15,6 +15,10 @@ import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis } from '@/services
 import { RichText } from '@/components/RichText';
 import { useTheme } from '@/contexts/ThemeContext';
 
+const kebabToCamelCase = (str: string): string => {
+  return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+};
+
 const getRiskStyles = (risk: RiskLevel) => {
   switch (risk) {
     case 'RISKY':
@@ -206,17 +210,17 @@ export default function AnalyzeScreen() {
               <ThemedView style={[styles.metadataContainer, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
                   <ThemedText style={[styles.badgeText, { color: colors.text }]}>
-                    Matchday {match.matchday}
+                    {t('matches.matchday')} {match.matchday}
                   </ThemedText>
                 </ThemedView>
                 
                 {match.utcDate && (
                   <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
                     <ThemedText style={[styles.badgeText, { color: colors.text }]}>
-                      {new Date(match.utcDate).toLocaleDateString('en-US', {
-                        month: 'short',
+                      {new Date(match.utcDate).toLocaleDateString(t('common.locale', { defaultValue: 'tr-TR' }), {
                         day: 'numeric',
-                      })} • {new Date(match.utcDate).toLocaleTimeString('en-US', {
+                        month: 'long',
+                      })} • {new Date(match.utcDate).toLocaleTimeString(t('common.locale', { defaultValue: 'tr-TR' }), {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}
@@ -257,7 +261,7 @@ export default function AnalyzeScreen() {
                     <ThemedView style={styles.predictionHeader}>
                       <ThemedView style={styles.predictionMain}>
                         <ThemedText style={[styles.predictionType, { color: colors.primary }]}>
-                          {predict.type}
+                          {t(`matches.predictions.types.${kebabToCamelCase(predict.id)}`)}
                         </ThemedText>
                         
                         <ThemedView style={[
@@ -265,7 +269,7 @@ export default function AnalyzeScreen() {
                           getRiskStyles(calculateRiskLevel(predict.probability))
                         ]}>
                           <ThemedText style={[styles.riskBadgeText]}>
-                            {calculateRiskLevel(predict.probability)}
+                            {t(`matches.predictions.risk.${calculateRiskLevel(predict.probability)}`)}
                           </ThemedText>
                         </ThemedView>
                       </ThemedView>
@@ -275,7 +279,7 @@ export default function AnalyzeScreen() {
                       </ThemedText>
 
                       <ThemedText style={[styles.probabilityText, { color: colors.textSecondary }]}>
-                        {Math.round(predict.probability * 100)}% Confidence
+                        {t('matches.predictions.confidence', { percent: Math.round(predict.probability * 100) })}
                       </ThemedText>
                     </ThemedView>
 
