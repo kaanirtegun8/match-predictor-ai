@@ -56,14 +56,26 @@ export default {
     noMatches: 'Maç bulunamadı',
     matchday: 'Hafta',
     form: {
-      win: 'K',
+      win: 'G',
       loss: 'M',
       draw: 'B'
     },
     analysis: {
       title: 'Maç Analizi',
       subtitle: 'AI destekli öngörüler ve tahminler',
-      button: 'Analiz Et'
+      button: 'Analiz Et',
+      showDetails: 'Detayları Göster',
+      hideDetails: 'Detayları Gizle',
+      loadingSteps: {
+        stats: 'Maç istatistikleri alınıyor...',
+        performance: 'Takım performansları analiz ediliyor...',
+        predictions: 'Yapay zeka tahminleri oluşturuluyor...',
+        finalizing: 'Maç öngörüleri tamamlanıyor...'
+      }
+    },
+    predictions: {
+      title: 'Tahminler',
+      confidence: '%{percent}% Güven'
     },
     headToHead: 'Karşılaştırma',
     status: {

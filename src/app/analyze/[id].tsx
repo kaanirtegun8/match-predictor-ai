@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Image } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 import { ThemedText } from '../../components/themed/ThemedText';
 import { ThemedView } from '../../components/themed/ThemedView';
@@ -34,6 +35,7 @@ const calculateRiskLevel = (probability: number): RiskLevel => {
 };
 
 export default function AnalyzeScreen() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const [match, setMatch] = useState<Match | null>(null);
   const [analysis, setAnalysis] = useState<AnalyzeResponseModel | null>(null);
@@ -119,10 +121,10 @@ export default function AnalyzeScreen() {
   const LoadingSteps = () => (
     <ThemedView style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
       {[
-        'Retrieving match statistics...',
-        'Analyzing team performances...',
-        'Generating AI predictions...',
-        'Finalizing match insights...'
+        t('matches.analysis.loadingSteps.stats'),
+        t('matches.analysis.loadingSteps.performance'),
+        t('matches.analysis.loadingSteps.predictions'),
+        t('matches.analysis.loadingSteps.finalizing')
       ].map((step, index) => (
         <ThemedView key={index} style={[styles.loadingStep, { backgroundColor: colors.border }]}>
           <ThemedView style={[styles.stepIndicator, { backgroundColor: colors.border }]}>
@@ -174,7 +176,7 @@ export default function AnalyzeScreen() {
               style={styles.backButton}
               onPress={() => router.back()}>
               <Ionicons name="chevron-back" size={24} color={colors.primary} />
-              <ThemedText style={[styles.backText, { color: colors.primary }]}>Back</ThemedText>
+              <ThemedText style={[styles.backText, { color: colors.primary }]}>{t('common.back')}</ThemedText>
             </TouchableOpacity>
           </ThemedView>
 
@@ -234,7 +236,7 @@ export default function AnalyzeScreen() {
               <ThemedView style={[styles.analysisSection, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
                   <Ionicons name="analytics-outline" size={24} color={colors.primary} />
-                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Match Analysis</ThemedText>
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.analysis.title')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={[styles.analysisCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <ThemedText style={[styles.analysisText, { color: colors.text }]}>
@@ -247,7 +249,7 @@ export default function AnalyzeScreen() {
               <ThemedView style={[styles.predictionsSection, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
                   <Ionicons name="podium-outline" size={24} color={colors.primary} />
-                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>Predictions</ThemedText>
+                  <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.predictions.title')}</ThemedText>
                 </ThemedView>
                 
                 {analysis.predicts.map((predict, index) => (
@@ -281,7 +283,7 @@ export default function AnalyzeScreen() {
                       style={styles.evidenceToggle}
                       onPress={() => togglePrediction(index)}>
                       <ThemedText style={[styles.evidenceToggleText, { color: colors.primary }]}>
-                        {expandedPredictions.includes(index) ? 'Hide Details' : 'Show Details'}
+                        {expandedPredictions.includes(index) ? t('matches.analysis.hideDetails') : t('matches.analysis.showDetails')}
                       </ThemedText>
                       <Ionicons 
                         name={expandedPredictions.includes(index) ? "chevron-up" : "chevron-down"} 
