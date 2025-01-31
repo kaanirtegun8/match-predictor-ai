@@ -5,6 +5,7 @@ import { useTutorial } from '@/contexts/TutorialContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
 import { ThemedText } from '../themed/ThemedText';
+import { useTranslation } from 'react-i18next';
 
 const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
 const TOOLTIP_MARGIN = 8;
@@ -13,6 +14,7 @@ const TOOLTIP_MAX_WIDTH = 300;
 export function TutorialTooltip() {
   const { isActive, targetMeasurements, steps, currentStep, nextStep, prevStep, skipTutorial } = useTutorial();
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   const currentTooltip = steps[currentStep];
   const position = currentTooltip?.position ?? 'bottom';
@@ -25,10 +27,10 @@ export function TutorialTooltip() {
   const showFinishButton = isLastStep && (currentTooltip?.hasFinishButton ?? true);
 
   // Button text configuration
-  const nextButtonText = currentTooltip?.customNextText ?? 'Next';
-  const finishButtonText = currentTooltip?.customFinishText ?? 'Finish';
-  const skipButtonText = currentTooltip?.customSkipText ?? 'Skip';
-  const backButtonText = currentTooltip?.customBackText;
+  const nextButtonText = currentTooltip?.customNextText ?? t('tutorial.buttons.next');
+  const finishButtonText = currentTooltip?.customFinishText ?? t('tutorial.buttons.finish');
+  const skipButtonText = currentTooltip?.customSkipText ?? t('tutorial.buttons.skip');
+  const backButtonText = currentTooltip?.customBackText ?? t('tutorial.buttons.back');
 
   // Button handlers
   const handleNext = () => {
@@ -65,7 +67,7 @@ export function TutorialTooltip() {
     // Calculate vertical position based on specified position
     switch (position) {
       case 'top':
-        tooltipY = y - TOOLTIP_MARGIN - 120;
+        tooltipY = y - TOOLTIP_MARGIN - 200;
         break;
       case 'bottom':
         tooltipY = y + height + TOOLTIP_MARGIN;
