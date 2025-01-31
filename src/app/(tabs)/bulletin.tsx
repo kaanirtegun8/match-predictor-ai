@@ -69,8 +69,8 @@ export default function BulletinScreen() {
         startTutorial([
           {
             targetRef: firstMatchRef,
-            title: "Günlük Maç Bülteni",
-            message: "Burada günün önemli maçlarını görebilir, detaylı analizlere ulaşabilirsiniz. Her maç kartına tıklayarak detaylı bilgilere erişebilirsiniz.",
+            title: t('tutorial.bulletin.title'),
+            message: t('tutorial.bulletin.message'),
             position: "bottom",
             onNext: async () => {
                 skipTutorial();
@@ -78,7 +78,8 @@ export default function BulletinScreen() {
                 await AsyncStorage.setItem(TUTORIAL_KEY, 'true');
             },
             hasNextButton: true,
-            hasFinishButton: false
+            hasFinishButton: false,
+            customNextText: t('tutorial.buttons.next')
           }
         ]);
       };

@@ -175,4 +175,20 @@ export default {
       nextMatch: 'Next Match'
     }
   },
+  tutorial: {
+    bulletin: {
+      title: "Daily Match Bulletin",
+      message: "Here you can see important matches of the day and access detailed analyses. Click on any match card to see detailed information."
+    },
+    match: {
+      title: "Match Details",
+      message: "Here you can see match information and detailed statistics. You can also click the Analyze button to see detailed match analysis."
+    },
+    buttons: {
+      next: "Next",
+      finish: "Finish",
+      skip: "Skip",
+      back: "Back"
+    }
+  }
 }; 

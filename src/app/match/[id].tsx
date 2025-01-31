@@ -71,11 +71,12 @@ export default function MatchDetailScreen() {
         startTutorial([
           {
             targetRef: analysisButtonRef,
-            title: "Maç Detayı",
-            message: "Burada maç bilgilerini görebilir, detaylı istatistikleri görebilirsiniz. Ayrıca Analiz butonuna tıklayarak maçın detaylı analizini görebilirsiniz.",
+            title: t('tutorial.match.title'),
+            message: t('tutorial.match.message'),
             position: "top",
             hasNextButton: false,
             hasFinishButton: true,
+            customFinishText: t('tutorial.buttons.finish'),
             onFinish: async () => {
               await AsyncStorage.setItem(TUTORIAL_KEY, 'true');
             }
@@ -556,6 +557,7 @@ const styles = StyleSheet.create({
   recentMatchesContainer: {
     marginHorizontal: 16,
     marginBottom: 16,
+    marginTop: 24,
     borderRadius: 12,
     padding: 16,
     shadowColor: '#000',
@@ -672,7 +674,6 @@ const styles = StyleSheet.create({
   },
   analysisOuterContainer: {
     marginHorizontal: 16,
-    marginBottom: 24,
   },
   animatedBorder: {
     borderWidth: 1,

@@ -175,4 +175,20 @@ export default {
       nextMatch: 'Sonraki Maç'
     }
   },
+  tutorial: {
+    bulletin: {
+      title: "Günlük Maç Bülteni",
+      message: "Burada günün önemli maçlarını görebilir, detaylı analizlere ulaşabilirsiniz. Her maç kartına tıklayarak detaylı bilgilere erişebilirsiniz."
+    },
+    match: {
+      title: "Maç Detayı",
+      message: "Burada maç bilgilerini görebilir, detaylı istatistikleri görebilirsiniz. Ayrıca Analiz butonuna tıklayarak maçın detaylı analizini görebilirsiniz."
+    },
+    buttons: {
+      next: "İleri",
+      finish: "Bitir",
+      skip: "Geç",
+      back: "Geri"
+    }
+  }
 }; 
