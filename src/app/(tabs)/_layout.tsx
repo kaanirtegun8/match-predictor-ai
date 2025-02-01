@@ -12,9 +12,8 @@ import { useTranslation } from 'react-i18next';
  * - Account (Profile)
  */
 export default function TabLayout() {
-  const { isDark } = useTheme();
+  const { colors } = useTheme();
   const { isSubscribed } = useSubscription();
-  const colors = isDark ? Colors.dark : Colors.light;
   const { t } = useTranslation();
 
   return (
@@ -62,7 +61,7 @@ export default function TabLayout() {
                   position: 'absolute',
                   top: -4,
                   right: -20,
-                  backgroundColor: isDark ? colors.inputBackground : colors.background,
+                  backgroundColor: colors.inputBackground,
                   borderRadius: 8,
                   paddingHorizontal: 4,
                   height: 16,

@@ -117,10 +117,11 @@ export default {
   },
   premium: {
     title: 'Premium',
-    subscribe: 'Subscribe',
+    subscribe: 'Manage',
     restore: 'Restore Purchases',
     freePlan: 'Free Plan',
-    analysesRemaining: 'analyses remaining this month',
+    analysesRemaining: 'Monthly analyses remaining: ',
+    premiumToggleText: 'Premium Color',
     features: {
       unlimitedAnalysis: {
         title: 'Unlimited Analysis',

@@ -32,7 +32,7 @@ export function LeagueSection({ matches, firstMatchRef }: LeagueSectionProps) {
             style={styles.logo}
             resizeMode="contain"
           />
-          <ThemedText style={[styles.title, { color: colors.buttonText }]}>
+          <ThemedText style={[styles.title, { color: colors.inputBackground }]}>
             {competition.name}
           </ThemedText>
         </ThemedView>

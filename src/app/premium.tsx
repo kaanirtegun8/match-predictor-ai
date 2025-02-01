@@ -22,8 +22,7 @@ export default function PremiumScreen() {
   useEffect(() => {
     if (packages && packages.length > 0) {
       const weeklyPackage = packages.find(pkg => 
-        pkg.product.title.toLowerCase().includes('weekly') || 
-        pkg.product.description.toLowerCase().includes('weekly')
+        pkg.product.identifier.toLowerCase().includes('weekly')
       );
       if (weeklyPackage) {
         setSelectedPackage(weeklyPackage);
@@ -139,7 +138,7 @@ export default function PremiumScreen() {
                     ]}
                     onPress={() => setSelectedPackage(pkg)}>
                     <ThemedText style={styles.packageTitle}>
-                      {pkg.product.title.toLowerCase().includes('weekly') ? t('premium.weekly') : t('premium.monthly')}
+                      {pkg.product.title}
                     </ThemedText>
                     {pkg.product.introPrice ? (
                       <>
@@ -155,9 +154,6 @@ export default function PremiumScreen() {
                         {pkg.product.priceString}
                       </ThemedText>
                     )}
-                    <ThemedText style={[styles.packagePeriod, { color: colors.textSecondary }]}>
-                      {pkg.product.description}
-                    </ThemedText>
                   </TouchableOpacity>
                 ))}
               </ScrollView>

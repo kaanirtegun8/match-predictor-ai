@@ -14,14 +14,16 @@ import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 
 export default function AccountScreen() {
   const { signOut, user, deleteAccount } = useAuth();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, isPremiumTheme, togglePremiumTheme } = useTheme();
   const { isSubscribed, checkStatus } = useSubscription();
   const { stats, loading } = useStats();
   const { colors } = useTheme();
   const { t, i18n } = useTranslation();
+  const router = useRouter();
 
   // Format creation date based on current language
   const memberSince = user?.metadata.creationTime 
@@ -174,6 +176,53 @@ export default function AccountScreen() {
             thumbColor={colors.primary}
           />
         </TouchableOpacity>
+
+        {/* Premium Theme Toggle */}
+        <TouchableOpacity 
+          style={[
+            styles.themeToggle, 
+            {
+              backgroundColor: colors.border, 
+              marginTop: 8,
+              opacity: isSubscribed ? 1 : 0.8
+            }
+          ]} 
+          onPress={() => {
+            if (isSubscribed) {
+              togglePremiumTheme();
+            } else {
+              router.push('/premium');
+            }
+          }}
+          activeOpacity={0.7}>
+          <ThemedView style={styles.themeInfo}>
+            <Ionicons 
+              name="star" 
+              size={24} 
+              color="#FFD700" 
+            />
+            <ThemedText style={[styles.themeText, {color: colors.text}]}>
+              {t('premium.premiumToggleText')}
+            </ThemedText>
+            {!isSubscribed && (
+              <ThemedView style={styles.premiumBadge}>
+                <ThemedText style={styles.premiumBadgeText}>PRO</ThemedText>
+              </ThemedView>
+            )}
+          </ThemedView>
+          <Switch
+            value={isSubscribed && isPremiumTheme}
+            onValueChange={() => {
+              if (isSubscribed) {
+                togglePremiumTheme();
+              } else {
+                router.push('/premium');
+              }
+            }}
+            trackColor={{ false: '#d1d5db', true: colors.background }}
+            thumbColor="#FFD700"
+          />
+        </TouchableOpacity>
       </ThemedView>
 
       {/* Account Management Section */}
@@ -323,6 +372,18 @@ const styles = StyleSheet.create({
   },
   deleteButtonText: {
     color: '#fff',
+    fontWeight: '600',
+  },
+  premiumBadge: {
+    backgroundColor: '#FFD700',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    marginLeft: 8,
+  },
+  premiumBadgeText: {
+    color: '#000',
+    fontSize: 10,
     fontWeight: '600',
   },
 }); 
