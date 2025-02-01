@@ -141,10 +141,11 @@ export default {
   },
   premium: {
     title: 'Premium',
-    subscribe: 'Abone Ol',
+    subscribe: 'Yönet',
     restore: 'Satın Alımları Geri Yükle',
     freePlan: 'Ücretsiz Plan',
-    analysesRemaining: 'analiz hakkı kaldı bu ay',
+    analysesRemaining: 'Bu ay kalan analiz hakkınız: ',
+    premiumToggleText: 'Premium Renk',
     features: {
       unlimitedAnalysis: {
         title: 'Sınırsız Analiz',

@@ -15,7 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTutorial } from '@/contexts/TutorialContext';
 import { useAuth } from '@/hooks/useAuth';
-import { checkAnalysisLimit, getAnalysisCount } from '@/services/userService';
+import { checkAnalysisLimit, getMonthlyAnalysisCount } from '@/services/userService';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -370,9 +370,6 @@ export default function MatchDetailScreen() {
                     
                     try {
                       setIsAnalyzing(true);
-                      
-                      // First get and log the analysis count
-                      await getAnalysisCount(user.uid);
                       
                       // Then check if user can analyze
                       const canAnalyze = await checkAnalysisLimit(user.uid);

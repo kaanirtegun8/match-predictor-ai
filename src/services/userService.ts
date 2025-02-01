@@ -1,11 +1,22 @@
-import { doc, getDoc, updateDoc, increment, collection, query, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, increment, collection, query, getDocs, setDoc, serverTimestamp, where, addDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
 
-export async function getAnalysisCount(userId: string): Promise<number> {
+export async function getMonthlyAnalysisCount(userId: string): Promise<number> {
+  // Get first day of current month
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
   const analysesRef = collection(db, 'users', userId, 'analyses');
-  const analysesSnapshot = await getDocs(analysesRef);
+  const monthlyQuery = query(
+    analysesRef,
+    where('createdAt', '>=', startOfMonth)
+  );
+  
+  const analysesSnapshot = await getDocs(monthlyQuery);
   const count = analysesSnapshot.size;
-  console.log(`👤 User ${userId} has performed ${count} analyses`);
+
+  console.log(`👤 User ${userId} has performed ${count} analyses this month`);
   return count;
 }
 
@@ -30,19 +41,17 @@ export async function checkAnalysisLimit(userId: string): Promise<boolean> {
     return true;
   }
 
-  // Count actual analyses for free users
-  const count = await getAnalysisCount(userId);
-  console.log(`Checking limit: User has ${count} analyses, limit is 3`);
+  // Count monthly analyses for free users
+  const monthlyCount = await getMonthlyAnalysisCount(userId);
+  console.log(`Checking limit: User has ${monthlyCount} analyses this month, limit is 3`);
 
-  // Free users have 3 analyses limit
-  return count < 3;
+  // Free users have 3 analyses limit per month
+  return monthlyCount <= 3;
 }
 
 export async function incrementAnalysisCount(userId: string): Promise<void> {
-  // This function is no longer needed since we're counting actual analyses
-  // But keeping it for backward compatibility
-  const userRef = doc(db, 'users', userId);
-  await updateDoc(userRef, {
-    analysisCount: increment(1)
+  const analysesRef = collection(db, 'users', userId, 'analyses');
+  await addDoc(analysesRef, {
+    createdAt: serverTimestamp(),
   });
 } 

@@ -6,6 +6,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { router } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useStats } from '@/hooks/useStats';
 
 const PREMIUM_FEATURES = [
   {
@@ -29,6 +30,7 @@ export function SubscriptionInfo() {
   const { isSubscribed } = useSubscription();
   const { colors } = useTheme();
   const { t } = useTranslation();
+  const { stats, loading } = useStats();
 
   return (
     <ThemedView style={styles.container}>
@@ -36,7 +38,7 @@ export function SubscriptionInfo() {
       <ThemedView style={styles.planInfo}>
         <ThemedView style={[
           styles.planBadge,
-          { backgroundColor: isSubscribed ? '#FFD700' : '#6b7280' }
+          { backgroundColor: colors.primary }
         ]}>
           <Ionicons 
             name={isSubscribed ? "star" : "star-outline"} 
@@ -48,9 +50,9 @@ export function SubscriptionInfo() {
           </ThemedText>
         </ThemedView>
         
-        {!isSubscribed && (
+        {!isSubscribed && !loading && (
           <ThemedText style={[styles.limitText, { color: colors.textTertiary }]}>
-            5 {t('premium.analysesRemaining')}
+            {t('premium.analysesRemaining')}{stats.remainingAnalyses} 
           </ThemedText>
         )}
       </ThemedView>
@@ -61,7 +63,7 @@ export function SubscriptionInfo() {
           <ThemedView key={index} style={styles.featureItem}>
             <ThemedView style={[
               styles.featureIcon,
-              { backgroundColor: isSubscribed ? '#FFD700' : '#6b7280' }
+              { backgroundColor: colors.primary }
             ]}>
               <Ionicons name={feature.icon as any} size={20} color="#fff" />
             </ThemedView>
