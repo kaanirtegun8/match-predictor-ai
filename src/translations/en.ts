@@ -62,12 +62,37 @@ export default {
       loss: 'L',
       draw: 'D'
     },
+    predictions: {
+      title: 'Predictions',
+      confidence: '{{percent}}% Confidence',
+      types: {
+        matchResult: 'Match Result',
+        totalGoals: 'Total Goals',
+        bothTeamsToScore: 'Both Teams to Score',
+        homeTeamGoals: 'Home Team Goals',
+        awayTeamGoals: 'Away Team Goals',
+        firstGoal: 'First Goal'
+      },
+      risk: {
+        RISKY: 'Risky',
+        MODERATE: 'Moderate',
+        SAFE: 'Safe'
+      }
+    },
     analysis: {
       title: 'Match Analysis',
       subtitle: 'AI-Powered insights and predictions',
       button: 'Analyze',
+      showDetails: 'Show Details',
+      hideDetails: 'Hide Details',
       error: 'Something went wrong while checking analysis limit. Please try again.',
-      noEvidence: 'No detailed analysis available for this prediction.'
+      noEvidence: 'No detailed analysis available for this prediction.',
+      loadingSteps: {
+        stats: 'Retrieving match statistics...',
+        performance: 'Analyzing team performances...',
+        predictions: 'Generating AI predictions...',
+        finalizing: 'Finalizing match insights...'
+      }
     },
     headToHead: 'Head to Head',
     status: {
