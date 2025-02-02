@@ -59,8 +59,6 @@ export const useSubscription = () => {
       const { isActive, customerInfo: info } = await checkSubscriptionStatus();
       setIsSubscribed(isActive);
       setCustomerInfo(info);
-      console.log('isActive:', isActive);
-      console.log('customerInfo:', info);
       // toggle premium theme
       if (!isActive && isPremiumTheme) {
         togglePremiumTheme();
@@ -95,7 +93,6 @@ export const useSubscription = () => {
     try {
       setIsLoading(true);
       const info = await restorePurchases();
-      console.log("info:", info);
       setCustomerInfo(info);
       const isActive = Object.values(info.entitlements.active).length > 0;
       setIsSubscribed(isActive);
