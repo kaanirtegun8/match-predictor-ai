@@ -8,17 +8,28 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import LottieView from 'lottie-react-native';
 import { useLoading } from '@/contexts/LoadingContext';
+import { useSubscription } from '@/hooks/useSubscription';
 
 export default function SuccessScreen() {
   const { colors } = useTheme();
   const { showLoading, hideLoading } = useLoading();
+  const { checkStatus } = useSubscription();
 
-  const handleExplore = () => {
-    showLoading();
-    router.back();
-    router.back();
-    router.push('/(tabs)/bulletin');
-    hideLoading();
+  const handleExplore = async () => {
+    try {
+      showLoading();
+      // Refresh subscription status
+      await checkStatus();
+      
+      // Navigate back to bulletin
+      router.back();
+      router.back();
+      router.push('/(tabs)/bulletin');
+    } catch (error) {
+      console.error('Error refreshing subscription status:', error);
+    } finally {
+      hideLoading();
+    }
   };
 
   return (

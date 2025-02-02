@@ -70,7 +70,7 @@ export function TutorialTooltip() {
         tooltipY = y - TOOLTIP_MARGIN - 200;
         break;
       case 'bottom':
-        tooltipY = y + height + TOOLTIP_MARGIN;
+        tooltipY = y + height + TOOLTIP_MARGIN + 10;
         break;
       case 'left':
         tooltipX = x - TOOLTIP_MAX_WIDTH - TOOLTIP_MARGIN;
@@ -101,7 +101,7 @@ export function TutorialTooltip() {
   if (!isActive) return null;
 
   return (
-    <Animated.View style={[styles.container, animatedStyle]}>
+    <Animated.View style={[styles.container, animatedStyle, { backgroundColor: colors.background }]}>
       {/* Title */}
       {currentTooltip?.title && (
         <ThemedText style={[styles.title, { color: colors.text }]}>

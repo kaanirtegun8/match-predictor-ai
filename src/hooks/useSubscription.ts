@@ -9,6 +9,7 @@ import {
   checkSubscriptionStatus,
   restorePurchases,
 } from '../config/revenuecat';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export const useSubscription = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -16,7 +17,7 @@ export const useSubscription = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const { user } = useAuth();
-
+  const { togglePremiumTheme, isPremiumTheme } = useTheme();
   // Initialize RevenueCat and check subscription status when user changes
   useEffect(() => {
     const init = async () => {
@@ -58,6 +59,12 @@ export const useSubscription = () => {
       const { isActive, customerInfo: info } = await checkSubscriptionStatus();
       setIsSubscribed(isActive);
       setCustomerInfo(info);
+      console.log('isActive:', isActive);
+      console.log('customerInfo:', info);
+      // toggle premium theme
+      if (!isActive && isPremiumTheme) {
+        togglePremiumTheme();
+      }
       return { isActive, customerInfo: info };
     } catch (error) {
       console.error('[Subscription] Failed to check status:', error);

@@ -5,7 +5,7 @@ const premiumLightColors = {
   buttonBackground: '#FFD700',
   background: '#fff',
   link: '#2f95dc',
-  border: '#e1e1e1',
+  border: '#f5f5f5',
   text: '#222831',
   textSecondary: '#393E46',
   textTertiary: '#666',

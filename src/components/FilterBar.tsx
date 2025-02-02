@@ -30,14 +30,14 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
       <TouchableOpacity
         style={[
           styles.filterItem,
-          { backgroundColor: colors.background },
-          !selectedCompetitionId && styles.selectedItem,
+          { backgroundColor: colors.background, borderColor: colors.border },
+          !selectedCompetitionId && { backgroundColor: colors.primary },
         ]}
         onPress={() => onCompetitionSelect(null)}
       >
         <ThemedText style={[
           styles.filterText,
-          !selectedCompetitionId && styles.selectedText,
+          selectedCompetitionId && { color: colors.text },
         ]}>
           {t('matches.filter.allLeagues')}
         </ThemedText>
@@ -47,8 +47,8 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           key={competition.id}
           style={[
             styles.filterItem,
-            { backgroundColor: colors.background },
-            selectedCompetitionId === competition.id.toString() && styles.selectedItem,
+            { backgroundColor: colors.background, borderColor: colors.border },
+            selectedCompetitionId === competition.id.toString() && { backgroundColor: colors.primary },
           ]}
           onPress={() => onCompetitionSelect(competition.id.toString())}
         >
@@ -60,7 +60,7 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
           <ThemedText style={[
             styles.filterText,
             { color: colors.text },
-            selectedCompetitionId === competition.id.toString() && styles.selectedText,
+            selectedCompetitionId === competition.id.toString() && { color: colors.textTertiary },
           ]}>
             {competition.name}
           </ThemedText>
@@ -81,7 +81,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#fff',
     gap: 8,
     borderWidth: 1,
     borderColor: '#e0e0e0',
@@ -94,17 +93,9 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  selectedItem: {
-    backgroundColor: '#65a30d',
-    borderColor: '#65a30d',
-  },
   filterText: {
     fontSize: 13,
     color: '#666',
-  },
-  selectedText: {
-    color: '#fff',
-    fontWeight: '600',
   },
   logo: {
     width: 20,
