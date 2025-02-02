@@ -221,10 +221,10 @@ export default function AnalyzeScreen() {
                 {match.utcDate && (
                   <ThemedView style={[styles.badge, { backgroundColor: colors.background }]}>
                     <ThemedText style={[styles.badgeText, { color: colors.text }]}>
-                      {new Date(match.utcDate).toLocaleDateString(t('common.locale', { defaultValue: 'tr-TR' }), {
+                      {new Date(match.utcDate).toLocaleDateString(currentLanguage === 'tr' ? 'tr-TR' : 'en-US', {
                         day: 'numeric',
                         month: 'long',
-                      })} • {new Date(match.utcDate).toLocaleTimeString(t('common.locale', { defaultValue: 'tr-TR' }), {
+                      })} • {new Date(match.utcDate).toLocaleTimeString(currentLanguage === 'tr' ? 'tr-TR' : 'en-US', {
                         hour: '2-digit',
                         minute: '2-digit',
                       })}

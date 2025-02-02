@@ -3,6 +3,7 @@
     "name": "Match Predictor AI",
     "slug": "match-predictor-ai",
     "version": "1.0.0",
+    "icon": "./src/assets/images/icon.png",
     "newArchEnabled": true,
     "assetBundlePatterns": [
       "**/*"
