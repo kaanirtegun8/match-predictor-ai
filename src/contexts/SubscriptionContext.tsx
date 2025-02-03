@@ -7,7 +7,7 @@ export function SubscriptionProvider({ children }: { children: React.ReactNode }
   const subscription = useSubscriptionHook();
 
   return (
-    <SubscriptionContext.Provider value={subscription}>
+    <SubscriptionContext.Provider value={{ ...subscription, isSubscribed: subscription.isSubscribed }}>
       {children}
     </SubscriptionContext.Provider>
   );

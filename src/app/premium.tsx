@@ -7,7 +7,7 @@ import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { PurchasesPackage } from 'react-native-purchases';
 import { useTranslation } from 'react-i18next';
 

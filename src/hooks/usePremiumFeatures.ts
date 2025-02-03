@@ -1,4 +1,4 @@
-import { useSubscription } from "./useSubscription";
+import { useSubscription } from "@/contexts/SubscriptionContext";
 
 export interface PremiumFeature {
   id: string;

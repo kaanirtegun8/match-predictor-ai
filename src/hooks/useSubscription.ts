@@ -10,6 +10,8 @@ import {
   restorePurchases,
 } from '../config/revenuecat';
 import { useTheme } from '@/contexts/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getMonthlyAnalysisCount } from '@/services/userService';
 
 export const useSubscription = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -35,6 +37,7 @@ export const useSubscription = () => {
           setCustomerInfo(null);
         }
       } catch (error) {
+        console.error('Failed to initialize subscription:', error);
       } finally {
         setIsLoading(false);
       }
@@ -59,10 +62,15 @@ export const useSubscription = () => {
       const { isActive, customerInfo: info } = await checkSubscriptionStatus();
       setIsSubscribed(isActive);
       setCustomerInfo(info);
-      // toggle premium theme
+      console.log("checkStatus", isSubscribed);
+      // If user is not subscribed but has premium theme enabled, disable it
       if (!isActive && isPremiumTheme) {
+        // Directly update AsyncStorage
+        await AsyncStorage.setItem('isPremiumTheme', 'false');
+        // Update state through context
         togglePremiumTheme();
       }
+
       return { isActive, customerInfo: info };
     } catch (error) {
       console.error('[Subscription] Failed to check status:', error);
@@ -127,11 +135,26 @@ export const useSubscription = () => {
     }
   }, []);
 
+
+  const checkAnalysisLimit = async (userId: string): Promise<boolean> => {
+    if (isSubscribed) {
+      return true;
+    }
+  
+    // Count monthly analyses for free users
+    const monthlyCount = await getMonthlyAnalysisCount(userId);
+    console.log(`Checking limit: User has ${monthlyCount} analyses this month, limit is 3`);
+  
+    // Free users have 3 analyses limit per month
+    return monthlyCount < 3;
+  }
+
   return {
     isLoading,
     packages,
     isSubscribed,
     customerInfo,
+    checkAnalysisLimit,
     purchase: handlePurchase,
     restore: handleRestore,
     checkStatus,
