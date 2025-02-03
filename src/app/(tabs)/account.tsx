@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator, TextInput } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
@@ -8,7 +8,7 @@ import { ThemedView } from '@/components/themed/ThemedView';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Ionicons } from '@expo/vector-icons';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { useStats } from '@/hooks/useStats';
 import { auth } from '@/config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
@@ -86,6 +86,7 @@ export default function AccountScreen() {
       ]
     );
   };
+
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.border }]}>

@@ -2,7 +2,7 @@ import { Tabs } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { View, Text } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
@@ -15,7 +15,7 @@ export default function TabLayout() {
   const { colors } = useTheme();
   const { isSubscribed } = useSubscription();
   const { t } = useTranslation();
-
+  
   return (
     <Tabs screenOptions={{
       tabBarActiveTintColor: colors.primary,
