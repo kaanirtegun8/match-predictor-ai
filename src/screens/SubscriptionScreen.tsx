@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
-import { useSubscription } from '../hooks/useSubscription';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 import { usePremiumFeatures } from '../hooks/usePremiumFeatures';
 import { PurchasesPackage } from 'react-native-purchases';
 

@@ -15,7 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTutorial } from '@/contexts/TutorialContext';
 import { useAuth } from '@/hooks/useAuth';
-import { checkAnalysisLimit, getMonthlyAnalysisCount } from '@/services/userService';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -59,6 +59,7 @@ export default function MatchDetailScreen() {
   const analysisButtonRef = useRef(null);
   const { startTutorial } = useTutorial();
   const { user } = useAuth();
+  const { checkAnalysisLimit } = useSubscription();
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
 
@@ -144,6 +145,47 @@ export default function MatchDetailScreen() {
     setRefreshing(true);
     loadMatchData();
   }, [id]);
+
+  const onAnalysisPress = async () => {
+    if (!user) {
+        Alert.alert(
+          t('common.error'),
+          t('auth.loginRequired'),
+          [
+            {
+              text: t('common.cancel'),
+              style: 'cancel'
+            },
+            {
+              text: t('auth.login'),
+              onPress: () => router.push('/(auth)/login')
+            }
+          ]
+        );
+        return;
+      }
+      
+      try {
+        setIsAnalyzing(true);
+        
+        // Then check if user can analyze
+        const canAnalyze = await checkAnalysisLimit(user.uid);
+        
+        if (canAnalyze) {
+          router.push(`/analyze/${id}`);
+        } else {
+          router.push('/premium');
+        }
+      } catch (error) {
+        console.error('Error checking analysis limit:', error);
+        Alert.alert(
+          t('common.error'),
+          t('matches.analysis.error')
+        );
+      } finally {
+        setIsAnalyzing(false);
+      }
+  }
 
   const homeTeamForm = getTeamForm(homeTeamMatches, match?.homeTeam.id ?? 0);
   const awayTeamForm = getTeamForm(awayTeamMatches, match?.awayTeam.id ?? 0);
@@ -350,44 +392,7 @@ export default function MatchDetailScreen() {
                   ]}
                   disabled={isAnalyzing}
                   onPress={async () => {
-                    if (!user) {
-                      Alert.alert(
-                        t('common.error'),
-                        t('auth.loginRequired'),
-                        [
-                          {
-                            text: t('common.cancel'),
-                            style: 'cancel'
-                          },
-                          {
-                            text: t('auth.login'),
-                            onPress: () => router.push('/(auth)/login')
-                          }
-                        ]
-                      );
-                      return;
-                    }
-                    
-                    try {
-                      setIsAnalyzing(true);
-                      
-                      // Then check if user can analyze
-                      const canAnalyze = await checkAnalysisLimit(user.uid);
-                      
-                      if (canAnalyze) {
-                        router.push(`/analyze/${match.id}`);
-                      } else {
-                        router.push('/premium');
-                      }
-                    } catch (error) {
-                      console.error('Error checking analysis limit:', error);
-                      Alert.alert(
-                        t('common.error'),
-                        t('matches.analysis.error')
-                      );
-                    } finally {
-                      setIsAnalyzing(false);
-                    }
+                    onAnalysisPress();
                   }}>
                   {isAnalyzing ? (
                     <ActivityIndicator size="small" color="#000" />

@@ -41,10 +41,10 @@ export default function RootLayout() {
   if (loading) return null;
 
   return (
+    <SubscriptionProvider>
     <LanguageProvider>
       <ThemeProvider>
         <LoadingProvider>
-          <SubscriptionProvider>
             <TutorialProvider>
               <Stack>
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -77,9 +77,9 @@ export default function RootLayout() {
                 <Stack.Screen name="analyze/[id]" options={{ headerShown: false }} />
               </Stack>
             </TutorialProvider>
-          </SubscriptionProvider>
         </LoadingProvider>
       </ThemeProvider>
     </LanguageProvider>
+    </SubscriptionProvider>
   );
 }

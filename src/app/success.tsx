@@ -8,7 +8,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { Colors } from '@/constants/Colors';
 import LottieView from 'lottie-react-native';
 import { useLoading } from '@/contexts/LoadingContext';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription } from '@/contexts/SubscriptionContext';
 
 export default function SuccessScreen() {
   const { colors } = useTheme();

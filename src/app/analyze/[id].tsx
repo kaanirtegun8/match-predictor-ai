@@ -11,7 +11,7 @@ import { ThemedView } from '../../components/themed/ThemedView';
 import { AnalyzeResponseModel, RiskLevel, Prediction } from '../../models/AnalyzeResponseModel';
 import { analyzeMatch } from '../../services/openaiApi';
 import { Match } from '@/models';
-import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis } from '@/services/matchService';
+import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis, saveMatchAnalysisToUser } from '@/services/matchService';
 import { RichText } from '@/components/RichText';
 import { useTheme } from '@/contexts/ThemeContext';
 import { BilingualAnalysis } from '@/models/BilingualAnalysis';
@@ -87,6 +87,7 @@ export default function AnalyzeScreen() {
             await new Promise(resolve => setTimeout(resolve, 400));
             
             setAnalysis(existingAnalysis);
+            saveMatchAnalysisToUser(id as string, existingAnalysis);
           } else {
             console.log('⚠️ No analysis found in Firestore, generating new analysis...');
             setLoadingStep(2);
