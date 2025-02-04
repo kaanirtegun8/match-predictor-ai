@@ -7,6 +7,9 @@ interface AuthHeaderProps {
   subtitle?: string;
 }
 
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
+
 export function AuthHeader({ title, subtitle }: AuthHeaderProps) {
   return (
     <View style={styles.container}>
@@ -30,25 +33,25 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: isIPad ? 64 : 32,
   },
   animation: {
     width: width * 0.6,
     height: width * 0.3,
-    marginBottom: 16,
+    marginBottom: isIPad ? 32 : 16,
   },
   title: {
-    fontSize: 24,
+    fontSize: isIPad ? 48 : 24,
     fontWeight: 'bold',
-    color: Colors.text,
+    color: Colors.light.text,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: isIPad ? 16 : 8,
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+    fontSize: isIPad ? 24 : 14,
+    color: Colors.light.textSecondary,
     textAlign: 'center',
-    paddingHorizontal: 20,
-    lineHeight: 20,
+    paddingHorizontal: isIPad ? 48 : 20,
+    lineHeight: isIPad ? 32 : 20,
   },
 }); 

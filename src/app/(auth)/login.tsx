@@ -1,10 +1,13 @@
-import { View, Text, StyleSheet, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, Platform, Alert, Dimensions } from 'react-native';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHeader } from '@/components/auth';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -87,7 +90,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     paddingTop: Platform.select({
       ios: 50,
       android: 40,
@@ -95,13 +98,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
   },
   inputContainer: {
-    gap: 10,
-    marginBottom: 20,
+    gap: isIPad ? 20 : 10,
+    marginBottom: isIPad ? 32 : 20,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: isIPad ? 32 : 16,
   },
   divider: {
     flex: 1,
@@ -110,21 +113,21 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     color: Colors.light.text,
-    paddingHorizontal: 12,
-    fontSize: 13,
+    paddingHorizontal: isIPad ? 32 : 12,
+    fontSize: isIPad ? 32 : 13,
   },
   socialButtonsContainer: {
-    gap: 8,
+    gap: isIPad ? 16 : 8,
   },
   socialButtonSpacer: {
-    height: 4,
+    height: isIPad ? 48 : 4,
   },
   link: {
-    marginTop: 16,
+    marginTop: isIPad ? 32 : 16,
     alignItems: 'center',
   },
   linkText: {
     color: Colors.light.link,
-    fontSize: 14,
+    fontSize: isIPad ? 32 : 14,
   },
 }); 

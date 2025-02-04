@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text, StyleSheet, View, Animated, Pressable, ActivityIndicator } from 'react-native';
+import { Text, StyleSheet, View, Animated, Pressable, ActivityIndicator, Dimensions, Platform } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { useRef, useCallback, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
@@ -12,6 +12,9 @@ const googleLogo = `
   <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
 </svg>
 `;
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export function GoogleSignInButton() {
   const scale = useRef(new Animated.Value(1)).current;
@@ -58,7 +61,7 @@ export function GoogleSignInButton() {
           {isLoading ? (
             <ActivityIndicator size="small" color="#4285F4" />
           ) : (
-            <SvgXml xml={googleLogo} width={18} height={18} />
+            <SvgXml xml={googleLogo} width={isIPad ? 32 : 18} height={isIPad ? 32 : 18} />
           )}
         </View>
         <View style={styles.separator} />
@@ -81,11 +84,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 1,
-    height: 40,
+    height: isIPad ? 50 : 40,
   },
   iconContainer: {
-    width: 40,
-    height: 40,
+    width: isIPad ? 50 : 40,
+    height: isIPad ? 50 : 40,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#fff',
@@ -94,13 +97,13 @@ const styles = StyleSheet.create({
   },
   separator: {
     width: 1,
-    height: 28,
+    height: isIPad ? 50 : 28,
     backgroundColor: '#ddd',
   },
   text: {
     flex: 1,
     color: 'rgba(0, 0, 0, 0.54)',
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     fontWeight: '500',
     textAlign: 'center',
     marginRight: 40, // To balance the icon width

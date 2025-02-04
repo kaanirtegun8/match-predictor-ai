@@ -12,6 +12,10 @@ import { FontAwesome } from '@expo/vector-icons';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { usePremiumFeatures } from '../hooks/usePremiumFeatures';
 import { PurchasesPackage } from 'react-native-purchases';
+import { Dimensions, Platform } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export const SubscriptionScreen = () => {
   const {
@@ -58,7 +62,7 @@ export const SubscriptionScreen = () => {
             <View style={styles.featureIcon}>
               <FontAwesome
                 name={feature.isAvailable ? 'check-circle' : 'circle-o'}
-                size={24}
+                size={isIPad ? 48 : 24}
                 color={feature.isAvailable ? '#4CAF50' : '#666'}
               />
             </View>
@@ -124,21 +128,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     alignItems: 'center',
   },
   title: {
-    fontSize: 24,
+    fontSize: isIPad ? 48 : 24,
     fontWeight: 'bold',
     marginBottom: 10,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     color: '#666',
     textAlign: 'center',
   },
   featuresContainer: {
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     backgroundColor: '#f8f9fa',
     marginBottom: 20,
   },
@@ -155,22 +159,22 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featureName: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     fontWeight: '600',
     marginBottom: 4,
   },
   featureDescription: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 16,
     color: '#666',
-    lineHeight: 20,
+    lineHeight: isIPad ? 32 : 20,
   },
   packagesContainer: {
-    padding: 20,
+    padding: isIPad ? 32 : 20,
   },
   packageCard: {
     backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 20,
+    borderRadius: isIPad ? 24 : 12,
+    padding: isIPad ? 32 : 20,
     marginBottom: 15,
     shadowColor: '#000',
     shadowOffset: {
@@ -182,42 +186,42 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   packageTitle: {
-    fontSize: 18,
+    fontSize: isIPad ? 32 : 18,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   packagePrice: {
-    fontSize: 24,
+    fontSize: isIPad ? 32 : 24,
     color: '#007AFF',
     marginBottom: 8,
   },
   packageDescription: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     color: '#666',
   },
   subscribedContainer: {
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     alignItems: 'center',
   },
   subscribedText: {
-    fontSize: 20,
+    fontSize: isIPad ? 32 : 20,
     fontWeight: 'bold',
     color: '#4CAF50',
     marginBottom: 10,
   },
   subscribedSubText: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     color: '#666',
     textAlign: 'center',
   },
   restoreButton: {
-    padding: 15,
+    padding: isIPad ? 32 : 15,
     alignItems: 'center',
     marginTop: 10,
     marginBottom: 30,
   },
   restoreButtonText: {
     color: '#007AFF',
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
   },
 }); 

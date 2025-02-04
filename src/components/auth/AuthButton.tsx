@@ -1,4 +1,4 @@
-import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator, Dimensions, Platform } from 'react-native';
 import { Colors } from '@/constants/Colors';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -8,6 +8,9 @@ export interface AuthButtonProps {
   loading?: boolean;
   variant?: 'primary' | 'social';
 }
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export function AuthButton({ title, onPress, loading, variant = 'primary' }: AuthButtonProps) {
   const { isDark } = useTheme();
@@ -39,14 +42,14 @@ export function AuthButton({ title, onPress, loading, variant = 'primary' }: Aut
 
 const styles = StyleSheet.create({
   button: {
-    padding: 15,
-    borderRadius: 10,
+    padding: isIPad ? 20 : 15,
+    borderRadius: isIPad ? 24 : 10,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 50,
+    minHeight: isIPad ? 50 : 50,
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     fontWeight: '600',
   },
 }); 

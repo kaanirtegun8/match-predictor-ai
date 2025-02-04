@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Dimensions, Image, Platform, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText, ThemedView } from '@/components';
 import { getLeagueStandings } from '@/services/footballApi';
@@ -9,6 +9,9 @@ import { StandingsResponse } from '@/models';
 import { Standing } from '@/models';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export default function StandingsScreen() {
     const { id, homeTeamId, awayTeamId } = useLocalSearchParams();
@@ -57,7 +60,7 @@ export default function StandingsScreen() {
                         <TouchableOpacity
                             style={styles.backButton}
                             onPress={() => router.back()}>
-                            <Ionicons name="chevron-back" size={24} color={colors.primary} />
+                            <Ionicons name="chevron-back" size={isIPad ? 32 : 24} color={colors.primary} />
                             <ThemedText style={[styles.backText, { color: colors.primary }]}>
                                 {t('common.back')}
                             </ThemedText>
@@ -212,7 +215,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     backText: {
-        fontSize: 16,
+        fontSize: isIPad ? 32 : 16,
         marginLeft: 4,
         color: '#1282A2',
     },
@@ -222,12 +225,12 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     competitionLogo: {
-        width: 48,
-        height: 48,
+        width: isIPad ? 120 : 48,
+        height: isIPad ? 120 : 48,
         marginBottom: 12,
     },
     competitionName: {
-        fontSize: 20,
+        fontSize: isIPad ? 32 : 20,
         fontWeight: '600',
         color: '#0f172a',
         textAlign: 'center',
@@ -269,12 +272,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cell: {
-        fontSize: 13,
+        fontSize: isIPad ? 18 : 13,
         color: '#475569',
         textAlign: 'center',
     },
     positionCell: {
-        width: 28,
+        width: isIPad ? 48 : 28,
         fontWeight: '600',
         color: '#0f172a',
     },
@@ -284,11 +287,11 @@ const styles = StyleSheet.create({
         paddingLeft: 8,
     },
     statsCell: {
-        width: 28,
+        width: isIPad ? 48 : 28,
         textAlign: 'center',
     },
     pointsCell: {
-        width: 32,
+        width: isIPad ? 48 : 28,
         textAlign: 'center',
         fontWeight: 'bold',
     },
@@ -299,12 +302,12 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     teamLogo: {
-        width: 20,
-        height: 20,
+        width: isIPad ? 48 : 20,
+        height: isIPad ? 48 : 20,
     },
     teamName: {
         flex: 1,
-        fontSize: 13,
+        fontSize: isIPad ? 18 : 13,
         color: '#475569',
     },
     teamInfoBackground: {
@@ -316,7 +319,7 @@ const styles = StyleSheet.create({
         fontWeight: '500',
     },
     loadingText: {
-        fontSize: 16,
+        fontSize: isIPad ? 32 : 16,
         marginTop: 16,
         color: '#475569',
     },

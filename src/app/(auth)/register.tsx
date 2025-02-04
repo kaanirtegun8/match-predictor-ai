@@ -1,10 +1,13 @@
-import { View, Text, StyleSheet, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, Platform, Alert, Dimensions, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHeader } from '@/components/auth';
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState('');
@@ -40,73 +43,82 @@ export default function RegisterScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <AuthHeader 
-        title={t('auth.createAccount')}
-        subtitle={t('auth.createAccountSubtitle')}
-      />
+    <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.container}>
+        <AuthHeader 
+          title={t('auth.createAccount')}
+          subtitle={t('auth.createAccountSubtitle')}
+        />
 
-      <View style={styles.inputContainer}>
-        <AuthInput
-          placeholder={t('auth.fullName')}
-          autoCapitalize="words"
-          value={fullName}
-          onChangeText={setFullName}
+        <View style={styles.inputContainer}>
+          <AuthInput
+            placeholder={t('auth.fullName')}
+            autoCapitalize="words"
+            value={fullName}
+            onChangeText={setFullName}
+          />
+          <AuthInput
+            placeholder={t('auth.email')}
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+          />
+          <AuthInput
+            placeholder={t('auth.password')}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+          <AuthInput
+            placeholder={t('auth.confirmPassword')}
+            secureTextEntry
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+          />
+        </View>
+
+        <AuthButton
+          title={t('auth.signUp')}
+          onPress={handleRegister}
+          loading={loading}
         />
-        <AuthInput
-          placeholder={t('auth.email')}
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-        />
-        <AuthInput
-          placeholder={t('auth.password')}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <AuthInput
-          placeholder={t('auth.confirmPassword')}
-          secureTextEntry
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-        />
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>{t('common.or')}</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <View style={styles.socialButtonsContainer}>
+          <GoogleSignInButton />
+          <View style={styles.socialButtonSpacer} />
+          {/* <FacebookSignInButton
+            onPress={() => {
+              // TODO: Implement Facebook Sign-In
+            }}
+          /> */}
+        </View>
+
+        <Link href={{ pathname: '/(auth)/login' }} style={styles.link}>
+          <Text style={styles.linkText}>{t('auth.haveAccount')}</Text>
+        </Link>
       </View>
-
-      <AuthButton
-        title={t('auth.signUp')}
-        onPress={handleRegister}
-        loading={loading}
-      />
-
-      <View style={styles.dividerContainer}>
-        <View style={styles.divider} />
-        <Text style={styles.dividerText}>{t('common.or')}</Text>
-        <View style={styles.divider} />
-      </View>
-
-      <View style={styles.socialButtonsContainer}>
-        <GoogleSignInButton />
-        <View style={styles.socialButtonSpacer} />
-        {/* <FacebookSignInButton
-          onPress={() => {
-            // TODO: Implement Facebook Sign-In
-          }}
-        /> */}
-      </View>
-
-      <Link href={{ pathname: '/(auth)/login' }} style={styles.link}>
-        <Text style={styles.linkText}>{t('auth.haveAccount')}</Text>
-      </Link>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: Colors.light.background,
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
   container: {
     flex: 1,
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     paddingTop: Platform.select({
       ios: 50,
       android: 40,
@@ -114,13 +126,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.background,
   },
   inputContainer: {
-    gap: 10,
-    marginBottom: 20,
+    gap: isIPad ? 16 : 10,
+    marginBottom: isIPad ? 24 : 20,
   },
   dividerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: isIPad ? 24 : 16,
   },
   divider: {
     flex: 1,
@@ -129,21 +141,21 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     color: Colors.light.text,
-    paddingHorizontal: 12,
-    fontSize: 13,
+    paddingHorizontal: isIPad ? 16 : 12,
+    fontSize: isIPad ? 18 : 13,
   },
   socialButtonsContainer: {
-    gap: 8,
+    gap: isIPad ? 16 : 8,
   },
   socialButtonSpacer: {
-    height: 4,
+    height: isIPad ? 16 : 4,
   },
   link: {
-    marginTop: 16,
+    marginTop: isIPad ? 24 : 16,
     alignItems: 'center',
   },
   linkText: {
     color: Colors.light.link,
-    fontSize: 14,
+    fontSize: isIPad ? 18 : 14,
   },
 }); 
