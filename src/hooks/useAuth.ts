@@ -8,7 +8,8 @@ import {
   GoogleAuthProvider,
   signInWithCredential,
   updateProfile,
-  deleteUser
+  deleteUser,
+  OAuthProvider
 } from 'firebase/auth';
 import { auth, db } from '../config/firebase';
 import * as Google from 'expo-auth-session/providers/google';
@@ -148,6 +149,25 @@ export function useAuth() {
     }
   };
 
+  const signInWithApple = async (identityToken: string) => {
+    try {
+      // Create an Apple OAuth provider
+      const provider = new OAuthProvider('apple.com');
+      
+      // Create a credential using the token
+      const credential = provider.credential({
+        idToken: identityToken,
+      });
+
+      // Sign in with the credential
+      await signInWithCredential(auth, credential);
+      return { success: true };
+    } catch (error: any) {
+      console.error('Apple Sign-In Error:', error);
+      return { success: false, error: error.message };
+    }
+  };
+
   return {
     user,
     loading,
@@ -157,6 +177,7 @@ export function useAuth() {
     signOut,
     signInWithGoogle,
     isAuthenticated: !!user,
-    deleteAccount
+    deleteAccount,
+    signInWithApple
   };
 } 

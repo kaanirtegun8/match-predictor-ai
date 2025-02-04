@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState, useRef, createRef } from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing, View, Alert } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, ActivityIndicator, Image, RefreshControl, Animated, Easing, View, Alert, Platform, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
@@ -16,6 +16,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTutorial } from '@/contexts/TutorialContext';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/contexts/SubscriptionContext';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 function getTeamForm(matches: Match[], teamId: number): string[] {
   return matches
@@ -250,7 +253,7 @@ export default function MatchDetailScreen() {
             <TouchableOpacity 
               style={[styles.backButton, { }]} 
               onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color={colors.primary} />
+              <Ionicons name="chevron-back" size={isIPad ? 32 : 16} color={colors.primary} />
               <ThemedText style={[styles.backText, { color: colors.primary }]}>
                 {t('common.back')}
               </ThemedText>
@@ -378,7 +381,7 @@ export default function MatchDetailScreen() {
             ]}>
               <ThemedView style={styles.analysisContent}>
                 <ThemedView style={styles.analysisLeft}>
-                  <Ionicons name="trending-up" size={24} color="#FFD700" />
+                  <Ionicons name="trending-up" size={isIPad ? 60 : 32} color="#FFD700" />
                   <ThemedView style={styles.textContainer}>
                     <ThemedText style={styles.analysisTitle}>{t('matches.analysis.title')}</ThemedText>
                     <ThemedText style={styles.analysisSubtitle}>{t('matches.analysis.subtitle')}</ThemedText>
@@ -401,7 +404,7 @@ export default function MatchDetailScreen() {
                       <ThemedText style={[styles.analysisButtonText, { color: '#000' }]}>
                         {t('matches.analysis.button')}
                       </ThemedText>
-                      <Ionicons name="arrow-forward" size={18} color="#000" />
+                      <Ionicons name="arrow-forward" size={isIPad ? 32 : 18} color="#000" />
                     </>
                   )}
                 </TouchableOpacity>
@@ -414,7 +417,7 @@ export default function MatchDetailScreen() {
           {h2h.length > 0 && (
             <ThemedView style={[styles.recentMatchesContainer, { backgroundColor: colors.background }]}>
               <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
-                <Ionicons name="time-outline" size={18} color={colors.primary} />
+                <Ionicons name="time-outline" size={isIPad ? 32 : 18} color={colors.primary} />
                 <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.headToHead')}</ThemedText>
               </ThemedView>
               <ThemedView style={styles.recentMatches}>
@@ -496,7 +499,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backText: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     marginLeft: 4,
     color: '#1282A2',
   },
@@ -511,34 +514,34 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     fontWeight: '600',
     color: '#2E7D32',
   },
   competitionInfoSimple: {
-    padding: 16,
+    padding: isIPad ? 24 : 16,
     alignItems: 'center',
     marginBottom: 8,
     marginHorizontal: 16,
   },
   competitionLogo: {
-    width: 40,
-    height: 40,
+    width: isIPad ? 120 : 80,
+    height: isIPad ? 120 : 80,
     marginBottom: 8,
   },
   competitionName: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '600',
     color: '#333',
   },
   statusContainerSimple: {
-    padding: 16,
+    padding: isIPad ? 24 : 16,
     alignItems: 'center',
     marginBottom: 16,
     marginHorizontal: 16,
   },
   date: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 16,
     color: '#666',
     marginBottom: 4,
   },
@@ -554,7 +557,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   venue: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 16,
     color: '#666',
     marginBottom: 4,
   },
@@ -575,7 +578,7 @@ const styles = StyleSheet.create({
   },
   teamsRow: {
     flexDirection: 'row',
-    padding: 24,
+    padding: isIPad ? 32 : 24,
     paddingTop: 16,
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -587,13 +590,13 @@ const styles = StyleSheet.create({
     maxWidth: '35%',
   },
   teamLogo: {
-    width: 64,
-    height: 64,
+    width: isIPad ? 128 : 64,
+    height: isIPad ? 128 : 64,
     marginBottom: 12,
   },
   teamName: {
-    fontSize: 15,
-    fontWeight: '500',
+    fontSize: isIPad ? 24 : 16,
+    fontWeight: '600',
     textAlign: 'center',
     color: '#333',
   },
@@ -606,8 +609,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   score: {
-    fontSize: 24,
-    fontWeight: '600',
+    fontSize: isIPad ? 26 : 24,
+    fontWeight: '700',
     color: '#fff',
   },
   vsText: {
@@ -620,7 +623,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginTop: 24,
     borderRadius: 12,
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -631,13 +634,13 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   recentMatches: {
-    gap: 2,
+    gap: isIPad ? 4 : 2,
   },
   recentMatch: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingVertical: isIPad ? 24 : 12,
+    paddingHorizontal: isIPad ? 16 : 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#f0f0f0',
   },
@@ -645,26 +648,27 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: isIPad ? 16 : 8,
   },
   recentMatchLogo: {
-    width: 20,
-    height: 20,
+    width: isIPad ? 40 : 20,
+    height: isIPad ? 40 : 20,
   },
   recentMatchTeamName: {
-    fontSize: 13,
+    fontSize: isIPad ? 24 : 12,
     color: '#333',
     flex: 1,
   },
   recentMatchScore: {
-    fontSize: 13,
+    fontSize: isIPad ? 24 : 12,
     fontWeight: '600',
     color: '#1282A2',
     minWidth: 40,
     textAlign: 'center',
+    marginRight: isIPad ? 60 : 0,
   },
   recentMatchDate: {
-    fontSize: 12,
+    fontSize: isIPad ? 24 : 10,
     color: '#666',
     minWidth: 90,
     textAlign: 'right',
@@ -674,32 +678,32 @@ const styles = StyleSheet.create({
     top: 0,
     right: 0,
     backgroundColor: '#4169E1',
-    paddingHorizontal: 16,
-    paddingVertical: 4,
+    paddingHorizontal: isIPad ? 24 : 16,
+    paddingVertical: isIPad ? 12 : 4,
     borderTopRightRadius: 12,
     borderBottomLeftRadius: 12,
     zIndex: 1,
   },
   matchBadgeText: {
     color: '#fff',
-    fontSize: 11,
+    fontSize: isIPad ? 16 : 11,
     fontWeight: '600',
     textTransform: 'uppercase',
   },
   formRow: {
     flexDirection: 'row',
-    gap: 4,
+    gap: isIPad ? 8 : 4,
     marginBottom: 8,
   },
   formIndicator: {
-    width: 20,
-    height: 20,
+    width: isIPad ? 40 : 20,
+    height: isIPad ? 40 : 20,
     borderRadius: 4,
     alignItems: 'center',
     justifyContent: 'center',
   },
   formText: {
-    fontSize: 12,
+    fontSize: isIPad ? 24 : 12,
     fontWeight: '600',
     color: '#fff',
   },
@@ -714,23 +718,23 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 8,
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 12,
     color: '#666',
   },
   errorText: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 12,
     color: '#666',
     marginBottom: 16,
   },
   retryButton: {
     backgroundColor: '#1282A2',
-    paddingHorizontal: 24,
+    paddingHorizontal: isIPad ? 32 : 24,
     paddingVertical: 12,
     borderRadius: 8,
   },
   retryButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: isIPad ? 14 : 13,
     fontWeight: '600',
   },
   analysisOuterContainer: {
@@ -750,11 +754,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   analysisContent: {
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 16,
+    gap: isIPad ? 32 : 16,
   },
   analysisLeft: {
     flexDirection: 'row',
@@ -767,12 +771,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   analysisTitle: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '600',
     color: '#FFD700',
   },
   analysisSubtitle: {
-    fontSize: 13,
+    fontSize: isIPad ? 24 : 16,
     color: '#666',
     flexShrink: 1,
   },
@@ -781,8 +785,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     backgroundColor: '#FFD700',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: isIPad ? 32 : 20,
+    paddingVertical: isIPad ? 16 : 10,
     borderRadius: 8,
     shadowColor: '#000',
     shadowOffset: {
@@ -793,7 +797,7 @@ const styles = StyleSheet.create({
     shadowRadius: 3.84,
   },
   analysisButtonText: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     fontWeight: '600',
     color: '#000',
   },

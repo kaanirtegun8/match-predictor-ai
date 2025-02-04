@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity, Image, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, Image, View, Platform, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
@@ -12,6 +12,9 @@ import { forwardRef } from 'react';
 interface MatchCardProps {
   match: Match;
 }
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 const formatMatchDate = (utcDate: string | undefined, language: string, t: any): string => {
   if (!utcDate) return t('common.notAvailable');
@@ -52,15 +55,27 @@ export const MatchCard = forwardRef<View, MatchCardProps>(({ match }, ref) => {
 
   return (
     <TouchableOpacity ref={ref} onPress={handlePress}>
-      <ThemedView style={[styles.container, { borderBottomColor: colors.border }]}>
+      <ThemedView style={[
+        styles.container, 
+        { borderBottomColor: colors.border },
+        isIPad && styles.containerTablet
+      ]}>
         <ThemedView style={styles.content}>
           <ThemedView style={styles.dateContainer}>
-            <ThemedText style={[styles.date, { color: colors.textSecondary }]}>
+            <ThemedText style={[
+              styles.date, 
+              { color: colors.textSecondary },
+              isIPad && styles.dateTablet
+            ]}>
               {formatMatchDate(match.utcDate, language, t)}
             </ThemedText>
             {isLive && (
               <ThemedView style={styles.liveContainer}>
-                <ThemedText style={[styles.liveIndicator, { color: colors.error }]}>
+                <ThemedText style={[
+                  styles.liveIndicator, 
+                  { color: colors.error },
+                  isIPad && styles.liveIndicatorTablet
+                ]}>
                   • LIVE
                 </ThemedText>
               </ThemedView>
@@ -71,27 +86,45 @@ export const MatchCard = forwardRef<View, MatchCardProps>(({ match }, ref) => {
             <ThemedView style={styles.teamContainer}>
               <Image
                 source={{ uri: match.homeTeam.crest }}
-                style={styles.teamLogo}
+                style={[styles.teamLogo, isIPad && styles.teamLogoTablet]}
                 resizeMode="contain"
               />
-              <ThemedText style={[styles.teamName, { color: colors.text }]} numberOfLines={1}>
+              <ThemedText 
+                style={[
+                  styles.teamName, 
+                  { color: colors.text },
+                  isIPad && styles.teamNameTablet
+                ]} 
+                numberOfLines={1}>
                 {match.homeTeam.shortName || match.homeTeam.name}
               </ThemedText>
             </ThemedView>
 
             <ThemedView style={styles.scoreContainer}>
-              <ThemedText style={[styles.score, { color: isFinished ? colors.textSecondary : colors.primary }]}>
+              <ThemedText 
+                style={[
+                  styles.score, 
+                  { color: isFinished ? colors.textSecondary : colors.primary },
+                  isIPad && styles.scoreTablet
+                ]}>
                 {getScore(match)}
               </ThemedText>
             </ThemedView>
 
             <ThemedView style={[styles.teamContainer, styles.awayTeam]}>
-              <ThemedText style={[styles.teamName, styles.awayTeamName, { color: colors.text }]} numberOfLines={1}>
+              <ThemedText 
+                style={[
+                  styles.teamName, 
+                  styles.awayTeamName, 
+                  { color: colors.text },
+                  isIPad && styles.teamNameTablet
+                ]} 
+                numberOfLines={1}>
                 {match.awayTeam.shortName || match.awayTeam.name}
               </ThemedText>
               <Image
                 source={{ uri: match.awayTeam.crest }}
-                style={styles.teamLogo}
+                style={[styles.teamLogo, isIPad && styles.teamLogoTablet]}
                 resizeMode="contain"
               />
             </ThemedView>
@@ -158,5 +191,26 @@ const styles = StyleSheet.create({
   score: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  // Tablet specific styles
+  containerTablet: {
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+  },
+  dateTablet: {
+    fontSize: 16,
+  },
+  liveIndicatorTablet: {
+    fontSize: 16,
+  },
+  teamLogoTablet: {
+    width: 40,
+    height: 40,
+  },
+  teamNameTablet: {
+    fontSize: 18,
+  },
+  scoreTablet: {
+    fontSize: 24,
   },
 }); 

@@ -1,11 +1,14 @@
-import { TextInput, StyleSheet, TextInputProps } from 'react-native';
+import { TextInput, StyleSheet, TextInputProps, Dimensions, Platform } from 'react-native';
 import { Colors } from '@/constants/Colors';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export function AuthInput(props: TextInputProps) {
   return (
     <TextInput
       style={styles.input}
-      placeholderTextColor={Colors.inputPlaceholder}
+      placeholderTextColor={Colors.light.textSecondary}
       {...props}
     />
   );
@@ -13,12 +16,12 @@ export function AuthInput(props: TextInputProps) {
 
 const styles = StyleSheet.create({
   input: {
-    backgroundColor: Colors.inputBackground,
+    backgroundColor: Colors.light.background,
     borderWidth: 1,
-    borderColor: Colors.inputBorder,
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 16,
-    color: Colors.inputText,
+    borderColor: Colors.dark.border,
+    borderRadius: isIPad ? 24 : 10,
+    padding: isIPad ? 24 : 15,
+    fontSize: isIPad ? 24 : 16,
+    color: Colors.light.text,
   },
 }); 

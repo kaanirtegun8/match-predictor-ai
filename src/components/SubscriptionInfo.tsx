@@ -7,6 +7,10 @@ import { router } from 'expo-router';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useStats } from '@/hooks/useStats';
+import { Dimensions, Platform } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 const PREMIUM_FEATURES = [
   {
@@ -42,7 +46,7 @@ export function SubscriptionInfo() {
         ]}>
           <Ionicons 
             name={isSubscribed ? "star" : "star-outline"} 
-            size={20} 
+            size={isIPad ? 48 : 20} 
             color="#fff" 
           />
           <ThemedText style={styles.planText}>
@@ -65,7 +69,7 @@ export function SubscriptionInfo() {
               styles.featureIcon,
               { backgroundColor: colors.primary }
             ]}>
-              <Ionicons name={feature.icon as any} size={20} color="#fff" />
+              <Ionicons name={feature.icon as any} size={isIPad ? 48 : 20} color="#fff" />
             </ThemedView>
             <ThemedView style={styles.featureInfo}>
               <ThemedText style={[styles.featureTitle, {color: colors.text}]}>
@@ -94,7 +98,7 @@ export function SubscriptionInfo() {
         </ThemedText>
         <Ionicons 
           name="arrow-forward" 
-          size={20} 
+          size={isIPad ? 48 : 20} 
           color={isSubscribed ? '#fff' : '#1f2937'} 
         />
       </TouchableOpacity>
@@ -113,19 +117,19 @@ const styles = StyleSheet.create({
   planBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: isIPad ? 20 : 12,
+    paddingVertical: isIPad ? 12 : 6,
+    borderRadius: 40,
     marginBottom: 8,
   },
   planText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '600',
     marginLeft: 6,
   },
   limitText: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     color: '#666',
   },
   featuresList: {
@@ -137,9 +141,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   featureIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: isIPad ? 80 : 40,
+    height: isIPad ? 80 : 40,
+    borderRadius: 40,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
@@ -148,24 +152,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   featureTitle: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '600',
     marginBottom: 2,
     color: '#1f2937',
   },
   featureDescription: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     color: '#666',
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    padding: isIPad ? 24 : 16,
     borderRadius: 12,
   },
   actionButtonText: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '600',
     marginRight: 8,
   },

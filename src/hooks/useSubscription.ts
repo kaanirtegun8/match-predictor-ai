@@ -9,7 +9,6 @@ import {
   checkSubscriptionStatus,
   restorePurchases,
 } from '../config/revenuecat';
-import { useTheme } from '@/contexts/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getMonthlyAnalysisCount } from '@/services/userService';
 
@@ -19,15 +18,13 @@ export const useSubscription = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [customerInfo, setCustomerInfo] = useState<CustomerInfo | null>(null);
   const { user } = useAuth();
-  const { togglePremiumTheme, isPremiumTheme } = useTheme();
+
   // Initialize RevenueCat and check subscription status when user changes
   useEffect(() => {
     const init = async () => {
       try {
         setIsLoading(true);
-        
         await initializeRevenueCat();
-        
         await loadPackages();
         
         if (user) {
@@ -62,15 +59,6 @@ export const useSubscription = () => {
       const { isActive, customerInfo: info } = await checkSubscriptionStatus();
       setIsSubscribed(isActive);
       setCustomerInfo(info);
-      console.log("checkStatus", isSubscribed);
-      // If user is not subscribed but has premium theme enabled, disable it
-      if (!isActive && isPremiumTheme) {
-        // Directly update AsyncStorage
-        await AsyncStorage.setItem('isPremiumTheme', 'false');
-        // Update state through context
-        togglePremiumTheme();
-      }
-
       return { isActive, customerInfo: info };
     } catch (error) {
       console.error('[Subscription] Failed to check status:', error);

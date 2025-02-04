@@ -6,10 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/themed/ThemedText';
 import { ThemedView } from '@/components/themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Colors } from '@/constants/Colors';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { PurchasesPackage } from 'react-native-purchases';
 import { useTranslation } from 'react-i18next';
+import { Dimensions, Platform } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export default function PremiumScreen() {
   const { colors } = useTheme();
@@ -83,7 +86,7 @@ export default function PremiumScreen() {
           <TouchableOpacity 
             style={[styles.closeButton, { backgroundColor: colors.background }]} 
             onPress={() => router.back()}>
-            <Ionicons name="close" size={24} color={colors.text} />
+            <Ionicons name="close" size={isIPad ? 32 : 24} color={colors.text} />
           </TouchableOpacity>
           <View style={styles.heroContent}>
             <ThemedText style={[styles.title, styles.heroText]}>{t('premium.upgradeToPremium')}</ThemedText>
@@ -181,7 +184,7 @@ export default function PremiumScreen() {
                 {loading ? t('premium.processing') : (
                   selectedPackage?.product.introPrice ? (
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Ionicons name="rocket" size={20} color={colors.error} style={{ marginRight: 8 }} />
+                      <Ionicons name="rocket" size={isIPad ? 48 : 20} color={colors.error} style={{ marginRight: 8 }} />
                       <ThemedText style={[styles.continueText, { color: colors.buttonText }]}>
                         {t('premium.startFreeTrial')}
                       </ThemedText>
@@ -229,8 +232,8 @@ function Feature({ icon, titleKey, color }: { icon: string, titleKey: string, co
       <TouchableOpacity 
         style={[styles.featureItem, { backgroundColor: colors.border }]}
         onPress={() => setShowTooltip(true)}>
-        <ThemedView style={[styles.featureIcon, { backgroundColor: color + '20' }]}>
-          <Ionicons name={icon as any} size={20} color={color} />
+        <ThemedView style={[styles.featureIcon, { backgroundColor: color +  '20' }]}>
+          <Ionicons name={icon as any} size={isIPad ? 48 : 20} color={color} />
         </ThemedView>
         <ThemedText style={styles.featureTitle}>{t(titleKey)}</ThemedText>
       </TouchableOpacity>
@@ -262,7 +265,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroContainer: {
-    height: 300,
+    height: isIPad ? 360 : 300,
     position: 'relative',
   },
   heroImage: {
@@ -289,7 +292,7 @@ const styles = StyleSheet.create({
     right: 16,
     zIndex: 1,
     padding: 8,
-    borderRadius: 20,
+    borderRadius: 40,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -301,16 +304,17 @@ const styles = StyleSheet.create({
   },
   mainContent: {
     flex: 1,
-    padding: 20,
+    padding: isIPad ? 32 : 20,
   },
   title: {
-    fontSize: 28,
+    fontSize: isIPad ? 48 : 28,
     fontWeight: 'bold',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 16,
-    fontWeight: '600'
+    fontSize: isIPad ? 20 : 16,
+    fontWeight: '600',
+    opacity: 0.8,
   },
   featuresGrid: {
     flexDirection: 'row',
@@ -321,22 +325,22 @@ const styles = StyleSheet.create({
     width: '31%',
   },
   featureItem: {
-    height: 100,
-    padding: 12,
-    borderRadius: 12,
+    height: isIPad ? 180 : 100,
+    padding: isIPad ? 24 : 12,
+    borderRadius: isIPad ? 24 : 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   featureIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: isIPad ? 64 : 36,
+    height: isIPad ? 64 : 36,
+    borderRadius: isIPad ? 32 : 18,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
   },
   featureTitle: {
-    fontSize: 12,
+    fontSize: isIPad ? 20 : 12,
     fontWeight: '600',
     textAlign: 'center',
     paddingHorizontal: 4,
@@ -345,58 +349,58 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   packagesTitle: {
-    fontSize: 18,
+    fontSize: isIPad ? 24 : 18,
     fontWeight: '600',
     marginBottom: 16,
   },
   packagesGrid: {
     paddingHorizontal: 4,
-    gap: 12,
+    gap: isIPad ? 40 : 12,
     flexDirection: 'row',
   },
   packageCard: {
-    width: 160,
-    padding: 16,
-    borderRadius: 12,
+    width: isIPad ? 240 : 160,
+    padding: isIPad ? 24 : 16,
+    borderRadius: isIPad ? 24 : 12,
     borderWidth: 2,
     alignItems: 'center',
   },
   packageTitle: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     fontWeight: '600',
     marginBottom: 8,
     textAlign: 'center',
   },
   packagePrice: {
-    fontSize: 24,
+    fontSize: isIPad ? 32 : 24,
     fontWeight: 'bold',
     marginBottom: 4,
   },
   packagePeriod: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     textAlign: 'center',
   },
   bottomActions: {
     marginTop: 'auto',
   },
   continueButton: {
-    padding: 16,
-    borderRadius: 12,
+    padding: isIPad ? 24 : 16,
+    borderRadius: isIPad ? 24 : 12,
     alignItems: 'center',
   },
   continueText: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     fontWeight: '600',
   },
   disabledButton: {
     opacity: 0.5,
   },
   restoreButton: {
-    padding: 16,
+    padding: isIPad ? 24 : 16,
     alignItems: 'center',
   },
   restoreText: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 16,
   },
   loader: {
     marginVertical: 20,
@@ -440,8 +444,8 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
   },
   tooltipText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: isIPad ? 24 : 16,
+    lineHeight: isIPad ? 32 : 20,
     textAlign: 'center',
   },
 });

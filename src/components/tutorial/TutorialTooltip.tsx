@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, Dimensions, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Dimensions, TouchableOpacity, View, Platform } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 import { useTutorial } from '@/contexts/TutorialContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -10,6 +10,9 @@ import { useTranslation } from 'react-i18next';
 const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get('window');
 const TOOLTIP_MARGIN = 8;
 const TOOLTIP_MAX_WIDTH = 300;
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export function TutorialTooltip() {
   const { isActive, targetMeasurements, steps, currentStep, nextStep, prevStep, skipTutorial } = useTutorial();
@@ -126,7 +129,7 @@ export function TutorialTooltip() {
                 {backButtonText}
               </ThemedText>
             ) : (
-              <Ionicons name="arrow-back" size={20} color={colors.text} />
+              <Ionicons name="arrow-back" size={isIPad ? 32 : 20} color={colors.text} />
             )}
           </TouchableOpacity>
         )}
@@ -151,7 +154,7 @@ export function TutorialTooltip() {
               {showFinishButton ? finishButtonText : nextButtonText}
             </ThemedText>
             {!showFinishButton && (
-              <Ionicons name="arrow-forward" size={20} color={colors.buttonText} />
+              <Ionicons name="arrow-forward" size={isIPad ? 32 : 20} color={colors.buttonText} />
             )}
           </TouchableOpacity>
         )}

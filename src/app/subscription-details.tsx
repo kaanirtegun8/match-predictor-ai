@@ -9,6 +9,10 @@ import { Colors } from '@/constants/Colors';
 import { useSubscription } from '@/contexts/SubscriptionContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useEffect, useRef } from 'react';
+import { Dimensions, Platform } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 function SkeletonLoader() {
   const { isDark } = useTheme();
@@ -104,7 +108,7 @@ export default function SubscriptionDetailsScreen() {
           <TouchableOpacity 
             style={styles.closeButton} 
             onPress={() => router.back()}>
-            <Ionicons name="close" size={24} color={colors.text} />
+            <Ionicons name="close" size={isIPad ? 32 : 24} color={colors.text} />
           </TouchableOpacity>
           <ThemedText style={styles.headerTitle}>Subscription Details</ThemedText>
         </View>
@@ -143,7 +147,7 @@ export default function SubscriptionDetailsScreen() {
             <TouchableOpacity
               style={[styles.cancelButton, { borderColor: colors.error }]}
               onPress={handleCancelSubscription}>
-              <Ionicons name="close-circle-outline" size={20} color={colors.error} />
+              <Ionicons name="close-circle-outline" size={isIPad ? 32 : 20} color={colors.error} />
               <ThemedText style={[styles.cancelButtonText, { color: colors.error }]}>
                 Cancel Auto-Renewal
               </ThemedText>
@@ -162,7 +166,7 @@ function DetailItem({ label, value, icon }: { label: string; value: string; icon
   return (
     <View style={[styles.detailItem, { borderBottomColor: colors.border }]}>
       <View style={styles.detailIcon}>
-        <Ionicons name={icon as any} size={20} color={colors.primary} />
+        <Ionicons name={icon as any} size={isIPad ? 48 : 20} color={colors.primary} />
       </View>
       <View style={styles.detailText}>
         <ThemedText style={styles.detailLabel}>{label}</ThemedText>
@@ -184,11 +188,11 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     justifyContent: 'center',
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: isIPad ? 32 : 18,
     fontWeight: '600',
   },
   closeButton: {
@@ -204,31 +208,31 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   statusContainer: {
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     alignItems: 'center',
   },
   badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: isIPad ? 32 : 12,
+    paddingVertical: isIPad ? 16 : 6,
     borderRadius: 16,
   },
   badgeText: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     fontWeight: '600',
   },
   detailsContainer: {
-    paddingHorizontal: 16,
+    paddingHorizontal: isIPad ? 32 : 16,
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: isIPad ? 32 : 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
   detailIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: isIPad ? 64 : 40,
+    height: isIPad ? 64 : 40,
+    borderRadius: isIPad ? 32 : 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -237,18 +241,18 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     fontWeight: '600',
     marginBottom: 4,
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
   },
   cancelButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     marginTop: 24,
     marginHorizontal: 16,
     borderRadius: 12,
