@@ -5,6 +5,7 @@ import { AuthInput, AuthButton, GoogleSignInButton, FacebookSignInButton, AuthHe
 import { Colors } from '@/constants/Colors';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from 'react-i18next';
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
@@ -15,7 +16,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, signInWithApple } = useAuth();
   const { t } = useTranslation();
 
   const handleRegister = async () => {
@@ -39,6 +40,33 @@ export default function RegisterScreen() {
       Alert.alert(t('common.error'), error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+      
+      if (credential) {
+        const { identityToken } = credential;
+        if (identityToken) {
+          const result = await signInWithApple(identityToken);
+          if (!result.success) {
+            Alert.alert(t('common.error'), result.error || t('auth.signInFailed'));
+          }
+        }
+      }
+    } catch (error: any) {
+      if (error.code === 'ERR_CANCELED') {
+        // Handle user cancellation
+      } else {
+        Alert.alert(t('common.error'), error.message);
+      }
     }
   };
 
@@ -93,11 +121,15 @@ export default function RegisterScreen() {
         <View style={styles.socialButtonsContainer}>
           <GoogleSignInButton />
           <View style={styles.socialButtonSpacer} />
-          {/* <FacebookSignInButton
-            onPress={() => {
-              // TODO: Implement Facebook Sign-In
-            }}
-          /> */}
+          {Platform.OS === 'ios' && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={isIPad ? 24 : 10}
+              style={styles.appleButton}
+              onPress={handleAppleSignIn}
+            />
+          )}
         </View>
 
         <Link href={{ pathname: '/(auth)/login' }} style={styles.link}>
@@ -157,5 +189,9 @@ const styles = StyleSheet.create({
   linkText: {
     color: Colors.light.link,
     fontSize: isIPad ? 18 : 14,
+  },
+  appleButton: {
+    width: '100%',
+    height: isIPad ? 64 : 50,
   },
 }); 
