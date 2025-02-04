@@ -15,6 +15,10 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { LanguageSelector } from '@/components/LanguageSelector';
 import { useTranslation } from 'react-i18next';
 import { useRouter } from 'expo-router';
+import { Dimensions, Platform } from 'react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export default function AccountScreen() {
   const { signOut, user, deleteAccount } = useAuth();
@@ -92,7 +96,7 @@ export default function AccountScreen() {
     <ScrollView style={[styles.container, { backgroundColor: colors.border }]}>
       {/* User Info Section */}
       <ThemedView style={[styles.section, { backgroundColor: colors.background }]}>
-        <Ionicons name="person-circle-outline" size={80} color={colors.primary} />
+        <Ionicons name="person-circle-outline" size={isIPad ? 160 : 80} color={colors.primary} />
         <ThemedText style={[styles.email, { color: colors.text }]}>{user?.email}</ThemedText>
         <ThemedText style={[styles.memberSince, { color: colors.textSecondary }]}>
           {t('settings.memberSince')} {memberSince}
@@ -119,21 +123,21 @@ export default function AccountScreen() {
             <>
               {/* Total Analyses */}
               <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
-                <Ionicons name="analytics-outline" size={24} color={colors.primary} />
+                <Ionicons name="analytics-outline" size={isIPad ? 48 : 24} color={colors.primary} />
                 <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.totalMatches}</ThemedText>
                 <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>{t('stats.totalAnalyses')}</ThemedText>
               </ThemedView>
 
               {/* Monthly Analyses */}
               <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
-                <Ionicons name="calendar-outline" size={24} color={colors.primary} />
+                <Ionicons name="calendar-outline" size={isIPad ? 48 : 24} color={colors.primary} />
                 <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.monthlyMatches}</ThemedText>
                 <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>{t('stats.thisMonth')}</ThemedText>
               </ThemedView>
 
               {/* Most Active League */}
               <ThemedView style={[styles.statCard, { backgroundColor: colors.border }]}>
-                <Ionicons name="trophy-outline" size={24} color={colors.primary} />
+                <Ionicons name="trophy-outline" size={isIPad ? 48 : 24} color={colors.primary} />
                 <ThemedText style={[styles.statNumber, { color: colors.text }]}>{stats.mostActiveLeague}</ThemedText>
                 <ThemedText style={[styles.statLabel, { color: colors.textSecondary }]}>{t('stats.mostActive')}</ThemedText>
               </ThemedView>
@@ -163,7 +167,7 @@ export default function AccountScreen() {
           <ThemedView style={styles.themeInfo}>
             <Ionicons 
               name={isDark ? "moon" : "sunny"} 
-              size={24} 
+              size={isIPad ? 48 : 24} 
               color={isDark ? "#fbbf24" : "#f59e0b"} 
             />
             <ThemedText style={[styles.themeText, {color: colors.text}]}>
@@ -199,7 +203,7 @@ export default function AccountScreen() {
           <ThemedView style={styles.themeInfo}>
             <Ionicons 
               name="star" 
-              size={24} 
+              size={isIPad ? 48 : 24} 
               color="#FFD700" 
             />
             <ThemedText style={[styles.themeText, {color: colors.text}]}>
@@ -234,7 +238,7 @@ export default function AccountScreen() {
         <TouchableOpacity 
           style={[styles.button, styles.deleteButton, {backgroundColor: colors.error}]} 
           onPress={handleDeleteAccount}>
-          <Ionicons name="trash-outline" size={24} color="#fff" />
+          <Ionicons name="trash-outline" size={isIPad ? 48 : 24} color="#fff" />
           <ThemedText style={[styles.buttonText, styles.deleteButtonText]}>
             {t('accountManagement.deleteAccount')}
           </ThemedText>
@@ -244,7 +248,7 @@ export default function AccountScreen() {
         <TouchableOpacity 
           style={[styles.button, {backgroundColor: colors.border}]} 
           onPress={signOut}>
-          <Ionicons name="log-out-outline" size={24} color={colors.text}/>
+          <Ionicons name="log-out-outline" size={isIPad ? 48 : 24} color={colors.text}/>
           <ThemedText style={[styles.buttonText, {color: colors.text}]}>{t('auth.signOut')}</ThemedText>
         </TouchableOpacity>
       </ThemedView>
@@ -255,11 +259,11 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: isIPad ? 20 : 16,
   },
   section: {
     borderRadius: 12,
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     marginBottom: 16,
     alignItems: 'center',
     shadowColor: '#000',
@@ -272,29 +276,30 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   email: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     marginTop: 8,
     marginBottom: 8,
     color: '#666',
   },
   memberSince: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 16,
     color: '#666',
     marginTop: 4,
     marginBottom: 8,
+    opacity: 0.6,
   },
   badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: isIPad ? 16 : 12,
+    paddingVertical: isIPad ? 8 : 4,
     borderRadius: 12,
   },
   badgeText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: isIPad ? 24 : 12,
     fontWeight: '600',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: isIPad ? 32 : 18,
     fontWeight: '600',
     marginBottom: 16,
     color: '#1282A2',
@@ -309,7 +314,7 @@ const styles = StyleSheet.create({
   statCard: {
     backgroundColor: '#f8fafc',
     borderRadius: 12,
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     alignItems: 'center',
     width: '31%',
     marginBottom: 12,
@@ -323,7 +328,7 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   statNumber: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '700',
     color: '#1f2937',
     marginTop: 8,
@@ -331,7 +336,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: isIPad ? 24 : 12,
     color: '#6b7280',
     textAlign: 'center',
   },
@@ -340,7 +345,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#f5f5f5',
-    padding: 12,
+    padding: isIPad ? 16 : 12,
     borderRadius: 8,
     width: '100%',
   },
@@ -351,21 +356,21 @@ const styles = StyleSheet.create({
   },
   themeText: {
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     color: '#666',
   },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
-    padding: 12,
+    padding: isIPad ? 16 : 12,
     borderRadius: 8,
     width: '100%',
-    marginBottom: 8,
+    marginBottom: isIPad ? 16 : 8,
   },
   buttonText: {
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     color: '#666',
   },
   deleteButton: {
@@ -377,14 +382,14 @@ const styles = StyleSheet.create({
   },
   premiumBadge: {
     backgroundColor: '#FFD700',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    paddingHorizontal: isIPad ? 16 : 6,
+    paddingVertical: isIPad ? 8 : 2,
     borderRadius: 4,
     marginLeft: 8,
   },
   premiumBadgeText: {
     color: '#000',
-    fontSize: 10,
+    fontSize: isIPad ? 24 :   10,
     fontWeight: '600',
   },
 }); 

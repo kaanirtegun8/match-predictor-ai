@@ -28,6 +28,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     loadTheme();
   }, []);
 
+  // Disable premium theme when subscription ends
+  useEffect(() => {
+    if (!isSubscribed && isPremiumTheme) {
+      togglePremiumTheme();
+    }
+  }, [isSubscribed]);
+
   const loadTheme = async () => {
     try {
       const savedTheme = await AsyncStorage.getItem('theme');

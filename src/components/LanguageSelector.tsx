@@ -1,11 +1,13 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions, Platform } from 'react-native';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ThemedText } from './themed/ThemedText';
-import { ThemedView } from './themed/ThemedView';
 import { Ionicons } from '@expo/vector-icons';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 export const LanguageSelector = () => {
   const { language, setLanguage, availableLanguages } = useLanguage();
@@ -17,7 +19,7 @@ export const LanguageSelector = () => {
       <View style={styles.leftContent}>
         <Ionicons 
           name="globe-outline" 
-          size={18} 
+          size={isIPad ? 48 : 24} 
           color={colors.primary}
           style={styles.icon} 
         />
@@ -56,7 +58,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    padding: 16,
     borderRadius: 8,
     marginBottom: 8,
   },
@@ -68,26 +70,23 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontSize: isIPad ? 32 : 16,
   },
   languageContainer: {
     flexDirection: 'row',
     backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 16,
-    padding: 2,
+    padding: isIPad ? 4 : 2,
   },
   languageButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 14,
+    paddingVertical: isIPad ? 12 : 6,
+    paddingHorizontal: isIPad ? 20 : 12,
+    borderRadius: 10,
   },
   languageText: {
-    fontSize: 14,
-    fontWeight: '500',
+    fontSize: isIPad ? 24 : 14,
   },
   selectedLanguageText: {
     color: '#fff',
-    fontWeight: '600',
   },
 }); 

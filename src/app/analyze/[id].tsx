@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Dimensions, Platform, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -15,6 +15,9 @@ import { getMatchDetails, saveMatchAnalysis, getMatchAnalysis, saveMatchAnalysis
 import { RichText } from '@/components/RichText';
 import { useTheme } from '@/contexts/ThemeContext';
 import { BilingualAnalysis } from '@/models/BilingualAnalysis';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 const kebabToCamelCase = (str: string): string => {
   return str.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
@@ -141,7 +144,7 @@ export default function AnalyzeScreen() {
               <ActivityIndicator size="small" color="#007AFF" />
             )}
             {index + 1 < loadingStep && (
-              <Ionicons name="checkmark-circle" size={20} color="#4CAF50" />
+              <Ionicons name="checkmark-circle" size={isIPad ? 32 : 20} color="#4CAF50" />
             )}
             {index + 1 > loadingStep && (
               <ThemedView style={styles.emptyStep} />
@@ -184,7 +187,7 @@ export default function AnalyzeScreen() {
             <TouchableOpacity
               style={styles.backButton}
               onPress={() => router.back()}>
-              <Ionicons name="chevron-back" size={24} color={colors.primary} />
+              <Ionicons name="chevron-back" size={isIPad ? 32 : 24} color={colors.primary} />
               <ThemedText style={[styles.backText, { color: colors.primary }]}>{t('common.back')}</ThemedText>
             </TouchableOpacity>
           </ThemedView>
@@ -244,7 +247,7 @@ export default function AnalyzeScreen() {
               {/* Match Analysis Section */}
               <ThemedView style={[styles.analysisSection, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
-                  <Ionicons name="analytics-outline" size={24} color={colors.primary} />
+                  <Ionicons name="analytics-outline" size={isIPad ? 48 : 24} color={colors.primary} />
                   <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.analysis.title')}</ThemedText>
                 </ThemedView>
                 <ThemedView style={[styles.analysisCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
@@ -257,7 +260,7 @@ export default function AnalyzeScreen() {
               {/* Predictions Section */}
               <ThemedView style={[styles.predictionsSection, { backgroundColor: colors.border }]}>
                 <ThemedView style={[styles.sectionHeader, { backgroundColor: colors.border }]}>
-                  <Ionicons name="podium-outline" size={24} color={colors.primary} />
+                  <Ionicons name="podium-outline" size={isIPad ? 48 : 24} color={colors.primary} />
                   <ThemedText style={[styles.sectionTitle, { color: colors.primary }]}>{t('matches.predictions.title')}</ThemedText>
                 </ThemedView>
                 
@@ -296,7 +299,7 @@ export default function AnalyzeScreen() {
                       </ThemedText>
                       <Ionicons 
                         name={expandedPredictions.includes(index) ? "chevron-up" : "chevron-down"} 
-                        size={16} 
+                        size={isIPad ? 32 : 16} 
                         color="#666" 
                       />
                     </TouchableOpacity>
@@ -342,7 +345,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backText: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     marginLeft: 4,
     color: '#1282A2',
   },
@@ -353,8 +356,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   competitionLogo: {
-    width: 44,
-    height: 44,
+    width: isIPad ? 176 : 88,
+    height: isIPad ? 176 : 88,
     marginBottom: 16,
   },
   teamsContainer: {
@@ -365,14 +368,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   teamName: {
-    fontSize: 20,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '600',
     color: '#000',
     flex: 1,
     textAlign: 'center',
   },
   vsText: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     color: '#666',
     marginHorizontal: 16,
   },
@@ -380,32 +383,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   competitionName: {
-    fontSize: 15,
+    fontSize: isIPad ? 32 : 16,
     color: '#666',
     marginBottom: 12,
   },
   metadataContainer: {
     flexDirection: 'row',
-    gap: 8,
+    gap: isIPad ? 16 : 8,
   },
   badge: {
     backgroundColor: '#f1f5f9',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: isIPad ? 16 : 12,
+    paddingVertical: isIPad ? 8 : 6,
     borderRadius: 16,
   },
   badgeText: {
-    fontSize: 13,
+    fontSize: isIPad ? 24 : 12,
     color: '#475569',
   },
   basicAnalysis: {
     backgroundColor: '#f8f9fa',
     borderRadius: 12,
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     marginBottom: 20,
   },
   basicAnalysisText: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     color: '#666',
     textAlign: 'center',
     lineHeight: 24,
@@ -413,18 +416,18 @@ const styles = StyleSheet.create({
   analyzeButton: {
     backgroundColor: '#007AFF',
     borderRadius: 12,
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
   },
   buttonIcon: {
-    marginRight: 8,
+    marginRight: isIPad ? 16 : 8,
   },
   buttonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     fontWeight: '600',
   },
   analysisContent: {
@@ -442,7 +445,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: isIPad ? 32 : 20,
     fontWeight: '700',
     color: '#1e40af',
     marginLeft: 8,
@@ -450,7 +453,7 @@ const styles = StyleSheet.create({
   analysisCard: {
     backgroundColor: '#fff',
     borderRadius: 16,
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: {
@@ -462,14 +465,14 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   analysisText: {
-    fontSize: 16,
-    lineHeight: 24,
+    fontSize: isIPad ? 24 : 16,
+    lineHeight: isIPad ? 32 : 24,
     color: '#334155',
   },
   predictionCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
+    padding: isIPad ? 32 : 16,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: '#e2e8f0',
@@ -492,23 +495,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   predictionType: {
-    fontSize: 16,
+    fontSize: isIPad ? 24 : 16,
     fontWeight: '600',
     color: '#1e293b',
   },
   predictionValue: {
-    fontSize: 24,
+    fontSize: isIPad ? 40 : 24,
     fontWeight: '700',
     color: '#0f172a',
     marginVertical: 8,
   },
   probabilityText: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 14,
     color: '#64748b',
   },
   riskBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: isIPad ? 16 : 12,
+    paddingVertical: isIPad ? 8 : 4,
     borderRadius: 6,
   },
   riskyBadge: {
@@ -521,7 +524,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#dcfce7',
   },
   riskBadgeText: {
-    fontSize: 12,
+    fontSize: isIPad ? 24 : 12,
     fontWeight: '600',
     color: '#1e293b',
   },
@@ -535,9 +538,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   evidenceToggleText: {
-    fontSize: 14,
+    fontSize: isIPad ? 24 : 12,
     color: '#666',
-    marginRight: 4,
+    marginRight: isIPad ? 8 : 4,
   },
   evidenceContainer: {
     marginTop: 12,
@@ -546,12 +549,12 @@ const styles = StyleSheet.create({
     borderTopColor: '#e2e8f0',
   },
   evidenceText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: isIPad ? 24 : 14,
+    lineHeight: isIPad ? 32 : 20,
     color: '#64748b',
   },
   loadingContainer: {
-    padding: 20,
+    padding: isIPad ? 32 : 20,
     backgroundColor: '#f8f9fa',
     borderRadius: 12,
     marginTop: 20,
@@ -562,21 +565,21 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   stepIndicator: {
-    width: 24,
-    height: 24,
-    marginRight: 12,
+    width: isIPad ? 48 : 24,
+    height: isIPad ? 48 : 24,
+    marginRight: isIPad ? 16 : 12,
     alignItems: 'center',
     justifyContent: 'center',
   },
   emptyStep: {
-    width: 20,
-    height: 20,
+    width: isIPad ? 48 : 24,
+    height: isIPad ? 48 : 24,
     borderRadius: 10,
     borderWidth: 2,
     borderColor: '#ddd',
   },
   loadingText: {
-    fontSize: 16,
+    fontSize: isIPad ? 32 : 16,
     color: '#666',
   },
   activeStep: {

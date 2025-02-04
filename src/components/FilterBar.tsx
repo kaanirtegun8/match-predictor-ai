@@ -1,9 +1,12 @@
 import React from 'react';
-import { ScrollView, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { ScrollView, StyleSheet, TouchableOpacity, Image, Platform, Dimensions } from 'react-native';
 import { ThemedText } from './themed/ThemedText';
 import { ThemedView } from './themed/ThemedView';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useTranslation } from 'react-i18next';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const isIPad = Platform.OS === 'ios' && SCREEN_WIDTH >= 768;
 
 interface Competition {
   id: number;
@@ -25,19 +28,21 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, isIPad && styles.containerTablet]}
     >
       <TouchableOpacity
         style={[
           styles.filterItem,
           { backgroundColor: colors.background, borderColor: colors.border },
           !selectedCompetitionId && { backgroundColor: colors.primary },
+          isIPad && styles.filterItemTablet
         ]}
         onPress={() => onCompetitionSelect(null)}
       >
         <ThemedText style={[
           styles.filterText,
           selectedCompetitionId && { color: colors.text },
+          isIPad && styles.filterTextTablet
         ]}>
           {t('matches.filter.allLeagues')}
         </ThemedText>
@@ -49,18 +54,20 @@ export function FilterBar({ competitions, selectedCompetitionId, onCompetitionSe
             styles.filterItem,
             { backgroundColor: colors.background, borderColor: colors.border },
             selectedCompetitionId === competition.id.toString() && { backgroundColor: colors.primary },
+            isIPad && styles.filterItemTablet
           ]}
           onPress={() => onCompetitionSelect(competition.id.toString())}
         >
           <Image
             source={{ uri: competition.emblem }}
-            style={styles.logo}
+            style={[styles.logo, isIPad && styles.logoTablet]}
             resizeMode="contain"
           />
           <ThemedText style={[
             styles.filterText,
             { color: colors.text },
             selectedCompetitionId === competition.id.toString() && { color: colors.textTertiary },
+            isIPad && styles.filterTextTablet
           ]}>
             {competition.name}
           </ThemedText>
@@ -100,5 +107,27 @@ const styles = StyleSheet.create({
   logo: {
     width: 20,
     height: 20,
+  },
+  containerTablet: {
+    padding: 20,
+    gap: 12,
+  },
+  filterItemTablet: {
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    gap: 12,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowRadius: 4,
+  },
+  filterTextTablet: {
+    fontSize: 16,
+  },
+  logoTablet: {
+    width: 28,
+    height: 28,
   },
 });
