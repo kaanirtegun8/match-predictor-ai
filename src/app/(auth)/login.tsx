@@ -64,7 +64,7 @@ export default function LoginScreen() {
         loading={loading}
       />
 
-      <View style={styles.dividerContainer}>
+      {/*<View style={styles.dividerContainer}>
         <View style={styles.divider} />
         <Text style={styles.dividerText}>{t('common.or')}</Text>
         <View style={styles.divider} />
@@ -77,8 +77,8 @@ export default function LoginScreen() {
           onPress={() => {
             // TODO: Implement Facebook Sign-In
           }}
-        /> */}
-      </View>
+        /> }
+      </View>*/}
 
       <Link href={{ pathname: '/(auth)/register' }} style={styles.link}>
         <Text style={styles.linkText}>{t('auth.noAccount')}</Text>
