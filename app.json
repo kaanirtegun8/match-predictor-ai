@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.matchpredictorai.matchpredictorai",
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -57,7 +58,8 @@
         }
       ],
       "expo-dev-client",
-      "expo-localization"
+      "expo-localization",
+      "expo-apple-authentication"
     ],
     "scheme": "com.matchpredictorai.matchpredictorai",
     "experiments": {
