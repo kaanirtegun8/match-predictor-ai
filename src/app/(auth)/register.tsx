@@ -84,7 +84,7 @@ export default function RegisterScreen() {
           loading={loading}
         />
 
-       {/* <View style={styles.dividerContainer}>
+        <View style={styles.dividerContainer}>
           <View style={styles.divider} />
           <Text style={styles.dividerText}>{t('common.or')}</Text>
           <View style={styles.divider} />
@@ -97,8 +97,8 @@ export default function RegisterScreen() {
             onPress={() => {
               // TODO: Implement Facebook Sign-In
             }}
-          /> }
-        </View>*/}
+          /> */}
+        </View>
 
         <Link href={{ pathname: '/(auth)/login' }} style={styles.link}>
           <Text style={styles.linkText}>{t('auth.haveAccount')}</Text>
