@@ -123,6 +123,9 @@ export default {
       premium: 'Premium'
     },
     subscription: 'Abonelik',
+    termsOfUse: 'Kullanım Şartları',
+    privacyPolicy: 'Gizlilik Politikası',
+    legal: 'Yasal',
   },
   stats: {
     totalAnalyses: 'Toplam Analiz',
@@ -144,36 +147,36 @@ export default {
     subscribe: 'Yönet',
     restore: 'Satın Alımları Geri Yükle',
     freePlan: 'Ücretsiz Plan',
-    analysesRemaining: 'Bu ay kalan analiz hakkınız: ',
+    analysesRemaining: 'Kalan aylık analiz: ',
     premiumToggleText: 'Premium Renk',
     features: {
       unlimitedAnalysis: {
         title: 'Sınırsız Analiz',
-        description: 'İstediğiniz maçı, istediğiniz zaman analiz edin'
+        description: 'İstediğiniz zaman herhangi bir maçı analiz edin'
       },
       detailedStats: {
         title: 'Detaylı İstatistikler',
         description: 'Gelişmiş istatistiklere erişim'
       },
       matchAlerts: {
-        title: 'Maç Bildirimleri',
+        title: 'Maç Uyarıları',
         description: 'Önemli maçlar için bildirim alın'
       },
       advancedAnalysis: {
         title: 'Gelişmiş Analiz',
-        description: 'Tarihsel veriler ve tahminlerle detaylı AI destekli maç analizleri alın'
+        description: 'Tarihsel veriler ve tahminlerle AI destekli detaylı maç analizleri alın'
       },
       historicalData: {
-        title: 'Geçmiş Veriler',
-        description: 'Kapsamlı geçmiş maç verilerine ve takım performans metriklerine erişin'
+        title: 'Tarihsel Veriler',
+        description: 'Kapsamlı tarihsel maç verilerine ve takım performans metriklerine erişin'
       },
       smartAlerts: {
-        title: 'Akıllı Bildirimler',
+        title: 'Akıllı Uyarılar',
         description: 'Yüksek olasılıklı maçlar ve önemli oyun olayları için bildirimler alın'
       }
     },
     upgradeToPremium: 'Premium\'a Yükselt',
-    unlockPotential: 'Match Predictor AI\'ın tüm potansiyelini açığa çıkarın',
+    unlockPotential: 'Match Predictor AI\'ın tüm potansiyelini açın',
     choosePlan: 'Planınızı Seçin',
     weekly: 'Haftalık',
     monthly: 'Aylık',
@@ -183,7 +186,19 @@ export default {
     restorePurchases: 'Satın Alımları Geri Yükle',
     purchaseError: 'Satın alma sırasında bir hata oluştu. Lütfen tekrar deneyin.',
     restoreError: 'Satın alımları geri yüklerken bir hata oluştu. Lütfen daha sonra tekrar deneyin.',
-    ok: 'Tamam'
+    ok: 'Tamam',
+    subscriptionInfo: 'Abonelik Bilgileri',
+    legalText: 'Abone olarak, Kullanım Koşullarımızı ve Gizlilik Politikamızı kabul etmiş olursunuz. Abonelikler, mevcut dönemin bitiminden en az 24 saat önce iptal edilmedikçe otomatik olarak yenilenecektir.',
+    duration: {
+        weekly: 'Haftalık abonelik - her 7 günde bir yenilenir',
+        monthly: 'Aylık abonelik - her ay yenilenir',
+        yearly: 'Yıllık abonelik - her yıl yenilenir',
+        simple: {
+          weekly: 'Her 7 günde bir yenilenir,',
+          monthly: 'Her ay yenilenir,',
+          yearly: 'Her yıl yenilenir,'
+        }
+      }
   },
   standings: {
     headers: {

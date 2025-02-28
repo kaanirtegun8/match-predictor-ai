@@ -124,6 +124,9 @@ export default {
       premium: 'Premium'
     },
     subscription: 'Subscription',
+    termsOfUse: 'Terms of Use',
+    privacyPolicy: 'Privacy Policy',
+    legal: 'Legal',
   },
   stats: {
     totalAnalyses: 'Total Analyses',
@@ -184,7 +187,19 @@ export default {
     restorePurchases: 'Restore Purchases',
     purchaseError: 'An error occurred during purchase. Please try again.',
     restoreError: 'An error occurred while restoring purchases. Please try again later.',
-    ok: 'OK'
+    ok: 'OK',
+    subscriptionInfo: 'Subscription Information',
+    legalText: 'By subscribing, you agree to our Terms of Use and Privacy Policy. Subscriptions will automatically renew unless canceled at least 24 hours before the end of the current period.',
+    duration: {
+        weekly: 'Weekly subscription - renews every 7 days',
+        monthly: 'Monthly subscription - renews every month',
+        yearly: 'Yearly subscription - renews every year',
+        simple: {
+          weekly: 'Renews every 7 days,',
+          monthly: 'Renews every month,',
+          yearly: 'Renews every year,'
+        }
+      }
   },
   standings: {
     headers: {

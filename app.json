@@ -19,7 +19,11 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": ["remote-notification"]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -75,6 +79,8 @@
     },
     "developmentClient": {
       "silentLaunch": true
-    }
+    },
+    "privacyPolicyUrl": "https://furkandursun947.github.io/match-predictor-legal/privacy",
+    "termsOfServiceUrl": "https://furkandursun947.github.io/match-predictor-legal/terms"
   }
 }
