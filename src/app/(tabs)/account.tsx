@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator, TextInput } from 'react-native';
+import { StyleSheet, TouchableOpacity, Alert, Switch, ScrollView, ActivityIndicator, TextInput, Linking } from 'react-native';
 import { AuthButton } from '@/components/auth';
 import { useAuth } from '@/hooks/useAuth';
 import { SubscriptionInfo } from '@/components/SubscriptionInfo';
@@ -227,6 +227,42 @@ export default function AccountScreen() {
             trackColor={{ false: '#d1d5db', true: colors.background }}
             thumbColor="#FFD700"
           />
+        </TouchableOpacity>
+        
+        {/* Terms of Use */}
+        <TouchableOpacity 
+          style={[styles.themeToggle, {backgroundColor: colors.border, marginTop: 8}]} 
+          onPress={() => Linking.openURL('https://furkandursun947.github.io/match-predictor-legal/terms')}
+          activeOpacity={0.7}>
+          <ThemedView style={styles.themeInfo}>
+            <Ionicons 
+              name="document-text-outline" 
+              size={isIPad ? 48 : 24} 
+              color={colors.primary} 
+            />
+            <ThemedText style={[styles.themeText, {color: colors.text}]}>
+              {t('settings.termsOfUse') || 'Terms of Use'}
+            </ThemedText>
+          </ThemedView>
+          <Ionicons name="chevron-forward" size={isIPad ? 32 : 20} color={colors.textSecondary} />
+        </TouchableOpacity>
+        
+        {/* Privacy Policy */}
+        <TouchableOpacity 
+          style={[styles.themeToggle, {backgroundColor: colors.border, marginTop: 8}]} 
+          onPress={() => Linking.openURL('https://furkandursun947.github.io/match-predictor-legal/privacy')}
+          activeOpacity={0.7}>
+          <ThemedView style={styles.themeInfo}>
+            <Ionicons 
+              name="shield-outline" 
+              size={isIPad ? 48 : 24} 
+              color={colors.primary} 
+            />
+            <ThemedText style={[styles.themeText, {color: colors.text}]}>
+              {t('settings.privacyPolicy') || 'Privacy Policy'}
+            </ThemedText>
+          </ThemedView>
+          <Ionicons name="chevron-forward" size={isIPad ? 32 : 20} color={colors.textSecondary} />
         </TouchableOpacity>
       </ThemedView>
 

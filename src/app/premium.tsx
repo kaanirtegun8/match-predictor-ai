@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, useColorScheme } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, ScrollView, Alert, ActivityIndicator, Modal, useColorScheme, Linking } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -76,12 +76,7 @@ export default function PremiumScreen() {
     <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]} edges={['top']}>
       <ThemedView style={styles.container}>
         {/* Hero Section with Dark Overlay */}
-        <View style={styles.heroContainer}>
-          <Image 
-            source={require('@/assets/images/download.jpeg')}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
+        <View style={[styles.heroContainer, {backgroundColor: colors.background}]}>
           <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.4)' }]} />
           <TouchableOpacity 
             style={[styles.closeButton, { backgroundColor: colors.background }]} 
@@ -96,116 +91,181 @@ export default function PremiumScreen() {
           </View>
         </View>
 
-        {/* Main Content */}
-        <ThemedView style={styles.mainContent}>
-          {/* Features Grid */}
-          <View style={styles.featuresGrid}>
-            <Feature 
-              icon="analytics" 
-              titleKey="premium.features.advancedAnalysis.title"
-              color={colors.primary}
-            />
-            <Feature 
-              icon="stats-chart" 
-              titleKey="premium.features.historicalData.title"
-              color={colors.success}
-            />
-            <Feature 
-              icon="notifications" 
-              titleKey="premium.features.smartAlerts.title"
-              color={colors.warning}
-            />
-          </View>
+        {/* Ana içeriği ScrollView içine alıyoruz */}
+        <ScrollView style={{ flex: 1 }} contentContainerStyle={{ flexGrow: 1 }}>
+          <ThemedView style={styles.mainContent}>
+            {/* Features Grid */}
+            <View style={styles.featuresGrid}>
+              <Feature 
+                icon="analytics" 
+                titleKey="premium.features.advancedAnalysis.title"
+                color={colors.primary}
+              />
+              <Feature 
+                icon="stats-chart" 
+                titleKey="premium.features.historicalData.title"
+                color={colors.success}
+              />
+              <Feature 
+                icon="notifications" 
+                titleKey="premium.features.smartAlerts.title"
+                color={colors.warning}
+              />
+            </View>
 
-          {/* Packages */}
-          <View style={styles.packagesContainer}>
-            <ThemedText style={styles.packagesTitle}>{t('premium.choosePlan')}</ThemedText>
-            {isLoading ? (
-              <ActivityIndicator color={colors.primary} style={styles.loader} />
-            ) : (
-              <ScrollView 
-                horizontal 
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.packagesGrid}>
-                {packages?.map((pkg) => (
-                  <TouchableOpacity
-                    key={pkg.identifier}
-                    style={[
-                      styles.packageCard,
-                      { 
-                        backgroundColor: selectedPackage?.identifier === pkg.identifier ? colors.border : colors.background,
-                        borderColor: selectedPackage?.identifier === pkg.identifier 
-                          ? colors.primary 
-                          : colors.border 
-                      },
-                    ]}
-                    onPress={() => setSelectedPackage(pkg)}>
-                    <ThemedText style={styles.packageTitle}>
-                      {pkg.product.title}
-                    </ThemedText>
-                    {pkg.product.introPrice ? (
-                      <>
-                        <ThemedText style={[styles.packagePrice, { textDecorationLine: 'line-through', color: colors.textSecondary, fontSize: 16 }]}>
+            {/* Packages */}
+            <View style={styles.packagesContainer}>
+              <ThemedText style={styles.packagesTitle}>{t('premium.choosePlan')}</ThemedText>
+              {isLoading ? (
+                <ActivityIndicator color={colors.primary} style={styles.loader} />
+              ) : (
+                <ScrollView 
+                  horizontal 
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.packagesGrid}>
+                  {packages?.map((pkg) => (
+                    <TouchableOpacity
+                      key={pkg.identifier}
+                      style={[
+                        styles.packageCard,
+                        { 
+                          backgroundColor: selectedPackage?.identifier === pkg.identifier ? colors.border : colors.background,
+                          borderColor: selectedPackage?.identifier === pkg.identifier 
+                            ? colors.primary 
+                            : colors.border 
+                        },
+                      ]}
+                      onPress={() => setSelectedPackage(pkg)}>
+                      <ThemedText style={styles.packageTitle}>
+                        {pkg.product.title}
+                      </ThemedText>
+                      {pkg.product.introPrice ? (
+                        <>
+                          <ThemedText style={[styles.packagePrice, { textDecorationLine: 'line-through', color: colors.textSecondary, fontSize: 16 }]}>
+                            {pkg.product.priceString}
+                          </ThemedText>
+                          <ThemedText style={[styles.packagePrice, { color: colors.primary }]}>
+                            {pkg.product.introPrice.priceString}
+                          </ThemedText>
+                        </>
+                      ) : (
+                        <ThemedText style={[styles.packagePrice, { color: colors.primary }]}>
                           {pkg.product.priceString}
                         </ThemedText>
-                        <ThemedText style={[styles.packagePrice, { color: colors.primary }]}>
-                          {pkg.product.introPrice.priceString}
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              )}
+            </View>
+
+            {/* Subscription Information - Required by App Store */}
+            <SubscriptionInfo packages={packages} selectedPackage={selectedPackage} />
+
+            {/* Bottom Actions */}
+            <View style={styles.bottomActions}>
+              <TouchableOpacity
+                style={[
+                  styles.continueButton,
+                  { 
+                    backgroundColor: selectedPackage ? colors.primary : colors.inputBackground,
+                    borderWidth: selectedPackage ? 0 : 1,
+                    borderColor: colors.border,
+                  },
+                  loading && styles.disabledButton
+                ]}
+                onPress={handleContinue}
+                disabled={loading || !selectedPackage}>
+                <ThemedText style={[
+                  styles.continueText, 
+                  { color: selectedPackage ? colors.buttonText : colors.textSecondary }
+                ]}>
+                  {loading ? t('premium.processing') : (
+                    selectedPackage?.product.introPrice ? (
+                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Ionicons name="rocket" size={isIPad ? 48 : 20} color={colors.error} style={{ marginRight: 8 }} />
+                        <ThemedText style={[styles.continueText, { color: colors.buttonText }]}>
+                          {t('premium.startFreeTrial')}
                         </ThemedText>
-                      </>
-                    ) : (
-                      <ThemedText style={[styles.packagePrice, { color: colors.primary }]}>
-                        {pkg.product.priceString}
-                      </ThemedText>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-          </View>
+                      </View>
+                    ) : t('premium.continue')
+                  )}
+                </ThemedText>
+              </TouchableOpacity>
 
-          {/* Bottom Actions */}
-          <View style={styles.bottomActions}>
-            <TouchableOpacity
-              style={[
-                styles.continueButton,
-                { 
-                  backgroundColor: selectedPackage ? colors.primary : colors.inputBackground,
-                  borderWidth: selectedPackage ? 0 : 1,
-                  borderColor: colors.border,
-                },
-                loading && styles.disabledButton
-              ]}
-              onPress={handleContinue}
-              disabled={loading || !selectedPackage}>
-              <ThemedText style={[
-                styles.continueText, 
-                { color: selectedPackage ? colors.buttonText : colors.textSecondary }
-              ]}>
-                {loading ? t('premium.processing') : (
-                  selectedPackage?.product.introPrice ? (
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Ionicons name="rocket" size={isIPad ? 48 : 20} color={colors.error} style={{ marginRight: 8 }} />
-                      <ThemedText style={[styles.continueText, { color: colors.buttonText }]}>
-                        {t('premium.startFreeTrial')}
-                      </ThemedText>
-                    </View>
-                  ) : t('premium.continue')
-                )}
-              </ThemedText>
-            </TouchableOpacity>
-
-            <TouchableOpacity 
-              style={styles.restoreButton} 
-              onPress={handleRestore}
-              disabled={loading}>
-              <ThemedText style={[styles.restoreText, { color: colors.textSecondary }]}>
-                {t('premium.restorePurchases')}
-              </ThemedText>
-            </TouchableOpacity>
-          </View>
-        </ThemedView>
+              <TouchableOpacity 
+                style={styles.restoreButton} 
+                onPress={handleRestore}
+                disabled={loading}>
+                <ThemedText style={[styles.restoreText, { color: colors.textSecondary }]}>
+                  {t('premium.restorePurchases')}
+                </ThemedText>
+              </TouchableOpacity>
+            </View>
+          </ThemedView>
+        </ScrollView>
       </ThemedView>
     </SafeAreaView>
+  );
+}
+
+// Subscription Information Component - Required by App Store
+function SubscriptionInfo({ packages, selectedPackage }: { packages: PurchasesPackage[] | null, selectedPackage: PurchasesPackage | null }) {
+  const { colors } = useTheme();
+  const { t } = useTranslation();
+
+  if (!packages || packages.length === 0) {
+    return null;
+  }
+
+  // Seçili paket veya ilk paketi kullan
+  const displayPackage = selectedPackage || packages[0];
+  
+  // Yenileme süresini belirle
+  const getRenewalPeriod = () => {
+    if (displayPackage.product.identifier.toLowerCase().includes('weekly')) {
+      return t('premium.duration.simple.weekly'); // "7 günde bir yenilenir"
+    } else if (displayPackage.product.identifier.toLowerCase().includes('monthly')) {
+      return t('premium.duration.simple.monthly'); // "ayda bir yenilenir"
+    } else {
+      return t('premium.duration.simple.yearly'); // "yılda bir yenilenir"
+    }
+  };
+
+  return (
+    <View style={styles.subscriptionInfoContainer}>
+      {/* Basitleştirilmiş abonelik bilgisi */}
+      <ThemedText style={styles.subscriptionInfoSimple}>
+        {getRenewalPeriod()} {displayPackage.product.priceString}
+      </ThemedText>
+
+      {/* Legal Links */}
+      <View style={styles.legalLinksContainer}>
+        <ThemedText style={styles.legalText}>
+          {t('premium.legalText')}
+        </ThemedText>
+        
+        <View style={styles.legalLinks}>
+          <TouchableOpacity 
+            onPress={() => Linking.openURL('https://furkandursun947.github.io/match-predictor-legal/privacy')}
+            style={styles.legalLinkButton}>
+            <ThemedText style={[styles.legalLinkText, { color: colors.primary }]}>
+              {t('settings.privacyPolicy')}
+            </ThemedText>
+          </TouchableOpacity>
+          
+          <ThemedText style={styles.legalLinkSeparator}>•</ThemedText>
+          
+          <TouchableOpacity 
+            onPress={() => Linking.openURL('https://furkandursun947.github.io/match-predictor-legal/terms')}
+            style={styles.legalLinkButton}>
+            <ThemedText style={[styles.legalLinkText, { color: colors.primary }]}>
+              {t('settings.termsOfUse')}
+            </ThemedText>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -265,7 +325,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heroContainer: {
-    height: isIPad ? 360 : 300,
+    height: isIPad ? 290 : 120,
     position: 'relative',
   },
   heroImage: {
@@ -447,5 +507,42 @@ const styles = StyleSheet.create({
     fontSize: isIPad ? 24 : 16,
     lineHeight: isIPad ? 32 : 20,
     textAlign: 'center',
+  },
+  subscriptionInfoContainer: {
+    marginTop: 24,
+    padding: 16,
+    backgroundColor: 'transparent',
+  },
+  subscriptionInfoSimple: {
+    fontSize: isIPad ? 20 : 14,
+    textAlign: 'center',
+    marginBottom: 16,
+    opacity: 0.8,
+  },
+  legalLinksContainer: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  legalText: {
+    fontSize: isIPad ? 18 : 12,
+    textAlign: 'center',
+    marginBottom: 8,
+    opacity: 0.7,
+  },
+  legalLinks: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  legalLinkButton: {
+    padding: 4,
+  },
+  legalLinkText: {
+    fontSize: isIPad ? 18 : 14,
+    fontWeight: '500',
+  },
+  legalLinkSeparator: {
+    marginHorizontal: 8,
+    opacity: 0.5,
   },
 });
